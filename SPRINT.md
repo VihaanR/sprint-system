@@ -14,10 +14,11 @@
 
 - [ ] **Phase 1: Discover & Spec** (~30 min)
   - [ ] Problem Statement & Winning Moat defined
+  - [ ] Impeccable product truth & UX shape (PRODUCT.md)
   - [ ] Architecture Diagram (`docs/SPEC.md`)
   - [ ] Database Relational ERD
   - [ ] OpenAPI Schema Draft
-  *Deliverable*: `docs/SPEC.md`
+  *Deliverable*: `PRODUCT.md` + `docs/SPEC.md`
 
 - [ ] **Phase 2: Core Engine & Backend** (~60 min)
   - [ ] FastAPI async scaffolding
@@ -34,6 +35,7 @@
   *Deliverable*: Working, interactive frontend
 
 - [ ] **Phase 4: Beautification & Polish** (~45 min)
+  - [ ] Impeccable anti-slop pass (npx impeccable detect + polish)
   - [ ] UI/UX Pro Max design intelligence applied (OLED Dark / Glassmorphism)
   - [ ] Semantic typography & Phosphor SVG icons
   - [ ] CSS micro-interactions & button active states
@@ -41,7 +43,8 @@
   *Deliverable*: Awwwards-grade visual presentation
 
 - [ ] **Phase 5: Ironclad Audit & Verification** (~45 min)
-  - [ ] OWASP Top 10 security scan (`security-auditor`)
+  - [ ] OWASP Top 10 security scan (security-auditor)
+  - [ ] Impeccable edge-case hardening (empty states & overflow)
   - [ ] Playwright automated E2E smoke tests
   - [ ] 0 uncaught exceptions & 0 network 404s
   - [ ] WCAG 2.1 AA accessibility audit

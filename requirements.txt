@@ -1,7 +1,7 @@
 # ==============================================================================
 # SPRINT SYSTEM: MASTER DEPENDENCY & TOOLCHAIN SPECIFICATION
 # The 5-Hour Global Hackathon Operating System for AI Coding Agents
-# Coordinates: 21 Installed Plugins | 9 MCP Servers | 22 Global Skills
+# Coordinates: 21 Installed Plugins | 9 MCP Servers | 23 Global Skills
 # Architecture: Python 3.11+ / Node.js 20+ / Zero-Conflict Production Stack
 # ==============================================================================
 #
@@ -46,17 +46,20 @@
 # 09. firebase-mcp       -> Firestore database operations & security rule verification
 #
 # ------------------------------------------------------------------------------
-# 22 GLOBAL SKILLS ORCHESTRATED:
+# 23 GLOBAL SKILLS ORCHESTRATED:
 # ------------------------------------------------------------------------------
 # Core Pipeline:
 # - sprint-orchestrator, phase-discover, phase-backend, phase-frontend,
 #   phase-polish, phase-audit, phase-launch
 # Specialized Domain Engines:
-# - live-swarm-coding, fastapi-pro, async-python-patterns, rag-implementation,
-#   sql-optimization-patterns, security-auditor, python-testing-patterns,
-#   e2e-testing-patterns, tailwind-design-system, react-state-management,
-#   react-modernization, mobile-developer, indian-gov-web-ui,
-#   ui-visual-validator, git-advanced-workflows
+# - impeccable, live-swarm-coding, fastapi-pro, async-python-patterns,
+#   rag-implementation, sql-optimization-patterns, security-auditor,
+#   python-testing-patterns, e2e-testing-patterns, tailwind-design-system,
+#   react-state-management, react-modernization, mobile-developer,
+#   indian-gov-web-ui, ui-visual-validator, git-advanced-workflows
+#
+# CLI & Engine Runtimes:
+# - impeccable detector  -> npx impeccable detect src/ (Anti-slop design scanner)
 # ==============================================================================
 
 # ==============================================================================

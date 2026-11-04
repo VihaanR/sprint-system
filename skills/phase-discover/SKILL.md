@@ -1,6 +1,6 @@
 ---
 name: phase-discover
-description: Phase 1 of the 5-Hour Hackathon Sprint. Leverages research subagents, mobbin, StitchMCP, context7, google-developer-knowledge, api-design-principles, and mermaid-expert to architect the winning moat, OpenAPI specs, and database ERD.
+description: Phase 1 of the 5-Hour Hackathon Sprint. Leverages research subagents, mobbin, StitchMCP, impeccable (init/shape), context7, google-developer-knowledge, api-design-principles, and mermaid-expert to architect the winning moat, OpenAPI specs, and database ERD.
 ---
 
 # Phase 1: Discover & Spec (Complete Research & Architecture)
@@ -13,6 +13,7 @@ description: Phase 1 of the 5-Hour Hackathon Sprint. Leverages research subagent
 ## Active Tooling & Capabilities
 
 - **`superpowers` (brainstorming)**: Translates vague requirements into concrete architecture.
+- **`impeccable` (init / shape)**: Establishes durable product truth (`PRODUCT.md`), user personas, design language (`DESIGN.md`), and pre-code UX planning (`shape`).
 - **`mobbin` MCP**: Searches 600,000+ real-world app flows to benchmark industry-leading UX for this exact domain.
 - **`StitchMCP`**: Generates initial visual layout concepts and wireframe variants.
 - **`context7` & `google-developer-knowledge`**: Fetches verified, up-to-date documentation on target frameworks and APIs.
@@ -28,6 +29,8 @@ description: Phase 1 of the 5-Hour Hackathon Sprint. Leverages research subagent
 
 1. **Scoping & The Winning Hook**:
    - Query `mobbin` MCP for top competitor UI/UX teardowns in this category.
+   - Run `impeccable init` to anchor product vision, target persona, and core constraints into `PRODUCT.md`.
+   - Run `impeccable shape` to plan information architecture and user journeys before touching code.
    - Define the unique technical moat (e.g. edge AI, multi-agent orchestration, offline-first).
 2. **System Architecture (`docs/SPEC.md`)**:
    - Use `mermaid-expert` to render end-to-end data flow (Client $\rightarrow$ API $\rightarrow$ Database/AI $\rightarrow$ Worker).
