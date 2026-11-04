@@ -1,33 +1,252 @@
-# Sprint System — Core Runtime & Testing Dependencies
-# Modern Python 3.11+ async stack for rapid hackathon execution
+# ==============================================================================
+# SPRINT SYSTEM: MASTER DEPENDENCY & TOOLCHAIN SPECIFICATION
+# The 5-Hour Global Hackathon Operating System for AI Coding Agents
+# Coordinates: 21 Installed Plugins | 9 MCP Servers | 22 Global Skills
+# Architecture: Python 3.11+ / Node.js 20+ / Zero-Conflict Production Stack
+# ==============================================================================
+#
+# [SYSTEM ARCHITECTURE & TOOLCHAIN REGISTRY]
+# 
+# ------------------------------------------------------------------------------
+# 21 ACTIVE PLUGINS POWERED:
+# ------------------------------------------------------------------------------
+# 01. android-cli-plugin        -> Android SDK, AVD manager, Jetpack Compose previews
+# 02. brag                      -> Hyperframes 60s launch video generation engine
+# 03. browser-code-verifier     -> Headless dev server probing & DOM visual testing
+# 04. chrome-devtools-plugin    -> Chrome DevTools MCP browser automation & a11y audits
+# 05. coderabbit                -> Automated AI pull request reviews & security fixes
+# 06. context7                  -> Framework documentation resolver & syntax lookups
+# 07. data-agent-kit-plugin     -> BigQuery, DAK Notebooks, and BigFrames ELT pipelines
+# 08. firebase                  -> Firebase Auth, Firestore, and Cloud Functions
+# 09. flutter                   -> Flutter SDK, Dart testing, and responsive UI engine
+# 10. gdocs                     -> Google Docs, Sheets, and Drive documentation sync
+# 11. gemini-api                -> Gemini 1.5/2.0 Pro, Flash, Live Multimodal, and Vision
+# 12. github                    -> GitHub pull requests, commits, issues, and releases
+# 13. google-antigravity-sdk    -> Multi-agent orchestration harness & subagent runtime
+# 14. google-developer-knowledge-> Official Google Cloud and developer knowledgebase
+# 15. google_maps_platform      -> Geocoding, Places API, Routes, and Elevation services
+# 16. indian-gov-ui-skills      -> GIGW 3.0, DBIM v3.0, UX4G, and bilingual accessibility
+# 17. postman                   -> API test collections, mock servers, and monitoring
+# 18. railway                   -> Railway cloud deployments, environments, and services
+# 19. sentry                    -> Distributed tracing, crash reporting, and profiling
+# 20. superpowers               -> TDD workflows, systematic debugging, and worktrees
+# 21. vercel-plugin             -> Vercel Edge functions, preview URLs, and AI SDK
+#
+# ------------------------------------------------------------------------------
+# 9 MCP SERVERS INTEGRATED:
+# ------------------------------------------------------------------------------
+# 01. sqlite             -> uvx mcp-server-sqlite (Local relational persistence)
+# 02. fetch              -> uvx mcp-server-fetch --allow-private-ips (HTTP probe)
+# 03. docker             -> npx @thelord/mcp-server-docker-npx (Container management)
+# 04. playwright         -> npx @executeautomation/playwright-mcp-server (E2E browser)
+# 05. StitchMCP          -> Google Stitch UI component generator & visual design
+# 06. github-mcp-server  -> Repository inspection, branch management & automated PRs
+# 07. railway_mcp        -> Microservice orchestration & cloud environment lifecycle
+# 08. sentry_sentry      -> Telemetry query engine, stacktrace & breadcrumb inspector
+# 09. firebase-mcp       -> Firestore database operations & security rule verification
+#
+# ------------------------------------------------------------------------------
+# 22 GLOBAL SKILLS ORCHESTRATED:
+# ------------------------------------------------------------------------------
+# Core Pipeline:
+# - sprint-orchestrator, phase-discover, phase-backend, phase-frontend,
+#   phase-polish, phase-audit, phase-launch
+# Specialized Domain Engines:
+# - live-swarm-coding, fastapi-pro, async-python-patterns, rag-implementation,
+#   sql-optimization-patterns, security-auditor, python-testing-patterns,
+#   e2e-testing-patterns, tailwind-design-system, react-state-management,
+#   react-modernization, mobile-developer, indian-gov-web-ui,
+#   ui-visual-validator, git-advanced-workflows
+# ==============================================================================
 
-# API & Backend Framework
-fastapi>=0.111.0
-uvicorn[standard]>=0.30.0
-pydantic>=2.7.0
-pydantic-settings>=2.3.0
+# ==============================================================================
+# [SECTION 01] CORE ASYNC API ENGINE (fastapi-pro, async-python-patterns)
+# Used in: Phase 2 (Backend)
+# Provides sub-millisecond asynchronous REST endpoints, WebSockets, and Pydantic V2
+# ==============================================================================
+fastapi>=0.111.0,<0.113.0
+uvicorn[standard]>=0.30.0,<0.32.0
+starlette>=0.37.0,<0.39.0
+pydantic>=2.7.4,<3.0.0
+pydantic-settings>=2.3.4,<3.0.0
+python-multipart>=0.0.9        # Multipart form data & file upload handling
+websockets>=12.0               # Real-time WebSocket streaming & Live Swarm state sync
+orjson>=3.10.3                 # High-performance C-accelerated JSON serialization
+anyio>=4.4.0,<5.0.0            # Structured concurrency abstraction
+httptools>=0.6.1               # Fast HTTP request parsing
 
-# Database & ORM
-sqlalchemy>=2.0.30
-aiosqlite>=0.20.0
+# ==============================================================================
+# [SECTION 02] PERSISTENCE, ASYNC ORM & CACHING (sqlite MCP, sql-optimization-patterns)
+# Used in: Phase 2 (Backend)
+# Powers async SQLite, PostgreSQL connections, migrations, and caching
+# ==============================================================================
+sqlalchemy[asyncio]>=2.0.30,<2.1.0
+aiosqlite>=0.20.0              # Async SQLite driver for rapid zero-config local prototyping
+alembic>=1.13.1                # Database schema migrations & version control
+asyncpg>=0.29.0                # High-throughput async PostgreSQL driver (Railway/Cloud)
+psycopg2-binary>=2.9.9         # Synchronous PostgreSQL adapter fallback
+redis>=5.0.4                   # In-memory key-value cache, pub/sub & rate limiting
+greenlet>=3.0.3                # Required runtime dependency for SQLAlchemy async execution
 
-# AI & LLM Integration
-google-generativeai>=0.7.2
-google-genai>=0.1.0
+# ==============================================================================
+# [SECTION 03] MODEL CONTEXT PROTOCOL (MCP) RUNTIMES (sqlite, fetch, git MCPs)
+# Used in: All Phases
+# Official Python MCP SDKs and servers executed locally or via uvx
+# ==============================================================================
+mcp>=1.0.0                     # Official Python Model Context Protocol specification & SDK
+mcp-server-sqlite>=0.1.0       # Official MCP server for SQLite database introspection
+mcp-server-fetch>=0.1.0        # Official MCP server for web content extraction & verification
+mcp-server-git>=0.1.0          # Official MCP server for local git repository operations
+uv>=0.2.10                     # Extremely fast package and virtual environment runner
 
-# HTTP & API Testing Client
-httpx>=0.27.0
-requests>=2.32.0
+# ==============================================================================
+# [SECTION 04] GEMINI AI, MULTIMODAL & RAG VECTOR STORE (gemini-api, rag-implementation)
+# Used in: Phase 2 (Backend) & Phase 1 (Discover)
+# Official Google GenAI SDK, local embeddings, vector similarity search, and RAG
+# ==============================================================================
+google-genai>=0.1.1            # Next-generation Google GenAI Python SDK
+google-generativeai>=0.7.2     # Official Gemini SDK (Flash 2.0, Pro 1.5, Live Audio/Vision)
+chromadb>=0.5.0                # Embedded vector database for local semantic retrieval
+sentence-transformers>=3.0.0    # Local dense embeddings generation
+faiss-cpu>=1.8.0               # Vector indexing and nearest-neighbor search
+tiktoken>=0.7.0                # Fast BPE tokenizer computation
+langchain>=0.2.3               # Context retrieval orchestration and prompt chains
+langchain-community>=0.2.4     # Third-party vector store and loader connectors
+langchain-google-genai>=1.0.6  # First-party Gemini integration for LangChain pipelines
 
-# Security & Password Hashing
-passlib[bcrypt]>=1.7.4
-bcrypt>=3.2.2
-python-jose[cryptography]>=3.3.0
+# ==============================================================================
+# [SECTION 05] GOOGLE CLOUD & BIGQUERY ELT (data-agent-kit-plugin, gcp-data-pipelines)
+# Used in: Phase 2 (Backend)
+# Cloud data warehouses, BigFrames analytics, Parquet pipelines, and dbt models
+# ==============================================================================
+google-cloud-bigquery>=3.24.0  # BigQuery API client for serverless data querying
+google-cloud-storage>=2.17.0   # Cloud Storage (GCS) blob management
+google-cloud-core>=2.4.1       # Shared core library for Google Cloud API clients
+bigframes>=1.8.0               # BigQuery DataFrames (scalable pandas API on BigQuery)
+db-dtypes>=1.2.0               # Data types bridge between BigQuery and pandas
+pyarrow>=16.1.0                # Apache Arrow zero-copy memory transport & Parquet format
+pandas>=2.2.2,<3.0.0           # Tabular data manipulation and analysis
+numpy>=1.26.4,<2.0.0           # Numerical mathematics and multidimensional arrays
+dbt-bigquery>=1.8.0            # dbt adapter for BigQuery modular data transformations
 
-# Testing & E2E Validation
-pytest>=8.2.0
-pytest-asyncio>=0.23.0
-playwright>=1.44.0
+# ==============================================================================
+# [SECTION 06] DAK NOTEBOOKS & INTERACTIVE ANALYTICS (dak-notebook, dak-viz)
+# Used in: Phase 2 (Backend) & Phase 1 (Discover)
+# Execution engine for automated Jupyter notebooks, interactive plots & data analysis
+# ==============================================================================
+jupyter>=1.0.0                 # Jupyter core metapackage
+ipykernel>=6.29.4              # IPython kernel for Jupyter execution
+nbformat>=5.10.4               # Jupyter notebook file format reader and writer
+nbclient>=0.10.0               # Programmatic notebook execution engine
+plotly>=5.22.0                 # Interactive HTML/WebGL charting engine for DAK dashboards
+seaborn>=0.13.2                # Statistical visualization and heatmaps
+scipy>=1.13.1                  # Scientific algorithms and statistical functions
+tabulate>=0.9.0                # Pretty-printed ASCII/Markdown tabular data formatter
 
-# Environment & Config
-python-dotenv>=1.0.0
+# ==============================================================================
+# [SECTION 07] GRAPH INTELLIGENCE & REPO TOPOLOGY (graphify MCP, code relationships)
+# Used in: Phase 1 (Discover) & Phase 5 (Audit)
+# AST dependency graphs, god node detection, and structural codebase visualization
+# ==============================================================================
+networkx>=3.3                  # Graph data structure manipulation & shortest path analysis
+
+# ==============================================================================
+# [SECTION 08] FIREBASE CLOUD INFRASTRUCTURE (firebase plugin, firebase-mcp)
+# Used in: Phase 2 (Backend) & Phase 6 (Launch)
+# Server-side Firebase Admin SDK for auth token verification and Firestore ops
+# ==============================================================================
+firebase-admin>=6.5.0          # Firebase Admin SDK (Auth, Firestore, Cloud Storage, FCM)
+pyrebase4>=4.8.0               # Python client library for Firebase REST API endpoints
+
+# ==============================================================================
+# [SECTION 09] GEOLOCATION & SPATIAL INTELLIGENCE (google_maps_platform plugin)
+# Used in: Phase 2 (Backend) & Phase 3 (Frontend)
+# Google Maps Platform client for geocoding, distance matrix, and places search
+# ==============================================================================
+googlemaps>=4.10.0             # Official Python client for Google Maps Services
+geopy>=2.4.1                   # Geocoding toolbox, coordinates conversion, distance math
+
+# ==============================================================================
+# [SECTION 10] DEVSECOPS, AUTH & VULNERABILITY AUDITING (security-auditor, phase-audit)
+# Used in: Phase 5 (Audit)
+# OWASP Top 10 mitigation, static code analysis, CVE scanning, and JWT security
+# ==============================================================================
+passlib[bcrypt]>=1.7.4         # Secure cryptographic password hashing
+bcrypt>=4.1.3                  # Low-level bcrypt password hashing implementation
+python-jose[cryptography]>=3.3.0 # JSON Web Signature (JWS) and JWT token generation
+cryptography>=42.0.7           # Robust symmetric and asymmetric encryption primitives
+pip-audit>=2.7.3               # Audits Python dependencies for known CVE vulnerabilities
+bandit>=1.7.8                  # AST-based static vulnerability analyzer for Python code
+safety>=3.2.0                  # Software supply chain vulnerability and advisory checker
+bleach>=6.1.0                  # HTML sanitization against XSS and malicious script injection
+defusedxml>=0.7.1              # Defenses against XML entity expansion vulnerabilities
+
+# ==============================================================================
+# [SECTION 11] API VALIDATION, TESTING & PROXY (postman plugin, fetch MCP)
+# Used in: Phase 2 (Backend) & Phase 5 (Audit)
+# Async HTTP client, OpenAPI 3.1 specification verification, and mock testing
+# ==============================================================================
+httpx[http2]>=0.27.0           # Next-generation async HTTP client with HTTP/2 support
+requests>=2.32.3               # Synchronous HTTP library standard
+openapi-spec-validator>=0.7.1  # Validates generated API schemas against OpenAPI 3.1 rules
+jsonschema>=4.22.0             # Structural validation of incoming and outgoing JSON payloads
+
+# ==============================================================================
+# [SECTION 12] SENTRY OBSERVABILITY & DISTRIBUTED TRACING (sentry plugin, sentry MCP)
+# Used in: Phase 5 (Audit) & Phase 6 (Launch)
+# Automated error capture, stack trace reporting, profiling, and OpenTelemetry
+# ==============================================================================
+sentry-sdk[fastapi]>=2.4.0     # Official Sentry SDK with native FastAPI error middleware
+opentelemetry-api>=1.25.0      # OpenTelemetry standard telemetry API
+opentelemetry-sdk>=1.25.0      # OpenTelemetry implementation and exporter runtime
+structlog>=24.2.0              # Production structured JSON logging engine
+
+# ==============================================================================
+# [SECTION 13] PLAYWRIGHT E2E QA & BROWSER AUTOMATION (playwright MCP, browser-code-verifier)
+# Used in: Phase 3 (Frontend), Phase 4 (Polish), Phase 5 (Audit)
+# Headless browser driving, visual regression, console error capture, and testing
+# ==============================================================================
+playwright>=1.44.0             # Headless Chromium, WebKit, and Firefox automation
+pytest>=8.2.1                  # Industry-standard automated test runner
+pytest-asyncio>=0.23.7         # Native async coroutine support for pytest
+pytest-cov>=5.0.0              # Code coverage measurement and HTML/terminal reports
+pytest-mock>=3.14.0            # Mocking and monkeypatching test utilities
+faker>=25.8.0                  # Realistic synthetic test data generation (names, addresses)
+beautifulsoup4>=4.12.3         # DOM parsing and HTML structural verification
+lxml>=5.2.0                    # High-speed XML/HTML processing backend
+
+# ==============================================================================
+# [SECTION 14] CLOUD DEPLOYMENTS & CONTAINER SERVICES (railway, vercel, docker MCP)
+# Used in: Phase 6 (Launch)
+# Docker orchestration, cloud environment management, and deployment automation
+# ==============================================================================
+docker>=7.1.0                  # Docker Python SDK for local container and image management
+PyGithub>=2.3.0                # GitHub REST API client for automated PR and release creation
+GitPython>=3.1.43              # Programmatic local Git repository management
+python-dotenv>=1.0.1           # Environment variable loader from .env files
+pyyaml>=6.0.1                  # YAML configuration parser for Docker and GitHub Actions
+svix>=1.21.0                   # Webhook signature verification and dispatch engine
+rich>=13.7.1                   # Beautiful terminal formatting, progress bars, and syntax
+typer>=0.12.3                  # Modern CLI application builder based on Python type hints
+click>=8.1.7                   # Core CLI composable interface framework
+
+# ==============================================================================
+# [SECTION 15] ASSET SYNTHESIS & DOCUMENTATION EXPORT (brag, gdocs plugins)
+# Used in: Phase 6 (Launch)
+# Video asset generation, slide rendering, and Google Workspace synchronization
+# ==============================================================================
+google-api-python-client>=2.132.0 # Programmatic Google Docs, Drive, and Sheets client
+google-auth-httplib2>=0.2.0    # Google OAuth2 transport adapter
+google-auth-oauthlib>=1.2.0    # OAuth 2.0 client authentication flow
+pillow>=10.3.0                 # Image manipulation, screenshot processing, and thumbnailing
+matplotlib>=3.9.0              # Figure plotting and graphical asset rendering
+
+# ==============================================================================
+# [SECTION 16] CODE QUALITY & CI LINTING (coderabbit, git-advanced-workflows)
+# Used in: All Phases
+# Fast linting, automated formatting, and strict type verification
+# ==============================================================================
+ruff>=0.4.7                    # Ultra-fast Rust-based Python linter and formatter
+black>=24.4.2                  # Deterministic Python code formatter
+mypy>=1.10.0                   # Strict static type checking and type inference
+pre-commit>=3.7.1              # Git pre-commit hooks runner
