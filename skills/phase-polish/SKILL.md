@@ -10,6 +10,12 @@ description: Phase 4 of the 5-Hour Hackathon Sprint. Applies impeccable anti-slo
 
 ---
 
+## Pre-Phase Interrogation Gate
+
+Before execution starts, the system delivers the **Phase 3 Executive Scorecard** (frontend components built, HMR latency, DevTools screenshots), followed by the **Devil's Advocate 15-Point Interrogation** via `ask_question`. The user must confirm color palette, typography archetype, and anti-slop priorities before visual refinement begins.
+
+---
+
 ## Active Tooling & Capabilities
 
 - **`impeccable`**: Primary design director & anti-slop engine (`/impeccable polish`, `/impeccable critique`, `/impeccable bolder`, `/impeccable typeset`, `/impeccable layout`, and `npx impeccable detect`).
@@ -25,27 +31,30 @@ description: Phase 4 of the 5-Hour Hackathon Sprint. Applies impeccable anti-slo
 
 ## Execution Checklist
 
-1. **Design System & Style Archetype**:
+1. **Pre-Phase Gate**:
+   - Deliver Phase 3 Executive Scorecard.
+   - Run Devil's Advocate interrogation probing for design compromises, bland layouts, and visual signature moments.
+2. **Design System & Style Archetype**:
    - Query `ui-ux-pro-max` search tool:
      ```powershell
      python "C:\Users\Vihaan\.gemini\config\skills\ui-ux-pro-max\scripts\search.py" "<product> dark mode" --domain style
      ```
    - Apply distinct visual style: Deep OLED Dark (`#000000`/`#121212`), Frosted Glassmorphism, or Bento Grid.
    - If targeting public sector or Indian audiences, apply `indian-gov-ui-skills` UX4G standards and bilingual typography.
-2. **Impeccable Anti-Slop Audit & Refinement**:
+3. **Impeccable Anti-Slop Audit & Refinement**:
    - Run deterministic anti-slop detector across the codebase:
      ```bash
      npx impeccable detect src/
      ```
    - Execute `impeccable polish` to strip generic AI gradients, balance whitespace, and sharpen contrast.
    - Run `impeccable bolder` if interface feels bland or timid; run `impeccable typeset` to enforce proper typographic rhythm.
-3. **Typography & Iconography Upgrade**:
+4. **Typography & Iconography Upgrade**:
    - Enforce verified font pairings (e.g. Inter + JetBrains Mono, or Outfit + Plus Jakarta Sans).
    - Replace raw text/emojis with Phosphor / Lucide SVG icons.
-4. **Micro-Interactions & Transitions**:
+5. **Micro-Interactions & Transitions**:
    - Add active button scales (`active:scale-95`), loading skeletons, and smooth CSS transitions (`duration-200`).
-5. **Responsive Viewport Audit**:
+6. **Responsive Viewport Audit**:
    - Test mobile ($375\text{px}$), tablet ($768\text{px}$), and desktop ($1440\text{px}$). Ensure zero horizontal overflow.
-6. **Phase Checkpoint**:
+7. **Phase Checkpoint**:
    - Capture clean visual screenshots via `chrome-devtools-plugin`.
-   - Update `SPRINT.md` and prompt user for gate approval into **Phase 5 (Ironclad Audit & Verification)**.
+   - Update `SPRINT.md` and prepare Executive Scorecard for gate approval into **Phase 5 (Ironclad Audit & Verification)**.

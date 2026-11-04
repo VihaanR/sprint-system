@@ -10,6 +10,12 @@ description: Phase 2 of the 5-Hour Hackathon Sprint. Implements backend services
 
 ---
 
+## Pre-Phase Interrogation Gate
+
+Before execution starts, the system delivers the **Phase 1 Executive Scorecard** (spec finalized, ERD schema locked, moat defined), followed by the **Devil's Advocate 15-Point Interrogation** via `ask_question`. The user must confirm database engine, AI model temperature/caching, and endpoint edge cases before code execution begins.
+
+---
+
 ## Active Tooling & Capabilities
 
 - **`fastapi-pro`**: Async FastAPI 0.100+, Pydantic V2 models, dependency injection, background tasks.
@@ -31,17 +37,20 @@ description: Phase 2 of the 5-Hour Hackathon Sprint. Implements backend services
 
 ## Execution Checklist
 
-1. **Environment & Scaffolding**:
+1. **Pre-Phase Gate**:
+   - Deliver Phase 1 Executive Scorecard.
+   - Run Devil's Advocate interrogation probing for concurrency locks, API latency, and data persistence models.
+2. **Environment & Scaffolding**:
    - Initialize with `uv` (`uv venv`, `uv pip install`).
-2. **Database & Data Layer**:
+3. **Database & Data Layer**:
    - Declare SQLAlchemy 2.0 models or configure Firebase Firestore.
    - Seed initial mock data; verify schemas with `sqlite` MCP or `firebase-mcp-server`.
-3. **AI & Core Intelligence**:
+4. **AI & Core Intelligence**:
    - Connect `gemini-api` with optimized system prompts (`prompt-engineering-patterns`).
    - If document Q&A or search is needed, wire up `rag-implementation`.
-4. **API Endpoints & Postman Collections**:
+5. **API Endpoints & Postman Collections**:
    - Implement routes with Pydantic validation.
    - Run `postman` collection verification and test live endpoints with `fetch` MCP.
-5. **Phase Checkpoint**:
+6. **Phase Checkpoint**:
    - Verify unit test pass (`pytest`).
-   - Update `SPRINT.md` and prompt user for gate approval into **Phase 3 (Visual Swarm & Frontend)**.
+   - Update `SPRINT.md` and prepare Executive Scorecard for gate approval into **Phase 3 (Visual Swarm & Frontend)**.

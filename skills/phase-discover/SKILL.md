@@ -10,6 +10,12 @@ description: Phase 1 of the 5-Hour Hackathon Sprint. Leverages research subagent
 
 ---
 
+## Pre-Phase Interrogation Gate
+
+Before research begins, the system executes the **Devil's Advocate 15-Point Interrogation** via `ask_question`. The user must define their vision, non-negotiable features, competitive differentiation, and target audience before research subagents dispatch.
+
+---
+
 ## Active Tooling & Capabilities
 
 - **`superpowers` (brainstorming)**: Translates vague requirements into concrete architecture.
@@ -27,16 +33,18 @@ description: Phase 1 of the 5-Hour Hackathon Sprint. Leverages research subagent
 
 ## Execution Checklist
 
-1. **Scoping & The Winning Hook**:
+1. **Pre-Phase Gate**:
+   - Run Devil's Advocate interrogation probing for problem statement validity, target persona, and unique technical moat.
+2. **Scoping & The Winning Hook**:
    - Query `mobbin` MCP for top competitor UI/UX teardowns in this category.
    - Run `impeccable init` to anchor product vision, target persona, and core constraints into `PRODUCT.md`.
    - Run `impeccable shape` to plan information architecture and user journeys before touching code.
    - Define the unique technical moat (e.g. edge AI, multi-agent orchestration, offline-first).
-2. **System Architecture (`docs/SPEC.md`)**:
+3. **System Architecture (`docs/SPEC.md`)**:
    - Use `mermaid-expert` to render end-to-end data flow (Client $\rightarrow$ API $\rightarrow$ Database/AI $\rightarrow$ Worker).
-3. **Database Schema & Relational ERD**:
+4. **Database Schema & Relational ERD**:
    - Model relational entities, foreign keys, and indexes in Mermaid syntax.
-4. **API Contract Definition**:
+5. **API Contract Definition**:
    - Use `api-design-principles` to define endpoint routes, payload contracts, and error responses.
-5. **Phase Checkpoint**:
-   - Output `docs/SPEC.md`. Update `SPRINT.md` and prompt user for gate approval into **Phase 2 (Core Engine & Backend)**.
+6. **Phase Checkpoint**:
+   - Output `docs/SPEC.md`. Update `SPRINT.md` and prepare Executive Scorecard for gate approval into **Phase 2 (Core Engine & Backend)**.

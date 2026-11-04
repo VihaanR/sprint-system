@@ -10,6 +10,12 @@ description: Phase 6 of the 5-Hour Hackathon Sprint. Packages the judge-ready su
 
 ---
 
+## Pre-Phase Interrogation Gate
+
+Before execution starts, the system delivers the **Phase 5 Executive Scorecard** (zero OWASP vulnerabilities, clean Playwright E2E pass, Sentry telemetry confirmed), followed by the **Devil's Advocate 15-Point Interrogation** via `ask_question`. The user must confirm deployment target, demo credentials, pitch video hooks, and judge presentation narrative before launch operations begin.
+
+---
+
 ## Active Tooling & Capabilities
 
 - **`brag` (Hyperframes)**: Generates a 60-second polished, shareable product launch video directly from the project code.
@@ -26,22 +32,25 @@ description: Phase 6 of the 5-Hour Hackathon Sprint. Packages the judge-ready su
 
 ## Execution Checklist
 
-1. **Production Deployment**:
+1. **Pre-Phase Gate**:
+   - Deliver Phase 5 Executive Scorecard.
+   - Run Devil's Advocate interrogation probing for deployment cold-starts, broken live demo links, and video storytelling punch.
+2. **Production Deployment**:
    - Deploy frontend via `vercel-plugin` or Firebase Hosting.
    - Deploy backend to Railway / container host and bind production environment variables.
    - Confirm the live URL loads with zero errors.
-2. **Interactive Judge Tools (Swagger & Postman)**:
+3. **Interactive Judge Tools (Swagger & Postman)**:
    - Verify `/docs` Swagger UI is accessible with pre-filled test payloads.
    - Publish a shared Postman collection link.
-3. **60-Second Demo Video (`brag`)**:
+4. **60-Second Demo Video (`brag`)**:
    - Run `brag` to generate the Hyperframes launch video summarizing the problem, solution, and live feature walkthrough.
-4. **The Winning Pitch `README.md`**:
+5. **The Winning Pitch `README.md`**:
    - Write a judge-facing `README.md` containing:
      - **Elevator Pitch & Hero Screenshots**: Headline and UI preview.
      - **Problem & Solution**: Why existing solutions fail and how your project solves it.
      - **Architecture Flowchart (`mermaid-expert`)**: Full visual data flow.
      - **Live Demo Links**: Deployed web app, Swagger API docs, Postman link, video demo.
      - **Judge Test Credentials**: Pre-seeded accounts to bypass signup friction.
-5. **Phase Checkpoint**:
+6. **Phase Checkpoint**:
    - Push release tag (`v1.0.0-hackathon`) via `git-advanced-workflows` and `github-mcp-server`.
    - Finalize `SPRINT.md`: Mark all 6 phases complete. Hackathon submission ready!
