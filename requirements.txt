@@ -1,0 +1,33 @@
+# Sprint System — Core Runtime & Testing Dependencies
+# Modern Python 3.11+ async stack for rapid hackathon execution
+
+# API & Backend Framework
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
+pydantic>=2.7.0
+pydantic-settings>=2.3.0
+
+# Database & ORM
+sqlalchemy>=2.0.30
+aiosqlite>=0.20.0
+
+# AI & LLM Integration
+google-generativeai>=0.7.2
+google-genai>=0.1.0
+
+# HTTP & API Testing Client
+httpx>=0.27.0
+requests>=2.32.0
+
+# Security & Password Hashing
+passlib[bcrypt]>=1.7.4
+bcrypt>=3.2.2
+python-jose[cryptography]>=3.3.0
+
+# Testing & E2E Validation
+pytest>=8.2.0
+pytest-asyncio>=0.23.0
+playwright>=1.44.0
+
+# Environment & Config
+python-dotenv>=1.0.0
