@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 130" width="100%" height="130">
+  <defs>
+    <style>
+      .phase-node { transition: all 0.3s; }
+      .phase-text { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 11px; font-weight: 700; }
+      .phase-time { font-family: 'JetBrains Mono', monospace; font-size: 9px; fill: #64748B; }
+      @keyframes dash {
+        to { stroke-dashoffset: -40; }
+      }
+      .flow-line {
+        stroke-dasharray: 6, 4;
+        animation: dash 2s linear infinite;
+      }
+    </style>
+  </defs>
+
+  <!-- Background bar -->
+  <rect x="0" y="0" width="1000" height="130" rx="14" fill="#0B0F19" stroke="#1E293B" stroke-width="1.5"/>
+
+  <!-- Connecting Animated Flowline -->
+  <line x1="85" y1="65" x2="915" y2="65" stroke="#334155" stroke-width="2"/>
+  <line x1="85" y1="65" x2="915" y2="65" stroke="#38BDF8" stroke-width="2" class="flow-line" opacity="0.6"/>
+
+  <!-- Node 1: Discover -->
+  <g transform="translate(85, 65)">
+    <circle cx="0" cy="0" r="18" fill="#1E293B" stroke="#38BDF8" stroke-width="2"/>
+    <circle cx="0" cy="0" r="6" fill="#38BDF8"/>
+    <text x="0" y="-28" text-anchor="middle" fill="#F8FAFC" class="phase-text">01. DISCOVER</text>
+    <text x="0" y="32" text-anchor="middle" class="phase-time">~30m / SPEC</text>
+  </g>
+
+  <!-- Node 2: Backend -->
+  <g transform="translate(251, 65)">
+    <circle cx="0" cy="0" r="18" fill="#1E293B" stroke="#818CF8" stroke-width="2"/>
+    <circle cx="0" cy="0" r="6" fill="#818CF8"/>
+    <text x="0" y="-28" text-anchor="middle" fill="#F8FAFC" class="phase-text">02. BACKEND</text>
+    <text x="0" y="32" text-anchor="middle" class="phase-time">~60m / API &amp; DB</text>
+  </g>
+
+  <!-- Node 3: Frontend -->
+  <g transform="translate(417, 65)">
+    <circle cx="0" cy="0" r="18" fill="#1E293B" stroke="#C084FC" stroke-width="2"/>
+    <circle cx="0" cy="0" r="6" fill="#C084FC"/>
+    <text x="0" y="-28" text-anchor="middle" fill="#F8FAFC" class="phase-text">03. FRONTEND</text>
+    <text x="0" y="32" text-anchor="middle" class="phase-time">~75m / SWARM</text>
+  </g>
+
+  <!-- Node 4: Polish -->
+  <g transform="translate(583, 65)">
+    <circle cx="0" cy="0" r="18" fill="#1E293B" stroke="#F472B6" stroke-width="2"/>
+    <circle cx="0" cy="0" r="6" fill="#F472B6"/>
+    <text x="0" y="-28" text-anchor="middle" fill="#F8FAFC" class="phase-text">04. POLISH</text>
+    <text x="0" y="32" text-anchor="middle" class="phase-time">~45m / UI-UX PRO</text>
+  </g>
+
+  <!-- Node 5: Audit -->
+  <g transform="translate(749, 65)">
+    <circle cx="0" cy="0" r="18" fill="#1E293B" stroke="#F59E0B" stroke-width="2"/>
+    <circle cx="0" cy="0" r="6" fill="#F59E0B"/>
+    <text x="0" y="-28" text-anchor="middle" fill="#F8FAFC" class="phase-text">05. AUDIT</text>
+    <text x="0" y="32" text-anchor="middle" class="phase-time">~45m / DEVSECOPS</text>
+  </g>
+
+  <!-- Node 6: Launch -->
+  <g transform="translate(915, 65)">
+    <circle cx="0" cy="0" r="18" fill="#1E293B" stroke="#10B981" stroke-width="2"/>
+    <circle cx="0" cy="0" r="6" fill="#10B981"/>
+    <text x="0" y="-28" text-anchor="middle" fill="#F8FAFC" class="phase-text">06. LAUNCH</text>
+    <text x="0" y="32" text-anchor="middle" class="phase-time">~45m / SHIP</text>
+  </g>
+</svg>

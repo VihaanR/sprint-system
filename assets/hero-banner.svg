@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 240" width="100%" height="240">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0B0F19"/>
+      <stop offset="50%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#070A10"/>
+    </linearGradient>
+
+    <!-- Border Glow Gradient -->
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#818CF8" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#C084FC" stop-opacity="0.8"/>
+    </linearGradient>
+
+    <!-- Animated Shimmer Gradient for Text -->
+    <linearGradient id="shimmerGrad" x1="0%" y1="0%" x2="200%" y2="0%">
+      <stop offset="0%" stop-color="#F8FAFC">
+        <animate attributeName="offset" values="0; 1" dur="4s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="25%" stop-color="#38BDF8">
+        <animate attributeName="offset" values="0.25; 1.25" dur="4s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="50%" stop-color="#A855F7">
+        <animate attributeName="offset" values="0.5; 1.5" dur="4s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="75%" stop-color="#38BDF8">
+        <animate attributeName="offset" values="0.75; 1.75" dur="4s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#F8FAFC">
+        <animate attributeName="offset" values="1; 2" dur="4s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+
+    <!-- Grid Pattern -->
+    <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#334155" opacity="0.35"/>
+    </pattern>
+
+    <style>
+      .title { font-family: 'Inter', -apple-system, sans-serif; font-weight: 900; font-size: 44px; letter-spacing: -0.04em; }
+      .mono { font-family: 'JetBrains Mono', 'Fira Code', monospace; }
+      .subtitle { font-size: 15px; fill: #94A3B8; letter-spacing: -0.01em; }
+      .tag { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.35; transform: scale(0.85); }
+      }
+      .pulsing-dot { animation: pulse 2s infinite ease-in-out; transform-origin: 890px 48px; }
+    </style>
+  </defs>
+
+  <!-- Container Box -->
+  <rect x="2" y="2" width="996" height="236" rx="20" fill="url(#bgGrad)" stroke="url(#borderGrad)" stroke-width="1.5"/>
+  <rect x="2" y="2" width="996" height="236" rx="20" fill="url(#grid)"/>
+
+  <!-- Top Status Badge -->
+  <g transform="translate(48, 36)">
+    <rect x="0" y="0" width="170" height="26" rx="13" fill="#1E293B" stroke="#334155" stroke-width="1"/>
+    <circle cx="16" cy="13" r="4.5" fill="#10B981" class="pulsing-dot"/>
+    <text x="30" y="17" fill="#E2E8F0" class="mono tag">SYSTEM: ONLINE</text>
+  </g>
+
+  <!-- Main Headline -->
+  <text x="48" y="112" fill="url(#shimmerGrad)" class="title">SPRINT SYSTEM</text>
+
+  <!-- Subtitle -->
+  <text x="48" y="145" class="mono subtitle">The 5-Hour Global Hackathon Operating System for AI Coding Agents</text>
+
+  <!-- Spec Pills -->
+  <g transform="translate(48, 175)">
+    <!-- Pill 1 -->
+    <rect x="0" y="0" width="145" height="30" rx="6" fill="#1E293B" stroke="#334155" stroke-width="1"/>
+    <text x="14" y="19" fill="#38BDF8" class="mono tag">[TIME: 5 HOURS]</text>
+
+    <!-- Pill 2 -->
+    <rect x="157" y="0" width="175" height="30" rx="6" fill="#1E293B" stroke="#334155" stroke-width="1"/>
+    <text x="171" y="19" fill="#A855F7" class="mono tag">[PIPELINE: 6 PHASES]</text>
+
+    <!-- Pill 3 -->
+    <rect x="344" y="0" width="195" height="30" rx="6" fill="#1E293B" stroke="#334155" stroke-width="1"/>
+    <text x="358" y="19" fill="#10B981" class="mono tag">[AUTONOMY: FAST-GATED]</text>
+
+    <!-- Pill 4 -->
+    <rect x="551" y="0" width="175" height="30" rx="6" fill="#1E293B" stroke="#334155" stroke-width="1"/>
+    <text x="565" y="19" fill="#F59E0B" class="mono tag">[STACK: PRODUCTION]</text>
+  </g>
+
+  <!-- Right Side Geometric Accent -->
+  <g transform="translate(820, 80)" opacity="0.65">
+    <polygon points="60,0 120,35 120,105 60,140 0,105 0,35" fill="none" stroke="#38BDF8" stroke-width="1.5" stroke-dasharray="6,4">
+      <animateTransform attributeName="transform" type="rotate" from="0 60 70" to="360 60 70" dur="24s" repeatCount="indefinite"/>
+    </polygon>
+    <polygon points="60,20 100,43 100,97 60,120 20,97 20,43" fill="none" stroke="#C084FC" stroke-width="1.5">
+      <animateTransform attributeName="transform" type="rotate" from="360 60 70" to="0 60 70" dur="18s" repeatCount="indefinite"/>
+    </polygon>
+  </g>
+</svg>
