@@ -5,20 +5,20 @@ description: Orchestrates a visible, multi-agent parallel frontend swarm with li
 
 # Live Swarm Coding (Visual Parallel Development)
 
-Transform Antigravity's parallel subagent engine into a visible, live-coding swarm with visual appeal matching (and exceeding) `pen.dev`.
+Transform Antigravity's parallel subagent engine into a visible, live-coding swarm with visual appeal matching and exceeding `pen.dev`.
 
-Rather than waiting on headless terminal diffs or vector mockups, this workflow boots your hot-reloading dev server, overlays the **Glassmorphic Swarm Visual Engine**, and dispatches parallel subagents that literally swarm your screen with glowing SVG cursors, Figma-style dashed selection boxes, and floating code streamers as your real application assembles in front of your eyes.
+Rather than waiting on headless terminal diffs or vector mockups, this workflow boots your hot-reloading dev server, overlays the **Glassmorphic Swarm Visual Engine**, and dispatches parallel subagents that swarm your screen with glowing SVG cursors, Figma-style dashed selection boxes, and floating code streamers as your real application assembles in front of your eyes.
 
 ---
 
-## 🎨 Visual Aesthetics & Customization (Pen.dev Parity & Beyond)
+## [VISUAL AESTHETICS & CUSTOMIZATION]
 
 The included visual engine (`resources/swarm-overlay.js`) provides:
 1. **Multi-Agent Glow Cursors**:
-   - 🟣 **Agent Orion** (`#A855F7`): Layout, Flexbox, & Grid Architecture.
-   - 🟢 **Agent Lyra** (`#10B981`): Design Tokens, Gradients, & Tailwind Spacing.
-   - 🟠 **Agent Echo** (`#F59E0B`): Reactive State, Event Handlers, & Interactions.
-   - 🔵 **Agent Nova** (`#0EA5E9`): Accessibility Auditing & WCAG Validation.
+   - `[Agent Orion]` (`#A855F7`): Layout, Flexbox, & Grid Architecture.
+   - `[Agent Lyra]` (`#10B981`): Design Tokens, Gradients, & Tailwind Spacing.
+   - `[Agent Echo]` (`#F59E0B`): Reactive State, Event Handlers, & Interactions.
+   - `[Agent Nova]` (`#0EA5E9`): Accessibility Auditing & WCAG Validation.
 2. **Dynamic Selection Bounding Boxes**: Animated dashed boxes with corner handles that snap around components being actively modified.
 3. **Floating Code Streamers**: Syntactically formatted pills showing real-time diffs (e.g. `+ backdrop-blur-2xl`, `+ useState(0)`).
 4. **Glassmorphic Floating Dock**:
@@ -29,7 +29,7 @@ The included visual engine (`resources/swarm-overlay.js`) provides:
 
 ---
 
-## 🛠️ How to Activate
+## [HOW TO ACTIVATE]
 
 ### Option A: Query Parameter or Single-Line Dev Inject
 To activate the visual overlay during development in any React/HTML project:
@@ -47,7 +47,7 @@ Antigravity evaluates `swarm-overlay.js` directly into the page context using `e
 
 ---
 
-## 🚀 Execution Playbook
+## [EXECUTION PLAYBOOK]
 
 1. **Server Boot**: Start `npm run dev` (Vite) as a daemon process.
 2. **Browser Launch**: Open the page using `chrome-devtools-plugin`.

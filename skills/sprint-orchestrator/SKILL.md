@@ -9,7 +9,7 @@ You are the Master Sprint Orchestrator for high-velocity, global-hackathon-winni
 
 ---
 
-## 🗺️ Complete Toolchain Master Matrix
+## [COMPLETE TOOLCHAIN MASTER MATRIX]
 
 The orchestrator dynamically routes your tools across the 6 phases based on project requirements:
 
@@ -24,7 +24,7 @@ The orchestrator dynamically routes your tools across the 6 phases based on proj
 
 ---
 
-## ⚡ Adaptive Domain Routing
+## [ADAPTIVE DOMAIN ROUTING]
 
 Depending on what you are building, the orchestrator triggers specialized sub-stacks:
 * **Generative AI / LLM features** $\rightarrow$ automatically activates `gemini-api`, `prompt-engineering-patterns`, and `rag-implementation`.
@@ -35,7 +35,7 @@ Depending on what you are building, the orchestrator triggers specialized sub-st
 
 ---
 
-## Operating Lifecycle
+## [OPERATING LIFECYCLE]
 
 1. **Initialize `SPRINT.md`**: Tracks time budget, completed tasks, active tools used, and next steps.
 2. **Fast-Gated Autonomy**: Subagents execute the phase tasks autonomously, update `SPRINT.md`, and pause for your 1-click confirmation before starting the next phase.
