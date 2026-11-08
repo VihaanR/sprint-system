@@ -41,6 +41,11 @@ The orchestrator dynamically routes your tools across the 6 phases based on proj
 - Proactively monitor conversation turns and token consumption.
 - Suggest `/caveman full` or `/caveman ultra` when session token usage exceeds 70% or during repetitive test/debug cycles.
 
+### 4. `Active Context Pruning (ACP)` Protocol (ranxianglei/billion-context)
+- **Disk-Offload Pruning**: Offload raw compiler logs, long stack traces, and verbose subagent outputs to disk (`SPRINT.md`, `docs/`) rather than retaining them in active context.
+- **Phase Boundary Condensation**: Prune conversational churn between phases; distill phase outputs into high-density Executive Scorecards.
+- **Compaction Gating**: Trigger or recommend `/compact` when turn count exceeds 25 or context load exceeds 60%. Provides `/acp`.
+
 ---
 
 ## [OPERATING LIFECYCLE & GATING]

@@ -1,7 +1,7 @@
 # ==============================================================================
 # SPRINT SYSTEM: MASTER DEPENDENCY & TOOLCHAIN SPECIFICATION
 # The 5-Hour Global Hackathon Operating System for AI Coding Agents
-# Coordinates: 21 Installed Plugins | 10 MCP Servers | 30 Global Skills | 4 AAS Elite Skills
+# Coordinates: 21 Installed Plugins | 10 MCP Servers | 31 Global Skills | 4 AAS Elite Skills
 # Architecture: Python 3.11+ / Node.js 20+ / Zero-Conflict Production Stack
 # ==============================================================================
 #
@@ -47,7 +47,7 @@
 # 10. api-anything       -> npx -y api-anything mcp (Direct Web-to-API engine)
 #
 # ------------------------------------------------------------------------------
-# 30 GLOBAL SKILLS ORCHESTRATED:
+# 31 GLOBAL SKILLS ORCHESTRATED:
 # ------------------------------------------------------------------------------
 # Core Pipeline:
 # - sprint-orchestrator, phase-discover, phase-backend, phase-frontend,
@@ -58,6 +58,7 @@
 # - code-simplify (Addy Osmani Complexity Reduction & Anti-Rationalization)
 # - understand-anything (Post-Graphify AST Architecture Tree & Viewer)
 # - caveman (Hybrid 65-75% Token Compression Protocol)
+# - acp (Active Context Pruning & Memory Offload Engine)
 # - api-anything, devils-advocate (Mandatory >= 15 Questions), impeccable,
 #   live-swarm-coding, fastapi-pro, async-python-patterns, rag-implementation,
 #   sql-optimization-patterns, security-auditor, python-testing-patterns,

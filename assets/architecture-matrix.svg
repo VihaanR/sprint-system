@@ -229,7 +229,7 @@
     <g transform="translate(16, 16)">
       <text x="0" y="12" class="proto-title">SYSTEM RELIABILITY &amp; TOKEN ENGINES</text>
       <text x="0" y="28" class="proto-val">GRAVITAS (Report what happened, not intended) | PONYTAIL (Ruthless YAGNI) | CODE-SIMPLIFY (Addy Osmani)</text>
-      <text x="0" y="44" class="proto-val">I-HAVE-ADHD (Action-first in line 1, minute bounds) | CAVEMAN (65-75% Token Compression) | UNDERSTAND-ANYTHING (AST Tree)</text>
+      <text x="0" y="44" class="proto-val">I-HAVE-ADHD (Action-first in line 1) | CAVEMAN (65-75% Token Compression) | ACP (Active Context Pruning) | UNDERSTAND-ANYTHING (AST Tree)</text>
     </g>
   </g>
 </svg>

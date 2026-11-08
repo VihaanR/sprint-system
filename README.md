@@ -103,6 +103,7 @@ Before any sprint phase begins, the system enforces a mandatory two-step gate po
 | **`Caveman`** | `juliusbrussee/caveman` | Extreme token compression (`lite`, `full`, `ultra`). | Slashes output tokens by **65-75%** during late-stage sprint runs and repetitive test/debug loops to preserve context headroom. |
 | **`Ponytail`** | `dietrichgebert/ponytail` | Ruthless YAGNI. Abstract only upon third duplication. | Bans speculative microservices, single-use interfaces, and premature wrappers. Measures and rewards negative LOC (`-LOC`). |
 | **`Code-Simplify`** | `addyosmani/agent-skills` | Early return guards, flattened promises, state consolidation. | Flattens control flows (max nesting <= 2), eliminates promise callback chains, and enforces the Anti-Rationalization matrix. |
+| **`ACP`** | `ranxianglei/billion-context` | Active Context Pruning, disk-offload, and phase condensation. | Flushes verbose terminal traces to `SPRINT.md`/`docs/`, prevents context exhaustion, and auto-gates `/compact`. |
 | **`Understand-Anything`** | `Egonex-AI/Understand-Anything` | AST architecture tree generator & interactive browser viewer. | Runs post-Graphify in Phase 1 & 5 to map presentation, routing, domain, and persistence tiers into `docs/ARCHITECTURE_TREE.md`. |
 | **`AAS Elite Bundle`** | `sickn33/agentic-awesome-skills` | Hardened playbooks for security, chaos, benchmarks, and leaks. | Modular playbooks in `skills/aas/` + runtime discovery via `npx agentic-awesome-skills` CLI. |
 
@@ -120,6 +121,7 @@ Before any sprint phase begins, the system enforces a mandatory two-step gate po
 | :--- | :--- | :--- | :--- |
 | `/ponytail-review` | `ponytail` | Auto-executed in Phase 2, 3, & 5 | Anti-overengineering review measuring negative LOC and deleting speculative code. |
 | `/code-simplify` | `code-simplify` | Auto-executed in Phase 4 (Polish) | Flattens control flows, reduces cyclomatic complexity, and consolidates state variables. |
+| `/acp` | `acp` | Auto-executed at Phase transitions | Active Context Pruning: flushes pending state to SPRINT.md, gates /compact, and prevents context exhaustion. |
 | `/caveman [tier]` | `caveman` | Auto-recommended at >70% tokens | Manual token compression (`lite`, `full`, `ultra`, `off`) to save 65-75% tokens. |
 | `/impeccable polish` | `impeccable` | Auto-executed in Phase 4 (Polish) | Anti-slop design polish stripping generic AI templates and balancing spacing. |
 | `/impeccable bolder` | `impeccable` | Auto-executed in Phase 4 (Polish) | Elevates timid typography, accentuates contrast, and injects visual confidence. |
