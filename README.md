@@ -196,16 +196,22 @@ flowchart TD
 
 ---
 
-## [SLASH COMMANDS]
+## [SLASH COMMANDS & PIPELINE AUTOMATION]
 
-| Command | Engine | Purpose |
-| :--- | :--- | :--- |
-| `/ponytail-review` | `ponytail` | Anti-overengineering review measuring negative LOC and deleting speculative code. |
-| `/code-simplify` | `code-simplify` | Flattens control flows, reduces cyclomatic complexity, and consolidates state variables. |
-| `/caveman [tier]` | `caveman` | Engages token compression (`lite`, `full`, `ultra`, `off`) to save 65-75% tokens. |
-| `/impeccable polish` | `impeccable` | Anti-slop design polish stripping generic AI templates and balancing spacing. |
-| `/impeccable bolder` | `impeccable` | Elevates timid typography, accentuates contrast, and injects visual confidence. |
-| `/grill-me` | `devils-advocate` | Triggers the adversarial pre-phase interrogation gate with >= 15 deep-dive questions. |
+> [!NOTE]
+> **Automated Pipeline vs On-Demand Shortcuts**:
+> Running the sprint pipeline (`sprint-orchestrator` or `phase-01` through `phase-06`) **automatically executes the complete amalgamation of all 62 tools, rules, and engines** under the hood. You do not need to manually call these slash commands during a normal sprint.
+>
+> The slash commands below are optional, standalone shortcuts surfaced for manual on-demand checks, targeted refactoring passes, or extra user confirmation:
+
+| Command | Engine | Automated Sprint Phase | Standalone On-Demand Purpose |
+| :--- | :--- | :--- | :--- |
+| `/ponytail-review` | `ponytail` | Auto-executed in Phase 2, 3, & 5 | Anti-overengineering review measuring negative LOC and deleting speculative code. |
+| `/code-simplify` | `code-simplify` | Auto-executed in Phase 4 (Polish) | Flattens control flows, reduces cyclomatic complexity, and consolidates state variables. |
+| `/caveman [tier]` | `caveman` | Auto-recommended at >70% tokens | Manual token compression (`lite`, `full`, `ultra`, `off`) to save 65-75% tokens. |
+| `/impeccable polish` | `impeccable` | Auto-executed in Phase 4 (Polish) | Anti-slop design polish stripping generic AI templates and balancing spacing. |
+| `/impeccable bolder` | `impeccable` | Auto-executed in Phase 4 (Polish) | Elevates timid typography, accentuates contrast, and injects visual confidence. |
+| `/grill-me` | `devils-advocate` | Auto-executed before EVERY phase | Triggers the adversarial pre-phase interrogation gate with >= 15 deep-dive questions. |
 
 ---
 
