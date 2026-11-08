@@ -13,13 +13,17 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/LICENSE-MIT-F59E0B?style=for-the-badge" alt="License" /></a>
 </p>
 
+<p align="center">
+  <img src="assets/wimpy-running-agent.svg" alt="Diary of a 5-Hour Sprint: The Running Agent" width="100%" />
+</p>
+
 ---
 
 ## [SYSTEM OVERVIEW]
 
 Developers and hackathon teams frequently have dozens of cutting-edge AI skills, plugins, and MCP servers available. During a competitive hackathon, tool execution often fractures into chaotic, ad-hoc prompting. Context windows overflow, verification passes get skipped, and prototypes end with unstyled interfaces or live runtime crashes during judging.
 
-**Sprint System** enforces a disciplined, phase-based agentic operating system that orchestrates **21 plugins, 10 MCP servers, 30 global skills, and 4 AAS elite skills** into an automated pipeline designed to achieve a production-ready, judge-ready submission within **5 hours of prompting (1 day of work)**.
+**Sprint System** enforces a disciplined, phase-based agentic operating system that orchestrates **21 plugins, 10 MCP servers, 31 global skills, and 4 AAS elite skills** into an automated pipeline designed to achieve a production-ready, judge-ready submission within **5 hours of prompting (1 day of work)**.
 
 ```
 Problem Statement -> 6 Gated Phases (with Pre-Phase Interrogation >= 15 Questions) -> Judge-Ready Submission
@@ -30,26 +34,8 @@ Problem Statement -> 6 Gated Phases (with Pre-Phase Interrogation >= 15 Question
 ## [PIPELINE]
 
 <p align="center">
-  <img src="assets/phase-pipeline.svg" alt="6-Phase Pipeline Overview" width="100%" />
+  <img src="assets/phase-pipeline.svg" alt="6-Phase Animated Pipeline Overview" width="100%" />
 </p>
-
-```mermaid
-flowchart LR
-    P1["01. DISCOVER: Spec and Moat"] --> P2["02. BACKEND: API and AI Engine"]
-    P2 --> P3["03. FRONTEND: Visual Swarm Build"]
-    P3 --> P4["04. POLISH: Impeccable and Simplify"]
-    P4 --> P5["05. AUDIT: Gravitas and QA"]
-    P5 --> P6["06. LAUNCH: Deploy and 60s Video"]
-
-    DA["devils-advocate: 15+ Deep-Dive Questions"] -.->|Gates Every Phase| P1
-    DA -.-> P2
-    DA -.-> P3
-    DA -.-> P4
-    DA -.-> P5
-    DA -.-> P6
-
-    SO["sprint-orchestrator: Master Coordinator"] -.-> DA
-```
 
 ---
 

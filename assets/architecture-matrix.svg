@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 540" width="100%" height="540">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 550" width="100%" height="550">
   <defs>
     <!-- Background Gradient -->
     <linearGradient id="matrixBg" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -9,8 +9,15 @@
 
     <!-- Card Background Gradient -->
     <linearGradient id="cardBg" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#1E293B" stop-opacity="0.8"/>
-      <stop offset="100%" stop-color="#0F172A" stop-opacity="0.9"/>
+      <stop offset="0%" stop-color="#1E293B" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#0F172A" stop-opacity="0.95"/>
+    </linearGradient>
+
+    <!-- Gate Glow Shimmer -->
+    <linearGradient id="gateGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F43F5E" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#FB7185" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#F43F5E" stop-opacity="0.8"/>
     </linearGradient>
 
     <!-- Grid Pattern -->
@@ -27,6 +34,23 @@
     <linearGradient id="accent6" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#10B981"/><stop offset="100%" stop-color="#059669"/></linearGradient>
 
     <style>
+      @keyframes gate-pulse {
+        0%, 100% { stroke-opacity: 0.8; }
+        50% { stroke-opacity: 0.3; }
+      }
+      @keyframes stream-down {
+        0% { stroke-dashoffset: 0; }
+        100% { stroke-dashoffset: -20; }
+      }
+      @keyframes beacon-ping {
+        0% { r: 4px; opacity: 1; }
+        100% { r: 12px; opacity: 0; }
+      }
+
+      .gate-box { animation: gate-pulse 3s ease-in-out infinite; }
+      .data-stream { stroke-dasharray: 4 4; animation: stream-down 1.2s linear infinite; }
+      .beacon { animation: beacon-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
+
       .hdr-title { font-family: 'Inter', -apple-system, sans-serif; font-weight: 900; font-size: 22px; fill: #F8FAFC; letter-spacing: -0.02em; }
       .hdr-sub { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 11px; fill: #94A3B8; }
       .gate-title { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; fill: #F43F5E; letter-spacing: 0.05em; }
@@ -37,30 +61,42 @@
       .item-val { font-family: 'Inter', sans-serif; font-size: 9.5px; fill: #CBD5E1; line-height: 1.35; }
       .proto-title { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; fill: #38BDF8; letter-spacing: 0.05em; }
       .proto-val { font-family: 'Inter', sans-serif; font-size: 9px; fill: #94A3B8; }
+      .doodle-text { font-family: 'Comic Sans MS', cursive, sans-serif; font-size: 9px; fill: #F59E0B; }
     </style>
   </defs>
 
   <!-- Outer Canvas -->
-  <rect x="2" y="2" width="996" height="536" rx="16" fill="url(#matrixBg)" stroke="#1E293B" stroke-width="1.5"/>
-  <rect x="2" y="2" width="996" height="536" rx="16" fill="url(#matrixGrid)"/>
+  <rect x="2" y="2" width="996" height="546" rx="16" fill="url(#matrixBg)" stroke="#1E293B" stroke-width="1.5"/>
+  <rect x="2" y="2" width="996" height="546" rx="16" fill="url(#matrixGrid)"/>
 
   <!-- Top Header Bar -->
   <g transform="translate(36, 24)">
     <text x="0" y="20" class="hdr-title">SPRINT SYSTEM ARCHITECTURE MATRIX</text>
-    <text x="0" y="38" class="hdr-sub">Autonomous 6-Phase Engineering Pipeline : 21 Plugins : 10 MCP Servers : 30 Skills : 5-Hour Budget</text>
+    <text x="0" y="38" class="hdr-sub">Autonomous 6-Phase Engineering Pipeline : 21 Plugins : 10 MCP Servers : 31 Skills : 5-Hour Budget</text>
   </g>
 
-  <!-- Pre-Phase Gate Banner -->
+  <!-- Pre-Phase Gate Banner (Animated Shimmer) -->
   <g transform="translate(36, 74)">
-    <rect x="0" y="0" width="928" height="42" rx="8" fill="#1C1017" stroke="#881337" stroke-width="1.2"/>
-    <circle cx="20" cy="21" r="6" fill="#F43F5E"/>
+    <rect x="0" y="0" width="928" height="42" rx="8" fill="#1C1017" stroke="url(#gateGlow)" stroke-width="1.5" class="gate-box"/>
+    <!-- Pulsing Radar Beacon -->
+    <circle cx="20" cy="21" r="5" fill="#F43F5E"/>
+    <circle cx="20" cy="21" class="beacon" stroke="#F43F5E" stroke-width="1.5" fill="none"/>
     <text x="36" y="19" class="gate-title">[PRE-PHASE INTERROGATION GATE : DEVIL'S ADVOCATE]</text>
-    <text x="36" y="32" class="gate-sub">Mandatory 15-Point Deep-Dive Matrix (Moat, Features, Architecture, UX, Resilience) + Addy Osmani Anti-Rationalization Verification</text>
+    <text x="36" y="32" class="gate-sub">Mandatory 15-Point Deep-Dive Matrix (Moat, Features, Architecture, UX, Resilience) + Addy Osmani Anti-Rationalization</text>
+    <text x="810" y="25" class="doodle-text">&lt;-- gates every phase!</text>
   </g>
+
+  <!-- Vertical Animated Data Streams from Gate into Columns -->
+  <line x1="108" y1="116" x2="108" y2="128" stroke="#38BDF8" stroke-width="1.8" class="data-stream"/>
+  <line x1="264" y1="116" x2="264" y2="128" stroke="#818CF8" stroke-width="1.8" class="data-stream"/>
+  <line x1="420" y1="116" x2="420" y2="128" stroke="#C084FC" stroke-width="1.8" class="data-stream"/>
+  <line x1="576" y1="116" x2="576" y2="128" stroke="#F472B6" stroke-width="1.8" class="data-stream"/>
+  <line x1="732" y1="116" x2="732" y2="128" stroke="#F59E0B" stroke-width="1.8" class="data-stream"/>
+  <line x1="888" y1="116" x2="888" y2="128" stroke="#10B981" stroke-width="1.8" class="data-stream"/>
 
   <!-- Phase Column 1: Discover -->
   <g transform="translate(36, 128)">
-    <rect x="0" y="0" width="144" height="300" rx="10" fill="url(#cardBg)" stroke="#1E293B" stroke-width="1.2"/>
+    <rect x="0" y="0" width="144" height="302" rx="10" fill="url(#cardBg)" stroke="#1E293B" stroke-width="1.2"/>
     <rect x="0" y="0" width="144" height="4" rx="2" fill="url(#accent1)"/>
     <text x="12" y="24" class="col-title">01. DISCOVER</text>
     <text x="12" y="38" fill="#38BDF8" class="col-time">~30m / Spec &amp; Moat</text>
@@ -84,12 +120,12 @@
     <text x="12" y="252" class="item-val">mermaid-expert</text>
     <text x="12" y="265" class="item-val">gravitas (recon)</text>
     
-    <text x="12" y="285" fill="#38BDF8" class="item-lbl">DELIVERABLE: SPEC.md</text>
+    <text x="12" y="287" fill="#38BDF8" class="item-lbl">DELIVERABLE: SPEC.md</text>
   </g>
 
   <!-- Phase Column 2: Backend -->
   <g transform="translate(192, 128)">
-    <rect x="0" y="0" width="144" height="300" rx="10" fill="url(#cardBg)" stroke="#1E293B" stroke-width="1.2"/>
+    <rect x="0" y="0" width="144" height="302" rx="10" fill="url(#cardBg)" stroke="#1E293B" stroke-width="1.2"/>
     <rect x="0" y="0" width="144" height="4" rx="2" fill="url(#accent2)"/>
     <text x="12" y="24" class="col-title">02. BACKEND</text>
     <text x="12" y="38" fill="#818CF8" class="col-time">~60m / API &amp; AI</text>
@@ -113,12 +149,12 @@
     <text x="12" y="252" class="item-val">async-python</text>
     <text x="12" y="265" class="item-val">gravitas (proof)</text>
     
-    <text x="12" y="285" fill="#818CF8" class="item-lbl">DELIVERABLE: API PASS</text>
+    <text x="12" y="287" fill="#818CF8" class="item-lbl">DELIVERABLE: API PASS</text>
   </g>
 
   <!-- Phase Column 3: Frontend -->
   <g transform="translate(348, 128)">
-    <rect x="0" y="0" width="144" height="300" rx="10" fill="url(#cardBg)" stroke="#1E293B" stroke-width="1.2"/>
+    <rect x="0" y="0" width="144" height="302" rx="10" fill="url(#cardBg)" stroke="#1E293B" stroke-width="1.2"/>
     <rect x="0" y="0" width="144" height="4" rx="2" fill="url(#accent3)"/>
     <text x="12" y="24" class="col-title">03. FRONTEND</text>
     <text x="12" y="38" fill="#C084FC" class="col-time">~75m / Visual Swarm</text>
@@ -140,12 +176,12 @@
     <text x="12" y="252" class="item-val">react-state-mgmt</text>
     <text x="12" y="265" class="item-val">gravitas (DOM)</text>
     
-    <text x="12" y="285" fill="#C084FC" class="item-lbl">DELIVERABLE: UI LIVE</text>
+    <text x="12" y="287" fill="#C084FC" class="item-lbl">DELIVERABLE: UI LIVE</text>
   </g>
 
   <!-- Phase Column 4: Polish -->
   <g transform="translate(504, 128)">
-    <rect x="0" y="0" width="144" height="300" rx="10" fill="url(#cardBg)" stroke="#1E293B" stroke-width="1.2"/>
+    <rect x="0" y="0" width="144" height="302" rx="10" fill="url(#cardBg)" stroke="#1E293B" stroke-width="1.2"/>
     <rect x="0" y="0" width="144" height="4" rx="2" fill="url(#accent4)"/>
     <text x="12" y="24" class="col-title">04. POLISH</text>
     <text x="12" y="38" fill="#F472B6" class="col-time">~45m / Anti-Slop</text>
@@ -166,12 +202,12 @@
     <text x="12" y="252" class="item-val">tailwind-design</text>
     <text x="12" y="265" class="item-val">ui-visual-validator</text>
     
-    <text x="12" y="285" fill="#F472B6" class="item-lbl">DELIVERABLE: OLED UI</text>
+    <text x="12" y="287" fill="#F472B6" class="item-lbl">DELIVERABLE: OLED UI</text>
   </g>
 
   <!-- Phase Column 5: Audit -->
   <g transform="translate(660, 128)">
-    <rect x="0" y="0" width="144" height="300" rx="10" fill="url(#cardBg)" stroke="#1E293B" stroke-width="1.2"/>
+    <rect x="0" y="0" width="144" height="302" rx="10" fill="url(#cardBg)" stroke="#1E293B" stroke-width="1.2"/>
     <rect x="0" y="0" width="144" height="4" rx="2" fill="url(#accent5)"/>
     <text x="12" y="24" class="col-title">05. AUDIT</text>
     <text x="12" y="38" fill="#F59E0B" class="col-time">~45m / Hardening</text>
@@ -193,12 +229,12 @@
     <text x="12" y="252" class="item-val">aas (elite bundle)</text>
     <text x="12" y="265" class="item-val">e2e-testing-patterns</text>
     
-    <text x="12" y="285" fill="#F59E0B" class="item-lbl">DELIVERABLE: AUDIT PASS</text>
+    <text x="12" y="287" fill="#F59E0B" class="item-lbl">DELIVERABLE: AUDIT PASS</text>
   </g>
 
   <!-- Phase Column 6: Launch -->
   <g transform="translate(816, 128)">
-    <rect x="0" y="0" width="148" height="300" rx="10" fill="url(#cardBg)" stroke="#1E293B" stroke-width="1.2"/>
+    <rect x="0" y="0" width="148" height="302" rx="10" fill="url(#cardBg)" stroke="#1E293B" stroke-width="1.2"/>
     <rect x="0" y="0" width="148" height="4" rx="2" fill="url(#accent6)"/>
     <text x="12" y="24" class="col-title">06. LAUNCH</text>
     <text x="12" y="38" fill="#10B981" class="col-time">~45m / Judge Pack</text>
@@ -219,15 +255,15 @@
     <text x="12" y="252" class="item-val">git-advanced-flow</text>
     <text x="12" y="265" class="item-val">mermaid-expert</text>
     
-    <text x="12" y="285" fill="#10B981" class="item-lbl">DELIVERABLE: PITCH PACK</text>
+    <text x="12" y="287" fill="#10B981" class="item-lbl">DELIVERABLE: PITCH PACK</text>
   </g>
 
   <!-- Bottom System Protocols Bar -->
-  <g transform="translate(36, 442)">
-    <rect x="0" y="0" width="928" height="72" rx="10" fill="#0A0F1D" stroke="#1E293B" stroke-width="1.2"/>
+  <g transform="translate(36, 446)">
+    <rect x="0" y="0" width="928" height="74" rx="10" fill="#0A0F1D" stroke="#1E293B" stroke-width="1.2"/>
     
     <g transform="translate(16, 16)">
-      <text x="0" y="12" class="proto-title">SYSTEM RELIABILITY &amp; TOKEN ENGINES</text>
+      <text x="0" y="12" class="proto-title">SYSTEM RELIABILITY, ANTI-OVERENGINEERING &amp; TOKEN ENGINES</text>
       <text x="0" y="28" class="proto-val">GRAVITAS (Report what happened, not intended) | PONYTAIL (Ruthless YAGNI) | CODE-SIMPLIFY (Addy Osmani)</text>
       <text x="0" y="44" class="proto-val">I-HAVE-ADHD (Action-first in line 1) | CAVEMAN (65-75% Token Compression) | ACP (Active Context Pruning) | UNDERSTAND-ANYTHING (AST Tree)</text>
     </g>

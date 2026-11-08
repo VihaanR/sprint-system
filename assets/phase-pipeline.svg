@@ -1,71 +1,135 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 130" width="100%" height="130">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 160" width="100%" height="160">
   <defs>
     <style>
-      .phase-node { transition: all 0.3s; }
-      .phase-text { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 11px; font-weight: 700; }
-      .phase-time { font-family: 'JetBrains Mono', monospace; font-size: 9px; fill: #64748B; }
-      @keyframes dash {
+      @keyframes dash-scroll {
         to { stroke-dashoffset: -40; }
       }
-      .flow-line {
-        stroke-dasharray: 6, 4;
-        animation: dash 2s linear infinite;
+      @keyframes node-pulse {
+        0%, 100% { transform: scale(1); opacity: 0.9; }
+        50% { transform: scale(1.15); opacity: 0.4; }
       }
+      @keyframes runner-glide {
+        0% { transform: translateX(45px); }
+        16.6% { transform: translateX(215px); }
+        33.3% { transform: translateX(385px); }
+        50% { transform: translateX(555px); }
+        66.6% { transform: translateX(725px); }
+        83.3% { transform: translateX(895px); }
+        100% { transform: translateX(930px); }
+      }
+      @keyframes leg-wiggle {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-20deg); }
+      }
+
+      .flow-track { stroke-dasharray: 8 6; animation: dash-scroll 2s linear infinite; }
+      .pulse-ring { animation: node-pulse 2.5s ease-in-out infinite; transform-origin: center; }
+      .running-sprite { animation: runner-glide 12s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+      .doodle-leg { animation: leg-wiggle 0.3s ease-in-out infinite; transform-origin: 0 0; }
+
+      .phase-text { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 11px; font-weight: 800; }
+      .phase-time { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600; fill: #64748B; }
+      .hand-note { font-family: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif; font-size: 8.5px; font-weight: 700; }
+      .ink-doodle { stroke-linecap: round; stroke-linejoin: round; fill: none; }
     </style>
+
+    <!-- Grid Background -->
+    <pattern id="pipeGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="0.8" fill="#334155" opacity="0.3"/>
+    </pattern>
   </defs>
 
-  <!-- Background bar -->
-  <rect x="0" y="0" width="1000" height="130" rx="14" fill="#0B0F19" stroke="#1E293B" stroke-width="1.5"/>
+  <!-- Container Box -->
+  <rect x="2" y="2" width="996" height="156" rx="16" fill="#0B0F19" stroke="#1E293B" stroke-width="1.8"/>
+  <rect x="2" y="2" width="996" height="156" rx="16" fill="url(#pipeGrid)"/>
 
-  <!-- Connecting Animated Flowline -->
-  <line x1="85" y1="65" x2="915" y2="65" stroke="#334155" stroke-width="2"/>
-  <line x1="85" y1="65" x2="915" y2="65" stroke="#38BDF8" stroke-width="2" class="flow-line" opacity="0.6"/>
+  <!-- Scribbled Top Banner Badge -->
+  <g transform="translate(36, 14)">
+    <rect x="0" y="0" width="220" height="20" rx="4" fill="#1C1917" stroke="#F59E0B" stroke-width="1" stroke-dasharray="3 2"/>
+    <text x="10" y="14" class="phase-text" font-size="9" fill="#F59E0B">[THE 5-HOUR ROADMAP : 6 GATES]</text>
+  </g>
 
-  <!-- Node 1: Discover -->
-  <g transform="translate(85, 65)">
-    <circle cx="0" cy="0" r="18" fill="#1E293B" stroke="#38BDF8" stroke-width="2"/>
+  <!-- Connecting Backbone Wire -->
+  <path d="M 75 88 Q 240 85, 410 88 T 750 88 T 925 88" stroke="#1E293B" stroke-width="3" fill="none"/>
+  <!-- Animated Streaming Dashed Flowline -->
+  <path d="M 75 88 Q 240 85, 410 88 T 750 88 T 925 88" stroke="#38BDF8" stroke-width="2.2" class="flow-track ink-doodle" opacity="0.75"/>
+
+  <!-- MINI ANIMATED RUNNER SPRITE (Scurrying between phases) -->
+  <g class="running-sprite" transform="translate(0, 0)">
+    <!-- Tiny Wimpy Kid Doodle Runner -->
+    <g transform="translate(0, 64)">
+      <!-- Head -->
+      <circle cx="0" cy="0" r="7" fill="#0B0F19" stroke="#F8FAFC" stroke-width="1.6"/>
+      <!-- Eyes -->
+      <circle cx="2" cy="-1" r="1" fill="#F8FAFC"/>
+      <!-- 2 hairs -->
+      <path d="M -2 -7 L -3 -11 M 1 -7 L 1 -11" stroke="#F8FAFC" stroke-width="1.2"/>
+      <!-- Body -->
+      <line x1="0" y1="7" x2="-2" y2="16" stroke="#F8FAFC" stroke-width="1.6"/>
+      <!-- Legs running -->
+      <path d="M -2 16 L -7 23 M -2 16 L 5 22" stroke="#F8FAFC" stroke-width="1.6" class="doodle-leg"/>
+      <!-- Tiny Laptop -->
+      <polygon points="4,10 11,8 10,13 3,13" fill="#38BDF8"/>
+    </g>
+  </g>
+
+  <!-- PHASE 01: DISCOVER -->
+  <g transform="translate(75, 88)">
+    <circle cx="0" cy="0" r="22" fill="#0284C7" opacity="0.15" class="pulse-ring"/>
+    <circle cx="0" cy="0" r="18" fill="#0F172A" stroke="#38BDF8" stroke-width="2.5"/>
     <circle cx="0" cy="0" r="6" fill="#38BDF8"/>
-    <text x="0" y="-28" text-anchor="middle" fill="#F8FAFC" class="phase-text">01. DISCOVER</text>
+    <text x="0" y="-26" text-anchor="middle" fill="#F8FAFC" class="phase-text">01. DISCOVER</text>
     <text x="0" y="32" text-anchor="middle" class="phase-time">~30m / SPEC</text>
+    <text x="0" y="44" text-anchor="middle" fill="#38BDF8" class="hand-note">spec + moat</text>
   </g>
 
-  <!-- Node 2: Backend -->
-  <g transform="translate(251, 65)">
-    <circle cx="0" cy="0" r="18" fill="#1E293B" stroke="#818CF8" stroke-width="2"/>
+  <!-- PHASE 02: BACKEND -->
+  <g transform="translate(245, 88)">
+    <circle cx="0" cy="0" r="22" fill="#4F46E5" opacity="0.15" class="pulse-ring"/>
+    <circle cx="0" cy="0" r="18" fill="#0F172A" stroke="#818CF8" stroke-width="2.5"/>
     <circle cx="0" cy="0" r="6" fill="#818CF8"/>
-    <text x="0" y="-28" text-anchor="middle" fill="#F8FAFC" class="phase-text">02. BACKEND</text>
+    <text x="0" y="-26" text-anchor="middle" fill="#F8FAFC" class="phase-text">02. BACKEND</text>
     <text x="0" y="32" text-anchor="middle" class="phase-time">~60m / API &amp; DB</text>
+    <text x="0" y="44" text-anchor="middle" fill="#818CF8" class="hand-note">yagni lean</text>
   </g>
 
-  <!-- Node 3: Frontend -->
-  <g transform="translate(417, 65)">
-    <circle cx="0" cy="0" r="18" fill="#1E293B" stroke="#C084FC" stroke-width="2"/>
+  <!-- PHASE 03: FRONTEND -->
+  <g transform="translate(415, 88)">
+    <circle cx="0" cy="0" r="22" fill="#9333EA" opacity="0.15" class="pulse-ring"/>
+    <circle cx="0" cy="0" r="18" fill="#0F172A" stroke="#C084FC" stroke-width="2.5"/>
     <circle cx="0" cy="0" r="6" fill="#C084FC"/>
-    <text x="0" y="-28" text-anchor="middle" fill="#F8FAFC" class="phase-text">03. FRONTEND</text>
+    <text x="0" y="-26" text-anchor="middle" fill="#F8FAFC" class="phase-text">03. FRONTEND</text>
     <text x="0" y="32" text-anchor="middle" class="phase-time">~75m / SWARM</text>
+    <text x="0" y="44" text-anchor="middle" fill="#C084FC" class="hand-note">multiplayer</text>
   </g>
 
-  <!-- Node 4: Polish -->
-  <g transform="translate(583, 65)">
-    <circle cx="0" cy="0" r="18" fill="#1E293B" stroke="#F472B6" stroke-width="2"/>
+  <!-- PHASE 04: POLISH -->
+  <g transform="translate(585, 88)">
+    <circle cx="0" cy="0" r="22" fill="#DB2777" opacity="0.15" class="pulse-ring"/>
+    <circle cx="0" cy="0" r="18" fill="#0F172A" stroke="#F472B6" stroke-width="2.5"/>
     <circle cx="0" cy="0" r="6" fill="#F472B6"/>
-    <text x="0" y="-28" text-anchor="middle" fill="#F8FAFC" class="phase-text">04. POLISH</text>
-    <text x="0" y="32" text-anchor="middle" class="phase-time">~45m / UI-UX PRO</text>
+    <text x="0" y="-26" text-anchor="middle" fill="#F8FAFC" class="phase-text">04. POLISH</text>
+    <text x="0" y="32" text-anchor="middle" class="phase-time">~45m / ANTI-SLOP</text>
+    <text x="0" y="44" text-anchor="middle" fill="#F472B6" class="hand-note">simplify</text>
   </g>
 
-  <!-- Node 5: Audit -->
-  <g transform="translate(749, 65)">
-    <circle cx="0" cy="0" r="18" fill="#1E293B" stroke="#F59E0B" stroke-width="2"/>
+  <!-- PHASE 05: AUDIT -->
+  <g transform="translate(755, 88)">
+    <circle cx="0" cy="0" r="22" fill="#D97706" opacity="0.15" class="pulse-ring"/>
+    <circle cx="0" cy="0" r="18" fill="#0F172A" stroke="#F59E0B" stroke-width="2.5"/>
     <circle cx="0" cy="0" r="6" fill="#F59E0B"/>
-    <text x="0" y="-28" text-anchor="middle" fill="#F8FAFC" class="phase-text">05. AUDIT</text>
+    <text x="0" y="-26" text-anchor="middle" fill="#F8FAFC" class="phase-text">05. AUDIT</text>
     <text x="0" y="32" text-anchor="middle" class="phase-time">~45m / DEVSECOPS</text>
+    <text x="0" y="44" text-anchor="middle" fill="#F59E0B" class="hand-note">gravitas proof</text>
   </g>
 
-  <!-- Node 6: Launch -->
-  <g transform="translate(915, 65)">
-    <circle cx="0" cy="0" r="18" fill="#1E293B" stroke="#10B981" stroke-width="2"/>
+  <!-- PHASE 06: LAUNCH -->
+  <g transform="translate(925, 88)">
+    <circle cx="0" cy="0" r="22" fill="#059669" opacity="0.15" class="pulse-ring"/>
+    <circle cx="0" cy="0" r="18" fill="#0F172A" stroke="#10B981" stroke-width="2.5"/>
     <circle cx="0" cy="0" r="6" fill="#10B981"/>
-    <text x="0" y="-28" text-anchor="middle" fill="#F8FAFC" class="phase-text">06. LAUNCH</text>
+    <text x="0" y="-26" text-anchor="middle" fill="#F8FAFC" class="phase-text">06. LAUNCH</text>
     <text x="0" y="32" text-anchor="middle" class="phase-time">~45m / SHIP</text>
+    <text x="0" y="44" text-anchor="middle" fill="#10B981" class="hand-note">60s demo</text>
   </g>
 </svg>
