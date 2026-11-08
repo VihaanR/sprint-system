@@ -9,7 +9,7 @@
 <p align="center">
   <a href="#pipeline"><img src="https://img.shields.io/badge/PIPELINE-6_PHASES-38BDF8?style=for-the-badge&logo=git&logoColor=white" alt="Pipeline" /></a>
   <a href="#time-budget"><img src="https://img.shields.io/badge/BUDGET-5_HOURS-A855F7?style=for-the-badge&logo=clock&logoColor=white" alt="Time Budget" /></a>
-  <a href="#toolchain"><img src="https://img.shields.io/badge/TOOLCHAIN-62_ACTIVE_TOOLS-10B981?style=for-the-badge&logo=git&logoColor=white" alt="Toolchain" /></a>
+  <a href="#toolchain"><img src="https://img.shields.io/badge/STACK-62_TOOLS-10B981?style=for-the-badge" alt="Toolchain" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/LICENSE-MIT-F59E0B?style=for-the-badge" alt="License" /></a>
 </p>
 
