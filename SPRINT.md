@@ -26,6 +26,7 @@
   - [ ] FastAPI async scaffolding
   - [ ] SQLAlchemy / SQLite persistence
   - [ ] Gemini API / RAG model integration
+  - [ ] Third-party live web data integrated via api-anything (if applicable)
   - [ ] TDD unit tests & live `fetch` validation
   *Deliverable*: Verified running API + populated database
 

@@ -1,7 +1,7 @@
 # ==============================================================================
 # SPRINT SYSTEM: MASTER DEPENDENCY & TOOLCHAIN SPECIFICATION
 # The 5-Hour Global Hackathon Operating System for AI Coding Agents
-# Coordinates: 21 Installed Plugins | 9 MCP Servers | 24 Global Skills
+# Coordinates: 21 Installed Plugins | 10 MCP Servers | 25 Global Skills
 # Architecture: Python 3.11+ / Node.js 20+ / Zero-Conflict Production Stack
 # ==============================================================================
 #
@@ -33,7 +33,7 @@
 # 21. vercel-plugin             -> Vercel Edge functions, preview URLs, and AI SDK
 #
 # ------------------------------------------------------------------------------
-# 9 MCP SERVERS INTEGRATED:
+# 10 MCP SERVERS INTEGRATED:
 # ------------------------------------------------------------------------------
 # 01. sqlite             -> uvx mcp-server-sqlite (Local relational persistence)
 # 02. fetch              -> uvx mcp-server-fetch --allow-private-ips (HTTP probe)
@@ -44,15 +44,16 @@
 # 07. railway_mcp        -> Microservice orchestration & cloud environment lifecycle
 # 08. sentry_sentry      -> Telemetry query engine, stacktrace & breadcrumb inspector
 # 09. firebase-mcp       -> Firestore database operations & security rule verification
+# 10. api-anything       -> npx -y api-anything mcp (Direct Web-to-API engine)
 #
 # ------------------------------------------------------------------------------
-# 24 GLOBAL SKILLS ORCHESTRATED:
+# 25 GLOBAL SKILLS ORCHESTRATED:
 # ------------------------------------------------------------------------------
 # Core Pipeline:
 # - sprint-orchestrator, phase-discover, phase-backend, phase-frontend,
 #   phase-polish, phase-audit, phase-launch
 # Specialized Domain Engines:
-# - devils-advocate, impeccable, live-swarm-coding, fastapi-pro,
+# - api-anything, devils-advocate, impeccable, live-swarm-coding, fastapi-pro,
 #   async-python-patterns, rag-implementation, sql-optimization-patterns,
 #   security-auditor, python-testing-patterns, e2e-testing-patterns,
 #   tailwind-design-system, react-state-management, react-modernization,
@@ -60,6 +61,7 @@
 #   git-advanced-workflows
 #
 # CLI & Engine Runtimes:
+# - api-anything CLI     -> npx -y api-anything call <site> <op> (Sub-second HTTP data)
 # - impeccable detector  -> npx impeccable detect src/ (Anti-slop design scanner)
 # ==============================================================================
 

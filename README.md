@@ -9,7 +9,7 @@
 <p align="center">
   <a href="#pipeline"><img src="https://img.shields.io/badge/PIPELINE-6_PHASES-38BDF8?style=for-the-badge&logo=git&logoColor=white" alt="Pipeline" /></a>
   <a href="#time-budget"><img src="https://img.shields.io/badge/BUDGET-5_HOURS-A855F7?style=for-the-badge&logo=clock&logoColor=white" alt="Time Budget" /></a>
-  <a href="#toolchain"><img src="https://img.shields.io/badge/TOOLCHAIN-54_INTEGRATIONS-10B981?style=for-the-badge&logo=google&logoColor=white" alt="Toolchain" /></a>
+  <a href="#toolchain"><img src="https://img.shields.io/badge/TOOLCHAIN-56_INTEGRATIONS-10B981?style=for-the-badge&logo=google&logoColor=white" alt="Toolchain" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/LICENSE-MIT-F59E0B?style=for-the-badge" alt="License" /></a>
 </p>
 
@@ -19,7 +19,7 @@
 
 Developers and hackathon teams frequently have dozens of cutting-edge AI skills, plugins, and MCP servers available. During a competitive hackathon, tool execution often fractures into chaotic, ad-hoc prompting. Context windows overflow, verification passes get skipped, and prototypes end with unstyled interfaces or live runtime crashes during judging.
 
-**Sprint System** enforces a disciplined, phase-based agentic operating system that orchestrates **21 plugins, 9 MCP servers, and 24 skills** into an automated pipeline designed to achieve a production-ready, judge-ready submission within **5 hours of prompting (1 day of work)**.
+**Sprint System** enforces a disciplined, phase-based agentic operating system that orchestrates **21 plugins, 10 MCP servers, and 25 skills** into an automated pipeline designed to achieve a production-ready, judge-ready submission within **5 hours of prompting (1 day of work)**.
 
 ```
 Problem Statement -> 6 Gated Phases (with Pre-Phase Interrogation) -> Judge-Ready Submission
@@ -80,13 +80,13 @@ Before any sprint phase begins, the system enforces a mandatory two-step gate po
 ### `[PHASE 01: DISCOVER]` (Target: ~30 min)
 * **Pre-Phase Gate**: `devils-advocate` probes problem statement validity, persona, and technical moat.
 * **Objective**: Technical scoping, competitor benchmarking, competitive moat definition, API contract, and relational schema.
-* **Active Tooling**: `research` subagent, `impeccable` (init / shape), `context7`, `api-design-principles`, `mermaid-expert`, `mobbin` MCP, `StitchMCP`, `graphify`.
+* **Active Tooling**: `research` subagent, `impeccable` (init / shape), `api-anything` MCP & skill, `context7`, `api-design-principles`, `mermaid-expert`, `mobbin` MCP, `StitchMCP`, `graphify`.
 * **Output**: `PRODUCT.md`, `docs/SPEC.md`, OpenAPI schema, relational ERD.
 
 ### `[PHASE 02: BACKEND]` (Target: ~60 min)
 * **Pre-Phase Gate**: Phase 1 Scorecard + `devils-advocate` probes concurrency, data persistence, and API schemas.
-* **Objective**: Core engine implementation, database persistence, Gemini LLM/RAG pipelines, and live endpoint verification.
-* **Active Tooling**: `fastapi-pro`, `gemini-api`, `rag-implementation`, `prompt-engineering-patterns`, `sqlite` MCP, `fetch` MCP, `docker` MCP, `postman`.
+* **Objective**: Core engine implementation, database persistence, Gemini LLM/RAG pipelines, un-APId live web data ingestion, and endpoint verification.
+* **Active Tooling**: `fastapi-pro`, `gemini-api`, `rag-implementation`, `prompt-engineering-patterns`, `api-anything` MCP, `sqlite` MCP, `fetch` MCP, `docker` MCP, `postman`.
 * **Output**: Operational async FastAPI backend with populated database and passing pytest suite.
 
 ### `[PHASE 03: FRONTEND]` (Target: ~75 min)
@@ -104,7 +104,7 @@ Before any sprint phase begins, the system enforces a mandatory two-step gate po
 ### `[PHASE 05: AUDIT]` (Target: ~45 min)
 * **Pre-Phase Gate**: Phase 4 Scorecard + `devils-advocate` probes attack vectors, auth scopes, and crash recovery.
 * **Objective**: DevSecOps security scanning, edge-case UI hardening, automated Playwright headless tests, telemetry, and zero console error verification.
-* **Active Tooling**: `security-auditor`, `impeccable` (harden / audit), `coderabbit`, `sentry`, `playwright` MCP, `chrome-devtools-plugin`, `e2e-testing-patterns`.
+* **Active Tooling**: `security-auditor`, `impeccable` (harden / audit), `coderabbit`, `sentry`, `playwright` MCP, `api-anything` MCP, `chrome-devtools-plugin`, `e2e-testing-patterns`.
 * **Output**: `docs/AUDIT_REPORT.md` with verified security clean bill and zero runtime errors.
 
 ### `[PHASE 06: LAUNCH]` (Target: ~45 min)
@@ -120,11 +120,11 @@ Before any sprint phase begins, the system enforces a mandatory two-step gate po
 ```mermaid
 flowchart TD
     subgraph P1 ["[01. DISCOVER & SPEC]"]
-        t1["Gate: devils-advocate<br/>Plugins: superpowers, context7, google-developer-knowledge, gdocs<br/>MCPs: mobbin, StitchMCP, github-mcp-server, graphify<br/>Skills: impeccable (init/shape), api-design-principles, mermaid-expert, openapi-spec-generation"]
+        t1["Gate: devils-advocate<br/>Plugins: superpowers, context7, google-developer-knowledge, gdocs<br/>MCPs: mobbin, StitchMCP, github-mcp-server, graphify, api-anything<br/>Skills: impeccable (init/shape), api-anything, api-design-principles, mermaid-expert, openapi-spec-generation"]
     end
 
     subgraph P2 ["[02. BACKEND, AI & DATA]"]
-        t2["Gate: devils-advocate<br/>Plugins: gemini-api, google-antigravity-sdk, data-agent-kit, firebase, postman, google_maps<br/>MCPs: sqlite, fetch, docker, firebase-mcp-server<br/>Skills: fastapi-pro, rag-implementation, prompt-engineering, async-python, sql-optimization, python-testing, uv"]
+        t2["Gate: devils-advocate<br/>Plugins: gemini-api, google-antigravity-sdk, data-agent-kit, firebase, postman, google_maps<br/>MCPs: sqlite, fetch, docker, firebase-mcp-server, api-anything<br/>Skills: fastapi-pro, rag-implementation, prompt-engineering, api-anything, async-python, sql-optimization, python-testing, uv"]
     end
 
     subgraph P3 ["[03. FRONTEND VISUAL SWARM]"]
@@ -136,7 +136,7 @@ flowchart TD
     end
 
     subgraph P5 ["[05. DEVSECOPS & QA AUDIT]"]
-        t5["Gate: devils-advocate<br/>Plugins: coderabbit, sentry, chrome-devtools, indian-gov-ui-skills (WCAG)<br/>MCPs: playwright, graphify<br/>Skills: security-auditor, impeccable (harden/audit), e2e-testing-patterns, superpowers (debug)"]
+        t5["Gate: devils-advocate<br/>Plugins: coderabbit, sentry, chrome-devtools, indian-gov-ui-skills (WCAG)<br/>MCPs: playwright, graphify, api-anything<br/>Skills: security-auditor, impeccable (harden/audit), e2e-testing-patterns, superpowers (debug)"]
     end
 
     subgraph P6 ["[06. PRODUCTION LAUNCH]"]

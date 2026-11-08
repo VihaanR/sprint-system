@@ -1,6 +1,6 @@
 ---
 name: sprint-orchestrator
-description: Master coordinator for the 5-Hour Global Hackathon Operating System. Orchestrates ALL 21 installed plugins, 9 MCP servers, and 24 skills across a disciplined 6-phase lifecycle.
+description: Master coordinator for the 5-Hour Global Hackathon Operating System. Orchestrates ALL 21 installed plugins, 10 MCP servers, and 25 skills across a disciplined 6-phase lifecycle.
 ---
 
 # Sprint Orchestrator (Complete Toolchain Coordination Engine)
@@ -15,11 +15,11 @@ The orchestrator dynamically routes your tools across the 6 phases based on proj
 
 | Phase | Core Objective | Pre-Phase Interrogation | Primary Plugins Used | Active MCP Servers | Activated Skills |
 |---|---|---|---|---|---|
-| **Phase 1: Discover** (~30m) | Spec, Moat, Contracts & Architecture | `devils-advocate` (Moat, Persona, Constraints) | `superpowers`, `context7`, `google-developer-knowledge`, `gdocs` | `github-mcp-server`, `graphify`, `mobbin`, `StitchMCP` | `impeccable` (init/shape), `api-design-principles`, `mermaid-expert`, `openapi-spec-generation`, `graphify` |
-| **Phase 2: Backend** (~60m) | Core Engine, AI/RAG, APIs & Data | `devils-advocate` (DB locks, API latency, Fallbacks) | `gemini-api`, `google-antigravity-sdk`, `data-agent-kit-plugin`, `firebase`, `postman`, `google_maps_platform` | `sqlite`, `fetch`, `docker`, `firebase-mcp-server` | `fastapi-pro`, `rag-implementation`, `prompt-engineering-patterns`, `async-python-patterns`, `sql-optimization-patterns`, `python-testing-patterns`, `uv-package-manager` |
+| **Phase 1: Discover** (~30m) | Spec, Moat, Contracts & Architecture | `devils-advocate` (Moat, Persona, Constraints) | `superpowers`, `context7`, `google-developer-knowledge`, `gdocs` | `github-mcp-server`, `graphify`, `mobbin`, `StitchMCP`, `api-anything` | `impeccable` (init/shape), `api-anything`, `api-design-principles`, `mermaid-expert`, `openapi-spec-generation`, `graphify` |
+| **Phase 2: Backend** (~60m) | Core Engine, AI/RAG, APIs & Data | `devils-advocate` (DB locks, API latency, Fallbacks) | `gemini-api`, `google-antigravity-sdk`, `data-agent-kit-plugin`, `firebase`, `postman`, `google_maps_platform` | `sqlite`, `fetch`, `docker`, `firebase-mcp-server`, `api-anything` | `fastapi-pro`, `rag-implementation`, `prompt-engineering-patterns`, `api-anything`, `async-python-patterns`, `sql-optimization-patterns`, `python-testing-patterns`, `uv-package-manager` |
 | **Phase 3: Frontend** (~75m) | Visual Swarm Assembly & State | `devils-advocate` (Hierarchy, State sync, Flairs) | `browser-code-verifier`, `chrome-devtools-plugin`, `android-cli-plugin`, `flutter`, `modern-web-guidance-plugin` | `StitchMCP` | `live-swarm-coding`, `impeccable` (craft-floor/live), `react-state-management`, `react-modernization`, `mobile-developer` |
 | **Phase 4: Polish** (~45m) | UI/UX Pro Max, Tokens & Motion | `devils-advocate` (Anti-slop, Typography, Blandness) | `modern-web-guidance-plugin`, `indian-gov-ui-skills` (if gov/bilingual/public) | `mobbin`, `StitchMCP` | `impeccable` (polish/critique/bolder/detect), `ui-ux-pro-max`, `tailwind-design-system`, `ui-visual-validator` |
-| **Phase 5: Audit** (~45m) | OWASP Security, E2E QA & Telemetry | `devils-advocate` (Attack vectors, Overflows, Crashes) | `coderabbit`, `sentry`, `chrome-devtools-plugin`, `indian-gov-ui-skills` (GIGW a11y) | `playwright`, `graphify` | `security-auditor`, `impeccable` (harden/audit), `e2e-testing-patterns` |
+| **Phase 5: Audit** (~45m) | OWASP Security, E2E QA & Telemetry | `devils-advocate` (Attack vectors, Overflows, Crashes) | `coderabbit`, `sentry`, `chrome-devtools-plugin`, `indian-gov-ui-skills` (GIGW a11y) | `playwright`, `graphify`, `api-anything` | `security-auditor`, `impeccable` (harden/audit), `e2e-testing-patterns` |
 | **Phase 6: Launch** (~45m) | Deployed URL, Video Demo & Pitch Pack | `devils-advocate` (Demo resilience, Story hook) | `brag`, `vercel-plugin`, `railway`, `firebase`, `postman` | `github-mcp-server` | `brag`, `openapi-spec-generation`, `git-advanced-workflows`, `mermaid-expert` |
 
 ---
@@ -29,6 +29,7 @@ The orchestrator dynamically routes your tools across the 6 phases based on proj
 Depending on what you are building, the orchestrator triggers specialized sub-stacks:
 * **Pre-Phase Adversarial Gate** $\rightarrow$ automatically invokes `devils-advocate` (Grill-Me interview + Previous Phase Scorecard).
 * **Generative AI / LLM features** $\rightarrow$ automatically activates `gemini-api`, `prompt-engineering-patterns`, and `rag-implementation`.
+* **External Web Data / Un-APId Websites** $\rightarrow$ routes to `api-anything` MCP (`find_sites`, `call_operation`, `learn_site`) for sub-second HTTP responses with zero API keys.
 * **Data pipelines / BigQuery** $\rightarrow$ automatically activates `data-agent-kit-plugin`.
 * **Frontend Design Polish & Anti-Slop** $\rightarrow$ routes to `impeccable` (`craft-floor`, `/impeccable polish`, `/impeccable bolder`, `npx impeccable detect`).
 * **Mobile interfaces** $\rightarrow$ routes to `android-cli-plugin` (Kotlin Compose) or `flutter`.

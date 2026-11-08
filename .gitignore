@@ -48,6 +48,10 @@ dist/
 .env
 .env.local
 *.pem
+
+# Graphify build output
+graphify-out/
+
 *.key
 
 # Operating System

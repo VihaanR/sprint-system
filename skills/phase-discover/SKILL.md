@@ -1,6 +1,6 @@
 ---
 name: phase-discover
-description: Phase 1 of the 5-Hour Hackathon Sprint. Leverages research subagents, mobbin, StitchMCP, impeccable (init/shape), context7, google-developer-knowledge, api-design-principles, and mermaid-expert to architect the winning moat, OpenAPI specs, and database ERD.
+description: Phase 1 of the 5-Hour Hackathon Sprint. Leverages research subagents, mobbin, StitchMCP, api-anything MCP, impeccable (init/shape), context7, google-developer-knowledge, api-design-principles, and mermaid-expert to architect the winning moat, OpenAPI specs, and database ERD.
 ---
 
 # Phase 1: Discover & Spec (Complete Research & Architecture)
@@ -20,6 +20,7 @@ Before research begins, the system executes the **Devil's Advocate 15-Point Inte
 
 - **`superpowers` (brainstorming)**: Translates vague requirements into concrete architecture.
 - **`impeccable` (init / shape)**: Establishes durable product truth (`PRODUCT.md`), user personas, design language (`DESIGN.md`), and pre-code UX planning (`shape`).
+- **`api-anything` MCP & skill**: Searches shared catalogs or learns live website APIs over plain HTTP (`find_sites`, `call_operation`), inspecting external data sources without API keys.
 - **`mobbin` MCP**: Searches 600,000+ real-world app flows to benchmark industry-leading UX for this exact domain.
 - **`StitchMCP`**: Generates initial visual layout concepts and wireframe variants.
 - **`context7` & `google-developer-knowledge`**: Fetches verified, up-to-date documentation on target frameworks and APIs.
@@ -37,6 +38,7 @@ Before research begins, the system executes the **Devil's Advocate 15-Point Inte
    - Run Devil's Advocate interrogation probing for problem statement validity, target persona, and unique technical moat.
 2. **Scoping & The Winning Hook**:
    - Query `mobbin` MCP for top competitor UI/UX teardowns in this category.
+   - Use `api-anything` (`find_sites`) to verify feasibility of integrating third-party web data without API key friction.
    - Run `impeccable init` to anchor product vision, target persona, and core constraints into `PRODUCT.md`.
    - Run `impeccable shape` to plan information architecture and user journeys before touching code.
    - Define the unique technical moat (e.g. edge AI, multi-agent orchestration, offline-first).
