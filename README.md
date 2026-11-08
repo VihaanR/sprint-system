@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <img src="assets/wimpy-running-agent.svg" alt="Diary of a 5-Hour Sprint: The Running Agent" width="100%" />
+  <img src="assets/wimpy-running-agent.svg" alt="The 5-Hour Sprint: The Running Agent" width="100%" />
 </p>
 
 ---
@@ -118,7 +118,7 @@ The Sprint System bans stiff, linear AI movements and generic AI video mocks. Al
 4. **Z-Axis & Parallax Depth**:
    - Split motion across three distinct spatial planes (foreground, midground, background) with different scroll ratios and hardware-accelerated 3D perspective transforms (`perspective: 1000px`, `transform-style: preserve-3d`, `backdrop-filter: blur(12px)`).
 
-5. **Diary of a Wimpy Kid Sketch Standard**:
+5. **Authentic Sketch & Doodle Standard**:
    - Authentic lined notebook paper canvas (`#FFFFFF` with `#FCFBF7` paper warmth) with blue ruled horizontal lines and red vertical left margin lines.
    - Graphite pencil and ink lines (`#18181B` / `#27272A`) with pencil cross-hatching, squash-and-stretch physics, and hand-drawn annotations.
 

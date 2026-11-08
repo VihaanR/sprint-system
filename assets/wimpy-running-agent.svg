@@ -173,8 +173,8 @@
 
   <!-- Top Margin Handwritten Header -->
   <g transform="translate(100, 42)">
-    <text x="0" y="0" class="mono-code" font-size="10" fill="#18181B" letter-spacing="1.5">DIARY OF A 5-HOUR SPRINT</text>
-    <text x="320" y="0" class="hand-note" font-size="10" fill="#52525B">• ENTRY #01: THE WINNING RUN •</text>
+    <text x="0" y="0" class="mono-code" font-size="10" fill="#18181B" letter-spacing="1.5">THE 5-HOUR SPRINT</text>
+    <text x="280" y="0" class="hand-note" font-size="10" fill="#52525B">• ENTRY #01: THE WINNING RUN •</text>
   </g>
 
   <!-- ======================================================== -->
