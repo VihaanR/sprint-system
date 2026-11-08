@@ -1,7 +1,7 @@
 # ==============================================================================
 # SPRINT SYSTEM: MASTER DEPENDENCY & TOOLCHAIN SPECIFICATION
 # The 5-Hour Global Hackathon Operating System for AI Coding Agents
-# Coordinates: 21 Installed Plugins | 10 MCP Servers | 31 Global Skills | 4 AAS Elite Skills
+# Coordinates: 21 Installed Plugins | 10 MCP Servers | 34 Global Skills | 4 AAS Elite Skills
 # Architecture: Python 3.11+ / Node.js 20+ / Zero-Conflict Production Stack
 # ==============================================================================
 #
@@ -47,11 +47,15 @@
 # 10. api-anything       -> npx -y api-anything mcp (Direct Web-to-API engine)
 #
 # ------------------------------------------------------------------------------
-# 31 GLOBAL SKILLS ORCHESTRATED:
+# 34 GLOBAL SKILLS ORCHESTRATED:
 # ------------------------------------------------------------------------------
 # Core Pipeline:
 # - sprint-orchestrator, phase-discover, phase-backend, phase-frontend,
 #   phase-polish, phase-audit, phase-launch
+# Motion & Video Engines:
+# - remotion-best-practices (Programmatic React/TypeScript Video Generation)
+# - motion-graphics (12 Principles of Animation, Timing & Non-linear Easing)
+# - antigravity-design-expert (Spatial UI, GSAP ScrollTrigger & R3F 3D)
 # Specialized Domain & Reliability Engines:
 # - gravitas (Reliability Kernel & Evidence Verification)
 # - ponytail (Ruthless YAGNI & Negative LOC Audit)
@@ -74,6 +78,7 @@
 # - impeccable detector     -> npx impeccable detect src/ (Anti-slop design scanner)
 # - AAS Core CLI            -> npx agentic-awesome-skills (On-demand playbook discovery)
 # - understand-anything UI  -> npx understand-anything-viewer (Interactive AST visualizer)
+# - Remotion Engine         -> npx remotion render <entry> (Programmatic video render)
 # ==============================================================================
 
 # ==============================================================================
@@ -267,3 +272,14 @@ ruff>=0.4.7                    # Ultra-fast Rust-based Python linter and formatt
 black>=24.4.2                  # Deterministic Python code formatter
 mypy>=1.10.0                   # Strict static type checking and type inference
 pre-commit>=3.7.1              # Git pre-commit hooks runner
+
+# ==============================================================================
+# [SECTION 17] MOTION GRAPHICS & PROGRAMMATIC VIDEO (remotion, motion-graphics)
+# Used in: Phase 3 (Frontend), Phase 4 (Polish), Phase 6 (Launch)
+# Programmatic video timelines, frame interpolation, and motion design
+# ==============================================================================
+# Node.js engines powered:
+# - remotion@latest             -> React programmatic video renderer and timeline compiler
+# - gsap@latest                 -> GreenSock animation platform with ScrollTrigger
+# - three@latest / @react-three/fiber -> 3D spatial canvas and WebGL rendering
+# - tailwindcss@latest          -> CSS utility engine with custom 3D perspective plugins

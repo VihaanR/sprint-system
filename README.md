@@ -9,7 +9,7 @@
 <p align="center">
   <a href="#pipeline"><img src="https://img.shields.io/badge/PIPELINE-6_PHASES-38BDF8?style=for-the-badge&logo=git&logoColor=white" alt="Pipeline" /></a>
   <a href="#time-budget"><img src="https://img.shields.io/badge/BUDGET-5_HOURS-A855F7?style=for-the-badge&logo=clock&logoColor=white" alt="Time Budget" /></a>
-  <a href="#toolchain"><img src="https://img.shields.io/badge/STACK-62_TOOLS-10B981?style=for-the-badge" alt="Toolchain" /></a>
+  <a href="#toolchain"><img src="https://img.shields.io/badge/STACK-65_TOOLS-10B981?style=for-the-badge" alt="Toolchain" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/LICENSE-MIT-F59E0B?style=for-the-badge" alt="License" /></a>
 </p>
 
@@ -23,7 +23,7 @@
 
 Developers and hackathon teams frequently have dozens of cutting-edge AI skills, plugins, and MCP servers available. During a competitive hackathon, tool execution often fractures into chaotic, ad-hoc prompting. Context windows overflow, verification passes get skipped, and prototypes end with unstyled interfaces or live runtime crashes during judging.
 
-**Sprint System** enforces a disciplined, phase-based agentic operating system that orchestrates **21 plugins, 10 MCP servers, 31 global skills, and 4 AAS elite skills** into an automated pipeline designed to achieve a production-ready, judge-ready submission within **5 hours of prompting (1 day of work)**.
+**Sprint System** enforces a disciplined, phase-based agentic operating system that orchestrates **21 plugins, 10 MCP servers, 34 global skills, and 4 AAS elite skills** into an automated pipeline designed to achieve a production-ready, judge-ready submission within **5 hours of prompting (1 day of work)**.
 
 ```
 Problem Statement -> 6 Gated Phases (with Pre-Phase Interrogation >= 15 Questions) -> Judge-Ready Submission
@@ -49,10 +49,10 @@ Problem Statement -> 6 Gated Phases (with Pre-Phase Interrogation >= 15 Question
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **01. Discover** | ~30 min | Spec, Moat, Contracts & Architecture | `superpowers`, `context7`, `google-developer-knowledge`, `gdocs` | `graphify`, `mobbin`, `StitchMCP`, `api-anything`, `github` | `impeccable` (init/shape), `understand-anything`, `api-anything`, `api-design-principles`, `mermaid-expert`, `gravitas` | `docs/SPEC.md`, `ARCHITECTURE_TREE.md` |
 | **02. Backend** | ~60 min | Core Engine, AI/RAG, APIs & Data Layer | `gemini-api`, `google-antigravity-sdk`, `data-agent-kit`, `firebase`, `postman`, `google-maps` | `sqlite`, `fetch`, `docker`, `firebase-mcp`, `api-anything` | `fastapi-pro`, `ponytail` (YAGNI), `rag-implementation`, `prompt-engineering`, `async-python`, `sql-opt`, `gravitas` | Async API, DB Models, Pytest Pass (Exit 0) |
-| **03. Frontend** | ~75 min | Visual Swarm Assembly & State Binding | `browser-code-verifier`, `chrome-devtools`, `android-cli`, `flutter`, `modern-web-guidance` | `StitchMCP`, `playwright` | `live-swarm-coding`, `ponytail` (flat state), `impeccable` (craft-floor/live), `react-state-management`, `gravitas` | Interactive Live UI, 0 Console Errors |
-| **04. Polish** | ~45 min | Design Intelligence, Tokens & Motion | `modern-web-guidance`, `indian-gov-ui-skills` (GIGW/UX4G) | `mobbin`, `StitchMCP` | `impeccable` (polish/critique/bolder/detect), `code-simplify` (Addy Osmani), `ui-ux-pro-max`, `tailwind-design-system`, `ui-visual-validator` | OLED Dark / Bento UI, Flattened Complexity |
+| **03. Frontend** | ~75 min | Visual Swarm Assembly & State Binding | `browser-code-verifier`, `chrome-devtools`, `android-cli`, `flutter`, `modern-web-guidance` | `StitchMCP`, `playwright` | `live-swarm-coding`, `antigravity-design-expert` (Spatial/GSAP/R3F), `impeccable` (craft-floor/live), `react-state-management`, `gravitas` | Interactive Live UI, 0 Console Errors |
+| **04. Polish** | ~45 min | Design Intelligence, Tokens & Motion | `modern-web-guidance`, `indian-gov-ui-skills` (GIGW/UX4G) | `mobbin`, `StitchMCP` | `motion-graphics` (12 animation laws), `code-simplify` (Addy Osmani), `impeccable` (polish/bolder/detect), `tailwind-design-system`, `ui-visual-validator` | OLED Dark / Bento UI, Flattened Complexity |
 | **05. Audit** | ~45 min | DevSecOps Security, E2E QA & Hardening | `coderabbit`, `sentry`, `chrome-devtools`, `indian-gov-ui-skills` (WCAG AA) | `playwright`, `graphify`, `api-anything` | `security-auditor`, `gravitas` (evidence pass), `ponytail-review` (-LOC), `understand-anything` (tree audit), `aas` (elite bundle) | `docs/AUDIT_REPORT.md`, Negative LOC |
-| **06. Launch** | ~45 min | Live URL, 60s Video Demo & Pitch Pack | `brag` (Hyperframes), `vercel`, `railway`, `firebase`, `postman`, `gdocs` | `github-mcp-server` | `brag` (video gen), `gravitas` (HTTP 200 proof), `openapi-spec-generation`, `git-advanced-workflows`, `mermaid-expert` | Deployed URL, 60s Launch Video, Pitch README |
+| **06. Launch** | ~45 min | Live URL, 60s Video Demo & Pitch Pack | `brag` (Hyperframes), `vercel`, `railway`, `firebase`, `postman`, `gdocs` | `github-mcp-server` | `remotion-best-practices` (React video), `brag` (video gen), `gravitas` (HTTP 200 proof), `openapi-spec-generation`, `mermaid-expert` | Deployed URL, 60s Launch Video, Pitch README |
 
 ---
 
@@ -92,6 +92,35 @@ Before any sprint phase begins, the system enforces a mandatory two-step gate po
 | **`ACP`** | `ranxianglei/billion-context` | Active Context Pruning, disk-offload, and phase condensation. | Flushes verbose terminal traces to `SPRINT.md`/`docs/`, prevents context exhaustion, and auto-gates `/compact`. |
 | **`Understand-Anything`** | `Egonex-AI/Understand-Anything` | AST architecture tree generator & interactive browser viewer. | Runs post-Graphify in Phase 1 & 5 to map presentation, routing, domain, and persistence tiers into `docs/ARCHITECTURE_TREE.md`. |
 | **`AAS Elite Bundle`** | `sickn33/agentic-awesome-skills` | Hardened playbooks for security, chaos, benchmarks, and leaks. | Modular playbooks in `skills/aas/` + runtime discovery via `npx agentic-awesome-skills` CLI. |
+| **`Remotion`** | `remotion-best-practices` | Frame-accurate React & TypeScript programmatic video rendering. | Replaces generic AI video with code-rendered timelines, spring physics, and static preloading. |
+| **`Motion-Graphics`** | `omer-metin/skills-for-antigravity` | 12 Principles of Animation, non-linear easing, timing & spacing. | Eliminates stiff AI movements; enforces `cubic-bezier(0.25, 1, 0.5, 1)` and organic squash-and-stretch. |
+| **`Antigravity-Design`** | `sickn33/agentic-awesome-skills` | Spatial depth, weightlessness, GSAP ScrollTrigger & R3F 3D. | Directs multi-layer parallax, hardware 3D transforms (`rotateX`, `rotateY`), and glassmorphic blurs. |
+
+---
+
+## [MOTION DESIGN & ANIMATION STANDARDS]
+
+The Sprint System bans stiff, linear AI movements and generic AI video mocks. All visual components and motion timelines follow strict organic engineering standards:
+
+1. **Code-Based Video & UI Engines**:
+   - Use **Remotion** for programmatic React/TypeScript video generation with deterministic frame rendering (`useCurrentFrame()`).
+   - Use **GSAP** with ScrollTrigger and **Tailwind CSS** for interactive web animations and scroll-linked spatial movements.
+
+2. **Controlled Non-Linear Easing & Timing**:
+   - Never use linear transitions (`linear`).
+   - Standard deceleration: `cubic-bezier(0.25, 1, 0.5, 1)`.
+   - Elastic settling bounce: `cubic-bezier(0.34, 1.56, 0.64, 1)`.
+   - Continuous organic bobbing: `cubic-bezier(0.45, 0, 0.55, 1)`.
+
+3. **Staggered Entrances**:
+   - Always stagger sibling element reveals with explicit offsets (0.05s to 0.1s offsets) so cards, badges, and headers reveal sequentially rather than popping in simultaneously.
+
+4. **Z-Axis & Parallax Depth**:
+   - Split motion across three distinct spatial planes (foreground, midground, background) with different scroll ratios and hardware-accelerated 3D perspective transforms (`perspective: 1000px`, `transform-style: preserve-3d`, `backdrop-filter: blur(12px)`).
+
+5. **Diary of a Wimpy Kid Sketch Standard**:
+   - Authentic lined notebook paper canvas (`#FFFFFF` with `#FCFBF7` paper warmth) with blue ruled horizontal lines and red vertical left margin lines.
+   - Graphite pencil and ink lines (`#18181B` / `#27272A`) with pencil cross-hatching, squash-and-stretch physics, and hand-drawn annotations.
 
 ---
 
@@ -99,7 +128,7 @@ Before any sprint phase begins, the system enforces a mandatory two-step gate po
 
 > [!NOTE]
 > **Automated Pipeline vs On-Demand Shortcuts**:
-> Running the sprint pipeline (`sprint-orchestrator` or `phase-01` through `phase-06`) **automatically executes the complete amalgamation of all 62 tools, rules, and engines** under the hood. You do not need to manually call these slash commands during a normal sprint.
+> Running the sprint pipeline (`sprint-orchestrator` or `phase-01` through `phase-06`) **automatically executes the complete amalgamation of all 65 tools, rules, and engines** under the hood. You do not need to manually call these slash commands during a normal sprint.
 >
 > The slash commands below are optional, standalone shortcuts surfaced for manual on-demand checks, targeted refactoring passes, or extra user confirmation:
 

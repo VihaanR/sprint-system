@@ -72,7 +72,7 @@
   <!-- Top Header Bar -->
   <g transform="translate(36, 24)">
     <text x="0" y="20" class="hdr-title">SPRINT SYSTEM ARCHITECTURE MATRIX</text>
-    <text x="0" y="38" class="hdr-sub">Autonomous 6-Phase Engineering Pipeline : 21 Plugins : 10 MCP Servers : 31 Skills : 5-Hour Budget</text>
+    <text x="0" y="38" class="hdr-sub">Autonomous 6-Phase Engineering Pipeline : 21 Plugins : 10 MCP Servers : 34 Skills : 5-Hour Budget</text>
   </g>
 
   <!-- Pre-Phase Gate Banner (Animated Shimmer) -->
@@ -171,7 +171,7 @@
     
     <text x="12" y="199" class="item-lbl">ACTIVATED SKILLS</text>
     <text x="12" y="213" class="item-val">live-swarm-coding</text>
-    <text x="12" y="226" class="item-val">ponytail (flat state)</text>
+    <text x="12" y="226" class="item-val">antigravity-design</text>
     <text x="12" y="239" class="item-val">impeccable (craft)</text>
     <text x="12" y="252" class="item-val">react-state-mgmt</text>
     <text x="12" y="265" class="item-val">gravitas (DOM)</text>
@@ -196,9 +196,9 @@
     <text x="12" y="153" class="item-val">StitchMCP</text>
     
     <text x="12" y="199" class="item-lbl">ACTIVATED SKILLS</text>
-    <text x="12" y="213" class="item-val">impeccable (polish)</text>
+    <text x="12" y="213" class="item-val">motion-graphics (12 laws)</text>
     <text x="12" y="226" class="item-val">code-simplify (Addy)</text>
-    <text x="12" y="239" class="item-val">ui-ux-pro-max</text>
+    <text x="12" y="239" class="item-val">impeccable (polish)</text>
     <text x="12" y="252" class="item-val">tailwind-design</text>
     <text x="12" y="265" class="item-val">ui-visual-validator</text>
     
@@ -249,10 +249,10 @@
     <text x="12" y="140" class="item-val">github-mcp-server</text>
     
     <text x="12" y="199" class="item-lbl">ACTIVATED SKILLS</text>
-    <text x="12" y="213" class="item-val">brag (video gen)</text>
-    <text x="12" y="226" class="item-val">gravitas (URL proof)</text>
-    <text x="12" y="239" class="item-val">openapi-spec-gen</text>
-    <text x="12" y="252" class="item-val">git-advanced-flow</text>
+    <text x="12" y="213" class="item-val">remotion-best-practices</text>
+    <text x="12" y="226" class="item-val">brag (launch video)</text>
+    <text x="12" y="239" class="item-val">gravitas (URL proof)</text>
+    <text x="12" y="252" class="item-val">openapi-spec-gen</text>
     <text x="12" y="265" class="item-val">mermaid-expert</text>
     
     <text x="12" y="287" fill="#10B981" class="item-lbl">DELIVERABLE: PITCH PACK</text>
@@ -263,9 +263,9 @@
     <rect x="0" y="0" width="928" height="74" rx="10" fill="#0A0F1D" stroke="#1E293B" stroke-width="1.2"/>
     
     <g transform="translate(16, 16)">
-      <text x="0" y="12" class="proto-title">SYSTEM RELIABILITY, ANTI-OVERENGINEERING &amp; TOKEN ENGINES</text>
+      <text x="0" y="12" class="proto-title">SYSTEM RELIABILITY, MOTION DESIGN &amp; TOKEN ENGINES</text>
       <text x="0" y="28" class="proto-val">GRAVITAS (Report what happened, not intended) | PONYTAIL (Ruthless YAGNI) | CODE-SIMPLIFY (Addy Osmani)</text>
-      <text x="0" y="44" class="proto-val">I-HAVE-ADHD (Action-first in line 1) | CAVEMAN (65-75% Token Compression) | ACP (Active Context Pruning) | UNDERSTAND-ANYTHING (AST Tree)</text>
+      <text x="0" y="44" class="proto-val">MOTION-GRAPHICS (12 Animation Laws &amp; Easing) | REMOTION (React Video) | ANTIGRAVITY-DESIGN-EXPERT (Spatial/GSAP/R3F)</text>
     </g>
   </g>
 </svg>
