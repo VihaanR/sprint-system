@@ -1,0 +1,235 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 540" width="100%" height="540">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="matrixBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#070A10"/>
+      <stop offset="50%" stop-color="#0B0F19"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+
+    <!-- Card Background Gradient -->
+    <linearGradient id="cardBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#0F172A" stop-opacity="0.9"/>
+    </linearGradient>
+
+    <!-- Grid Pattern -->
+    <pattern id="matrixGrid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#334155" opacity="0.25"/>
+    </pattern>
+
+    <!-- Phase Accents -->
+    <linearGradient id="accent1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#38BDF8"/><stop offset="100%" stop-color="#0284C7"/></linearGradient>
+    <linearGradient id="accent2" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#818CF8"/><stop offset="100%" stop-color="#4F46E5"/></linearGradient>
+    <linearGradient id="accent3" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#C084FC"/><stop offset="100%" stop-color="#9333EA"/></linearGradient>
+    <linearGradient id="accent4" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#F472B6"/><stop offset="100%" stop-color="#DB2777"/></linearGradient>
+    <linearGradient id="accent5" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#F59E0B"/><stop offset="100%" stop-color="#D97706"/></linearGradient>
+    <linearGradient id="accent6" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#10B981"/><stop offset="100%" stop-color="#059669"/></linearGradient>
+
+    <style>
+      .hdr-title { font-family: 'Inter', -apple-system, sans-serif; font-weight: 900; font-size: 22px; fill: #F8FAFC; letter-spacing: -0.02em; }
+      .hdr-sub { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 11px; fill: #94A3B8; }
+      .gate-title { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; fill: #F43F5E; letter-spacing: 0.05em; }
+      .gate-sub { font-family: 'Inter', sans-serif; font-size: 10px; fill: #CBD5E1; }
+      .col-title { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; fill: #F8FAFC; }
+      .col-time { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600; }
+      .item-lbl { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; font-weight: 700; fill: #64748B; letter-spacing: 0.04em; }
+      .item-val { font-family: 'Inter', sans-serif; font-size: 9.5px; fill: #CBD5E1; line-height: 1.35; }
+      .proto-title { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; fill: #38BDF8; letter-spacing: 0.05em; }
+      .proto-val { font-family: 'Inter', sans-serif; font-size: 9px; fill: #94A3B8; }
+    </style>
+  </defs>
+
+  <!-- Outer Canvas -->
+  <rect x="2" y="2" width="996" height="536" rx="16" fill="url(#matrixBg)" stroke="#1E293B" stroke-width="1.5"/>
+  <rect x="2" y="2" width="996" height="536" rx="16" fill="url(#matrixGrid)"/>
+
+  <!-- Top Header Bar -->
+  <g transform="translate(36, 24)">
+    <text x="0" y="20" class="hdr-title">SPRINT SYSTEM ARCHITECTURE MATRIX</text>
+    <text x="0" y="38" class="hdr-sub">Autonomous 6-Phase Engineering Pipeline : 21 Plugins : 10 MCP Servers : 30 Skills : 5-Hour Budget</text>
+  </g>
+
+  <!-- Pre-Phase Gate Banner -->
+  <g transform="translate(36, 74)">
+    <rect x="0" y="0" width="928" height="42" rx="8" fill="#1C1017" stroke="#881337" stroke-width="1.2"/>
+    <circle cx="20" cy="21" r="6" fill="#F43F5E"/>
+    <text x="36" y="19" class="gate-title">[PRE-PHASE INTERROGATION GATE : DEVIL'S ADVOCATE]</text>
+    <text x="36" y="32" class="gate-sub">Mandatory 15-Point Deep-Dive Matrix (Moat, Features, Architecture, UX, Resilience) + Addy Osmani Anti-Rationalization Verification</text>
+  </g>
+
+  <!-- Phase Column 1: Discover -->
+  <g transform="translate(36, 128)">
+    <rect x="0" y="0" width="144" height="300" rx="10" fill="url(#cardBg)" stroke="#1E293B" stroke-width="1.2"/>
+    <rect x="0" y="0" width="144" height="4" rx="2" fill="url(#accent1)"/>
+    <text x="12" y="24" class="col-title">01. DISCOVER</text>
+    <text x="12" y="38" fill="#38BDF8" class="col-time">~30m / Spec &amp; Moat</text>
+    <line x1="12" y1="48" x2="132" y2="48" stroke="#334155" stroke-width="0.8"/>
+    
+    <text x="12" y="66" class="item-lbl">PRIMARY PLUGINS</text>
+    <text x="12" y="80" class="item-val">superpowers</text>
+    <text x="12" y="93" class="item-val">context7</text>
+    <text x="12" y="106" class="item-val">google-developer</text>
+    
+    <text x="12" y="126" class="item-lbl">ACTIVE MCPS</text>
+    <text x="12" y="140" class="item-val">graphify</text>
+    <text x="12" y="153" class="item-val">mobbin</text>
+    <text x="12" y="166" class="item-val">StitchMCP</text>
+    <text x="12" y="179" class="item-val">api-anything</text>
+    
+    <text x="12" y="199" class="item-lbl">ACTIVATED SKILLS</text>
+    <text x="12" y="213" class="item-val">impeccable (init/shape)</text>
+    <text x="12" y="226" class="item-val">understand-anything</text>
+    <text x="12" y="239" class="item-val">api-design-principles</text>
+    <text x="12" y="252" class="item-val">mermaid-expert</text>
+    <text x="12" y="265" class="item-val">gravitas (recon)</text>
+    
+    <text x="12" y="285" fill="#38BDF8" class="item-lbl">DELIVERABLE: SPEC.md</text>
+  </g>
+
+  <!-- Phase Column 2: Backend -->
+  <g transform="translate(192, 128)">
+    <rect x="0" y="0" width="144" height="300" rx="10" fill="url(#cardBg)" stroke="#1E293B" stroke-width="1.2"/>
+    <rect x="0" y="0" width="144" height="4" rx="2" fill="url(#accent2)"/>
+    <text x="12" y="24" class="col-title">02. BACKEND</text>
+    <text x="12" y="38" fill="#818CF8" class="col-time">~60m / API &amp; AI</text>
+    <line x1="12" y1="48" x2="132" y2="48" stroke="#334155" stroke-width="0.8"/>
+    
+    <text x="12" y="66" class="item-lbl">PRIMARY PLUGINS</text>
+    <text x="12" y="80" class="item-val">gemini-api</text>
+    <text x="12" y="93" class="item-val">google-antigravity</text>
+    <text x="12" y="106" class="item-val">data-agent-kit</text>
+    
+    <text x="12" y="126" class="item-lbl">ACTIVE MCPS</text>
+    <text x="12" y="140" class="item-val">sqlite</text>
+    <text x="12" y="153" class="item-val">fetch</text>
+    <text x="12" y="166" class="item-val">docker</text>
+    <text x="12" y="179" class="item-val">firebase-mcp</text>
+    
+    <text x="12" y="199" class="item-lbl">ACTIVATED SKILLS</text>
+    <text x="12" y="213" class="item-val">fastapi-pro</text>
+    <text x="12" y="226" class="item-val">ponytail (YAGNI)</text>
+    <text x="12" y="239" class="item-val">rag-implementation</text>
+    <text x="12" y="252" class="item-val">async-python</text>
+    <text x="12" y="265" class="item-val">gravitas (proof)</text>
+    
+    <text x="12" y="285" fill="#818CF8" class="item-lbl">DELIVERABLE: API PASS</text>
+  </g>
+
+  <!-- Phase Column 3: Frontend -->
+  <g transform="translate(348, 128)">
+    <rect x="0" y="0" width="144" height="300" rx="10" fill="url(#cardBg)" stroke="#1E293B" stroke-width="1.2"/>
+    <rect x="0" y="0" width="144" height="4" rx="2" fill="url(#accent3)"/>
+    <text x="12" y="24" class="col-title">03. FRONTEND</text>
+    <text x="12" y="38" fill="#C084FC" class="col-time">~75m / Visual Swarm</text>
+    <line x1="12" y1="48" x2="132" y2="48" stroke="#334155" stroke-width="0.8"/>
+    
+    <text x="12" y="66" class="item-lbl">PRIMARY PLUGINS</text>
+    <text x="12" y="80" class="item-val">browser-verifier</text>
+    <text x="12" y="93" class="item-val">chrome-devtools</text>
+    <text x="12" y="106" class="item-val">android-cli / flutter</text>
+    
+    <text x="12" y="126" class="item-lbl">ACTIVE MCPS</text>
+    <text x="12" y="140" class="item-val">StitchMCP</text>
+    <text x="12" y="153" class="item-val">playwright</text>
+    
+    <text x="12" y="199" class="item-lbl">ACTIVATED SKILLS</text>
+    <text x="12" y="213" class="item-val">live-swarm-coding</text>
+    <text x="12" y="226" class="item-val">ponytail (flat state)</text>
+    <text x="12" y="239" class="item-val">impeccable (craft)</text>
+    <text x="12" y="252" class="item-val">react-state-mgmt</text>
+    <text x="12" y="265" class="item-val">gravitas (DOM)</text>
+    
+    <text x="12" y="285" fill="#C084FC" class="item-lbl">DELIVERABLE: UI LIVE</text>
+  </g>
+
+  <!-- Phase Column 4: Polish -->
+  <g transform="translate(504, 128)">
+    <rect x="0" y="0" width="144" height="300" rx="10" fill="url(#cardBg)" stroke="#1E293B" stroke-width="1.2"/>
+    <rect x="0" y="0" width="144" height="4" rx="2" fill="url(#accent4)"/>
+    <text x="12" y="24" class="col-title">04. POLISH</text>
+    <text x="12" y="38" fill="#F472B6" class="col-time">~45m / Anti-Slop</text>
+    <line x1="12" y1="48" x2="132" y2="48" stroke="#334155" stroke-width="0.8"/>
+    
+    <text x="12" y="66" class="item-lbl">PRIMARY PLUGINS</text>
+    <text x="12" y="80" class="item-val">modern-web-guidance</text>
+    <text x="12" y="93" class="item-val">indian-gov-ui (UX4G)</text>
+    
+    <text x="12" y="126" class="item-lbl">ACTIVE MCPS</text>
+    <text x="12" y="140" class="item-val">mobbin</text>
+    <text x="12" y="153" class="item-val">StitchMCP</text>
+    
+    <text x="12" y="199" class="item-lbl">ACTIVATED SKILLS</text>
+    <text x="12" y="213" class="item-val">impeccable (polish)</text>
+    <text x="12" y="226" class="item-val">code-simplify (Addy)</text>
+    <text x="12" y="239" class="item-val">ui-ux-pro-max</text>
+    <text x="12" y="252" class="item-val">tailwind-design</text>
+    <text x="12" y="265" class="item-val">ui-visual-validator</text>
+    
+    <text x="12" y="285" fill="#F472B6" class="item-lbl">DELIVERABLE: OLED UI</text>
+  </g>
+
+  <!-- Phase Column 5: Audit -->
+  <g transform="translate(660, 128)">
+    <rect x="0" y="0" width="144" height="300" rx="10" fill="url(#cardBg)" stroke="#1E293B" stroke-width="1.2"/>
+    <rect x="0" y="0" width="144" height="4" rx="2" fill="url(#accent5)"/>
+    <text x="12" y="24" class="col-title">05. AUDIT</text>
+    <text x="12" y="38" fill="#F59E0B" class="col-time">~45m / Hardening</text>
+    <line x1="12" y1="48" x2="132" y2="48" stroke="#334155" stroke-width="0.8"/>
+    
+    <text x="12" y="66" class="item-lbl">PRIMARY PLUGINS</text>
+    <text x="12" y="80" class="item-val">coderabbit</text>
+    <text x="12" y="93" class="item-val">sentry</text>
+    <text x="12" y="106" class="item-val">chrome-devtools</text>
+    
+    <text x="12" y="126" class="item-lbl">ACTIVE MCPS</text>
+    <text x="12" y="140" class="item-val">playwright</text>
+    <text x="12" y="153" class="item-val">graphify</text>
+    
+    <text x="12" y="199" class="item-lbl">ACTIVATED SKILLS</text>
+    <text x="12" y="213" class="item-val">security-auditor</text>
+    <text x="12" y="226" class="item-val">gravitas (evidence)</text>
+    <text x="12" y="239" class="item-val">ponytail-review</text>
+    <text x="12" y="252" class="item-val">aas (elite bundle)</text>
+    <text x="12" y="265" class="item-val">e2e-testing-patterns</text>
+    
+    <text x="12" y="285" fill="#F59E0B" class="item-lbl">DELIVERABLE: AUDIT PASS</text>
+  </g>
+
+  <!-- Phase Column 6: Launch -->
+  <g transform="translate(816, 128)">
+    <rect x="0" y="0" width="148" height="300" rx="10" fill="url(#cardBg)" stroke="#1E293B" stroke-width="1.2"/>
+    <rect x="0" y="0" width="148" height="4" rx="2" fill="url(#accent6)"/>
+    <text x="12" y="24" class="col-title">06. LAUNCH</text>
+    <text x="12" y="38" fill="#10B981" class="col-time">~45m / Judge Pack</text>
+    <line x1="12" y1="48" x2="136" y2="48" stroke="#334155" stroke-width="0.8"/>
+    
+    <text x="12" y="66" class="item-lbl">PRIMARY PLUGINS</text>
+    <text x="12" y="80" class="item-val">brag (Hyperframes)</text>
+    <text x="12" y="93" class="item-val">vercel-plugin</text>
+    <text x="12" y="106" class="item-val">railway / firebase</text>
+    
+    <text x="12" y="126" class="item-lbl">ACTIVE MCPS</text>
+    <text x="12" y="140" class="item-val">github-mcp-server</text>
+    
+    <text x="12" y="199" class="item-lbl">ACTIVATED SKILLS</text>
+    <text x="12" y="213" class="item-val">brag (video gen)</text>
+    <text x="12" y="226" class="item-val">gravitas (URL proof)</text>
+    <text x="12" y="239" class="item-val">openapi-spec-gen</text>
+    <text x="12" y="252" class="item-val">git-advanced-flow</text>
+    <text x="12" y="265" class="item-val">mermaid-expert</text>
+    
+    <text x="12" y="285" fill="#10B981" class="item-lbl">DELIVERABLE: PITCH PACK</text>
+  </g>
+
+  <!-- Bottom System Protocols Bar -->
+  <g transform="translate(36, 442)">
+    <rect x="0" y="0" width="928" height="72" rx="10" fill="#0A0F1D" stroke="#1E293B" stroke-width="1.2"/>
+    
+    <g transform="translate(16, 16)">
+      <text x="0" y="12" class="proto-title">SYSTEM RELIABILITY &amp; TOKEN ENGINES</text>
+      <text x="0" y="28" class="proto-val">GRAVITAS (Report what happened, not intended) | PONYTAIL (Ruthless YAGNI) | CODE-SIMPLIFY (Addy Osmani)</text>
+      <text x="0" y="44" class="proto-val">I-HAVE-ADHD (Action-first in line 1, minute bounds) | CAVEMAN (65-75% Token Compression) | UNDERSTAND-ANYTHING (AST Tree)</text>
+    </g>
+  </g>
+</svg>
