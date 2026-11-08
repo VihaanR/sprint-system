@@ -1,87 +1,61 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" width="100%" height="360">
   <defs>
     <style>
-      /* Non-linear Easing and 12 Principles of Animation */
+      /* Non-linear Easing and 12 Principles of Animation - Pure Graphite Pencil Engine */
       @keyframes runner-bounce {
-        0%, 100% {
-          transform: translateY(0px) scale(1.03, 0.97);
-        }
-        30% {
-          transform: translateY(-10px) scale(0.97, 1.03) rotate(-1deg);
-        }
-        60% {
-          transform: translateY(-16px) scale(0.95, 1.05) rotate(-2deg);
-        }
-        85% {
-          transform: translateY(-2px) scale(1.02, 0.98);
-        }
+        0%, 100% { transform: translateY(0px) scale(1.03, 0.97); }
+        30% { transform: translateY(-10px) scale(0.97, 1.03) rotate(-1deg); }
+        60% { transform: translateY(-16px) scale(0.95, 1.05) rotate(-2deg); }
+        85% { transform: translateY(-2px) scale(1.02, 0.98); }
       }
-
       @keyframes leg-front-stride {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(-32deg); }
       }
-
       @keyframes leg-back-stride {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(34deg); }
       }
-
       @keyframes arm-front-swing {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(-14deg); }
       }
-
       @keyframes arm-back-swing {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(18deg); }
       }
-
       @keyframes sweat-particle-1 {
         0% { opacity: 0; transform: translate(0, 0) scale(0.4); }
         35% { opacity: 1; transform: translate(-14px, -12px) scale(1.1); }
         100% { opacity: 0; transform: translate(-36px, 10px) scale(0.2); }
       }
-
       @keyframes sweat-particle-2 {
         0% { opacity: 0; transform: translate(0, 0) scale(0.4); }
         35% { opacity: 1; transform: translate(-10px, -18px) scale(1); }
         100% { opacity: 0; transform: translate(-30px, 6px) scale(0.2); }
       }
-
-      @keyframes sweat-particle-3 {
-        0% { opacity: 0; transform: translate(0, 0) scale(0.4); }
-        35% { opacity: 1; transform: translate(-18px, -8px) scale(1.2); }
-        100% { opacity: 0; transform: translate(-42px, 14px) scale(0.3); }
-      }
-
       @keyframes coffee-drip {
         0% { opacity: 0; transform: translate(0, 0) scale(0.5); }
         40% { opacity: 1; transform: translate(-10px, 8px) scale(1); }
         100% { opacity: 0; transform: translate(-26px, 30px) scale(0.3); }
       }
-
       @keyframes puff-fade {
         0% { opacity: 0.8; transform: translate(0, 0) scale(0.6); }
         50% { opacity: 0.5; transform: translate(-12px, -4px) scale(1); }
         100% { opacity: 0; transform: translate(-24px, -8px) scale(1.3); }
       }
-
       @keyframes bubble-float {
         0%, 100% { transform: translateY(0px) rotate(0deg); }
         50% { transform: translateY(-4px) rotate(0.5deg); }
       }
-
       @keyframes clock-tick {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
       }
-
       @keyframes note-jiggle-1 {
         0%, 100% { transform: translateY(0px) rotate(-3deg); }
         50% { transform: translateY(-5px) rotate(-1deg); }
       }
-
       @keyframes note-jiggle-2 {
         0%, 100% { transform: translateY(0px) rotate(4deg); }
         50% { transform: translateY(-6px) rotate(7deg); }
@@ -107,108 +81,58 @@
         animation: arm-back-swing 0.54s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         transform-origin: 275px 180px;
       }
-      .sweat-1 {
-        animation: sweat-particle-1 0.8s cubic-bezier(0.25, 1, 0.5, 1) infinite;
-      }
-      .sweat-2 {
-        animation: sweat-particle-2 0.8s 0.26s cubic-bezier(0.25, 1, 0.5, 1) infinite;
-      }
-      .sweat-3 {
-        animation: sweat-particle-3 0.8s 0.52s cubic-bezier(0.25, 1, 0.5, 1) infinite;
-      }
-      .coffee-splat {
-        animation: coffee-drip 0.6s cubic-bezier(0.25, 1, 0.5, 1) infinite;
-      }
-      .dust-puff {
-        animation: puff-fade 0.7s cubic-bezier(0.25, 1, 0.5, 1) infinite;
-        transform-origin: 230px 290px;
-      }
-      .bubble-motion {
-        animation: bubble-float 2.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-        transform-origin: 175px 45px;
-      }
-      .stopwatch-tick {
-        animation: clock-tick 4s steps(60, end) infinite;
-        transform-origin: 0px 0px;
-      }
-      .floating-tag-1 {
-        animation: note-jiggle-1 2.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-        transform-origin: center;
-      }
-      .floating-tag-2 {
-        animation: note-jiggle-2 3.1s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-        transform-origin: center;
-      }
+      .sweat-1 { animation: sweat-particle-1 0.8s cubic-bezier(0.25, 1, 0.5, 1) infinite; }
+      .sweat-2 { animation: sweat-particle-2 0.8s 0.3s cubic-bezier(0.25, 1, 0.5, 1) infinite; }
+      .coffee-splat { animation: coffee-drip 0.6s cubic-bezier(0.25, 1, 0.5, 1) infinite; }
+      .dust-puff { animation: puff-fade 0.7s cubic-bezier(0.25, 1, 0.5, 1) infinite; transform-origin: 230px 290px; }
+      .bubble-motion { animation: bubble-float 2.8s cubic-bezier(0.45, 0, 0.55, 1) infinite; }
+      .stopwatch-tick { animation: clock-tick 4s steps(60, end) infinite; transform-origin: 0px 0px; }
+      .floating-tag-1 { animation: note-jiggle-1 2.6s cubic-bezier(0.45, 0, 0.55, 1) infinite; }
+      .floating-tag-2 { animation: note-jiggle-2 3.1s cubic-bezier(0.45, 0, 0.55, 1) infinite; }
 
       /* Typography */
-      .comic-title {
-        font-family: 'Comic Sans MS', 'Chalkboard SE', 'Bradley Hand', 'Segoe Print', cursive, sans-serif;
-        font-weight: 700;
-      }
-      .mono-code {
-        font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
-        font-weight: 700;
-      }
-      .hand-note {
-        font-family: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
-        font-weight: 700;
-      }
+      .comic-title { font-family: 'Comic Sans MS', 'Chalkboard SE', 'Bradley Hand', 'Segoe Print', cursive, sans-serif; font-weight: 700; }
+      .mono-code { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; font-weight: 700; }
+      .hand-note { font-family: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif; font-weight: 700; }
 
-      /* Line Weights */
-      .ink-heavy {
-        stroke: #18181B;
-        stroke-width: 3.5;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        fill: none;
-      }
-      .ink-med {
-        stroke: #18181B;
-        stroke-width: 2.4;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        fill: none;
-      }
-      .ink-light {
-        stroke: #3F3F46;
-        stroke-width: 1.4;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        fill: none;
-      }
+      /* Pure Graphite and Ink Line Weights */
+      .ink-heavy { stroke: #18181B; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+      .ink-med { stroke: #18181B; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+      .ink-light { stroke: #52525B; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+      .pencil-shade { stroke: #71717A; stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; fill: none; }
     </style>
 
-    <!-- Realistic Paper Drop Shadow for Dark Mode GitHub -->
-    <filter id="desk-shadow" x="-5%" y="-5%" width="112%" height="116%">
-      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000000" flood-opacity="0.45"/>
-      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000000" flood-opacity="0.25"/>
+    <!-- Subtle Pencil Drop Shadow -->
+    <filter id="pencil-shadow" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="2" dy="5" stdDeviation="6" flood-color="#000000" flood-opacity="0.25"/>
     </filter>
 
-    <!-- Post-it Note Shadow -->
-    <filter id="postit-shadow" x="-8%" y="-8%" width="120%" height="120%">
-      <feDropShadow dx="2" dy="4" stdDeviation="3.5" flood-color="#0F172A" flood-opacity="0.18"/>
+    <!-- Post-it Tape / Card Shadow -->
+    <filter id="card-shadow" x="-8%" y="-8%" width="118%" height="118%">
+      <feDropShadow dx="1.5" dy="3" stdDeviation="2.5" flood-color="#000000" flood-opacity="0.16"/>
     </filter>
 
-    <!-- Delicate Blue Ruled Lines -->
-    <pattern id="delicate-ruling" width="100" height="26" patternUnits="userSpaceOnUse">
-      <line x1="0" y1="26" x2="100" y2="26" stroke="#DBEAFE" stroke-width="1" opacity="0.75"/>
+    <!-- Faint Pencil Ruled Lines -->
+    <pattern id="pencil-ruling" width="100" height="26" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="26" x2="100" y2="26" stroke="#E4E4E7" stroke-width="1"/>
     </pattern>
 
-    <!-- Crosshatch Pattern -->
-    <pattern id="pencil-hatch" width="6" height="6" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
-      <line x1="0" y1="0" x2="0" y2="6" stroke="#18181B" stroke-width="1"/>
+    <!-- Graphite Crosshatch Shading -->
+    <pattern id="graphite-hatch" width="5" height="5" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="0" y2="5" stroke="#18181B" stroke-width="1"/>
     </pattern>
   </defs>
 
   <!-- ======================================================== -->
-  <!-- 1. REALISTIC SKETCHBOOK / NOTEBOOK SHEET WITH DESK SHADOW -->
+  <!-- 1. PURE WHITE NOTEBOOK PAGE (PENCIL SCRIBBLE STYLE)      -->
   <!-- ======================================================== -->
-  <rect x="18" y="16" width="924" height="328" rx="16" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="2" filter="url(#desk-shadow)"/>
-  <rect x="18" y="16" width="924" height="328" rx="16" fill="#FCFBF7" opacity="0.75"/>
+  <!-- Sketched Outer Sheet -->
+  <rect x="18" y="16" width="924" height="328" rx="14" fill="#FFFFFF" stroke="#18181B" stroke-width="3" filter="url(#pencil-shadow)"/>
+  <rect x="22" y="20" width="916" height="320" rx="12" fill="none" stroke="#71717A" stroke-width="1" stroke-dasharray="8 4"/>
 
-  <!-- Top Spiral Binder Wire Loops -->
+  <!-- Top Spiral Binder Wire Coils (Hand-drawn in Black Ink) -->
   <g transform="translate(48, 12)">
-    <g fill="#E2E8F0" stroke="#CBD5E1" stroke-width="1.5">
+    <g fill="#F4F4F5" stroke="#18181B" stroke-width="1.8">
       <rect x="20" y="8" width="14" height="7" rx="3.5"/>
       <rect x="90" y="8" width="14" height="7" rx="3.5"/>
       <rect x="160" y="8" width="14" height="7" rx="3.5"/>
@@ -223,7 +147,7 @@
       <rect x="790" y="8" width="14" height="7" rx="3.5"/>
       <rect x="860" y="8" width="14" height="7" rx="3.5"/>
     </g>
-    <g stroke="#64748B" stroke-width="2.5" fill="none" stroke-linecap="round">
+    <g stroke="#18181B" stroke-width="2.6" fill="none" stroke-linecap="round">
       <path d="M 23 4 C 23 -4, 31 -4, 31 4 L 31 12"/>
       <path d="M 93 4 C 93 -4, 101 -4, 101 4 L 101 12"/>
       <path d="M 163 4 C 163 -4, 171 -4, 171 4 L 171 12"/>
@@ -240,108 +164,114 @@
     </g>
   </g>
 
-  <!-- Horizontal Blue Ruled Lines -->
-  <rect x="20" y="44" width="920" height="296" fill="url(#delicate-ruling)"/>
+  <!-- Faint Pencil Ruled Lines -->
+  <rect x="24" y="44" width="912" height="294" fill="url(#pencil-ruling)"/>
 
-  <!-- Left Red Margin Line -->
-  <line x1="86" y1="24" x2="86" y2="340" stroke="#EF4444" stroke-width="2" opacity="0.8"/>
-  <line x1="90" y1="24" x2="90" y2="340" stroke="#EF4444" stroke-width="0.8" opacity="0.45"/>
+  <!-- Pencil Sketched Margin Line -->
+  <line x1="86" y1="24" x2="86" y2="340" stroke="#71717A" stroke-width="2"/>
+  <line x1="90" y1="24" x2="90" y2="340" stroke="#A1A1AA" stroke-width="1"/>
 
   <!-- Top Margin Handwritten Header -->
   <g transform="translate(100, 42)">
-    <text x="0" y="0" class="mono-code" font-size="10" fill="#64748B" letter-spacing="1.5">DIARY OF A 5-HOUR SPRINT</text>
-    <text x="320" y="0" class="hand-note" font-size="10" fill="#94A3B8">• ENTRY #01: THE WINNING RUN •</text>
+    <text x="0" y="0" class="mono-code" font-size="10" fill="#18181B" letter-spacing="1.5">DIARY OF A 5-HOUR SPRINT</text>
+    <text x="320" y="0" class="hand-note" font-size="10" fill="#52525B">• ENTRY #01: THE WINNING RUN •</text>
   </g>
 
   <!-- ======================================================== -->
-  <!-- 2. HAND-DRAWN GROUND LINE & PENCIL SPEEDLINES            -->
+  <!-- 2. HAND-DRAWN GROUND LINE and PENCIL SPEEDLINES            -->
   <!-- ======================================================== -->
-  <path d="M 86 295 C 220 293, 380 296, 520 294 C 660 292, 780 296, 920 294" class="ink-heavy" stroke-width="3.8"/>
-  <path d="M 96 299 C 230 297, 390 300, 530 298 C 670 296, 790 300, 910 298" class="ink-light" stroke="#71717A"/>
-  <path d="M 120 295 L 115 304 M 180 295 L 175 305 M 260 295 L 254 305 M 360 295 L 354 306 M 480 295 L 474 305 M 620 295 L 614 305 M 760 295 L 754 305 M 880 295 L 874 305" class="ink-light" stroke="#A1A1AA"/>
+  <!-- Ground Baseline with Pencil Jitter -->
+  <path d="M 86 295 C 220 293, 380 296, 520 294 C 660 292, 780 296, 920 294" class="ink-heavy" stroke-width="4"/>
+  <path d="M 96 300 C 230 298, 390 301, 530 299 C 670 297, 790 301, 910 299" class="pencil-shade"/>
+  <!-- Crosshatch Dirt Tufts -->
+  <path d="M 120 295 L 115 304 M 180 295 L 175 305 M 260 295 L 254 305 M 360 295 L 354 306 M 480 295 L 474 305 M 620 295 L 614 305 M 760 295 L 754 305 M 880 295 L 874 305" class="pencil-shade"/>
 
   <!-- Speed Dust Puffs Behind Heels -->
   <g class="dust-puff">
     <path d="M 228 290 C 220 284, 210 286, 206 290 C 200 288, 194 292, 198 295" class="ink-med" fill="#FFFFFF"/>
-    <circle cx="218" cy="286" r="3" fill="#D4D4D8"/>
-    <circle cx="204" cy="289" r="2" fill="#D4D4D8"/>
+    <circle cx="218" cy="286" r="3" fill="#A1A1AA"/>
+    <circle cx="204" cy="289" r="2" fill="#A1A1AA"/>
   </g>
 
-  <!-- Hand-drawn Parabolic Speed Wind Lines -->
+  <!-- Hand-drawn Graphite Speed Wind Lines -->
   <g class="ink-med" stroke="#18181B">
     <path d="M 110 200 C 145 196, 185 198, 220 204" stroke-dasharray="10 6"/>
     <path d="M 100 226 C 145 220, 195 224, 235 230" stroke-dasharray="14 8"/>
     <path d="M 120 252 C 160 248, 205 250, 245 256" stroke-dasharray="12 6"/>
     <path d="M 135 276 C 175 274, 215 276, 255 280" stroke-dasharray="8 5"/>
   </g>
-  <path d="M 140 175 C 170 170, 200 172, 230 176" class="ink-light" stroke="#0284C7" stroke-dasharray="6 4"/>
+  <path d="M 140 175 C 170 170, 200 172, 230 176" class="pencil-shade" stroke-dasharray="6 4"/>
 
   <!-- ======================================================== -->
   <!-- 3. THE RUNNER: AUTHENTIC WIMPY KID / GREG PROPORTIONS    -->
   <!-- ======================================================== -->
   <g class="runner-group">
 
-    <!-- Contact Ground Shadow -->
-    <ellipse cx="292" cy="295" rx="38" ry="5.5" fill="#18181B" opacity="0.25"/>
+    <!-- Contact Ground Shadow (Crosshatched Oval) -->
+    <ellipse cx="292" cy="295" rx="38" ry="5.5" fill="#18181B" opacity="0.3"/>
 
     <!-- BACK LEG (Trailing High Kick) -->
     <g class="back-leg">
-      <path d="M 280 226 C 258 240, 236 256, 216 262" class="ink-heavy" stroke-width="4"/>
+      <path d="M 280 226 C 258 240, 236 256, 216 262" class="ink-heavy" stroke-width="4.2"/>
       <path d="M 216 262 C 206 260, 194 268, 200 276 C 208 282, 226 274, 228 266 Z" fill="#FFFFFF" stroke="#18181B" stroke-width="3" stroke-linejoin="round"/>
       <path d="M 202 274 L 214 274" class="ink-med"/>
     </g>
 
-    <!-- BACKPACK -->
+    <!-- BACKPACK (Crosshatched Pocket) -->
     <g transform="translate(252, 172) rotate(-14)">
       <rect x="0" y="0" width="22" height="36" rx="4" fill="#FFFFFF" stroke="#18181B" stroke-width="3"/>
-      <rect x="4" y="14" width="14" height="16" rx="2" fill="url(#pencil-hatch)" stroke="#18181B" stroke-width="2"/>
+      <rect x="4" y="14" width="14" height="16" rx="2" fill="url(#graphite-hatch)" stroke="#18181B" stroke-width="2"/>
       <path d="M 18 4 C 28 8, 32 18, 30 28" class="ink-med"/>
       <text x="3" y="10" class="mono-code" font-size="6" fill="#18181B">SPRINT</text>
     </g>
 
-    <!-- TORSO: T-SHIRT + BLACK SHORTS -->
-    <path d="M 288 174 L 272 222 C 278 225, 292 225, 304 220 L 308 176 Z" fill="#FFFFFF" stroke="#18181B" stroke-width="3.5" stroke-linejoin="round"/>
+    <!-- TORSO: T-SHIRT + BLACK SHORTS (Wimpy Kid Signature) -->
+    <path d="M 288 174 L 272 222 C 278 225, 292 225, 304 220 L 308 176 Z" fill="#FFFFFF" stroke="#18181B" stroke-width="3.6" stroke-linejoin="round"/>
     <path d="M 292 176 C 298 180, 304 178, 308 176" class="ink-med"/>
+    <!-- Black Shorts Fill -->
     <path d="M 272 222 L 268 238 C 278 241, 292 241, 304 236 L 304 220 Z" fill="#18181B" stroke="#18181B" stroke-width="3" stroke-linejoin="round"/>
 
-    <!-- FRONT LEG -->
+    <!-- FRONT LEG (Driving Knee and Sneaker Landing) -->
     <g class="front-leg">
-      <path d="M 298 232 C 318 248, 328 256, 332 278 L 334 290" class="ink-heavy" stroke-width="4"/>
+      <path d="M 298 232 C 318 248, 328 256, 332 278 L 334 290" class="ink-heavy" stroke-width="4.2"/>
       <path d="M 334 290 C 336 296, 348 298, 356 292 C 362 286, 352 282, 342 284 Z" fill="#FFFFFF" stroke="#18181B" stroke-width="3" stroke-linejoin="round"/>
       <path d="M 342 293 L 352 292" class="ink-med"/>
     </g>
 
-    <!-- BACK ARM WITH COFFEE -->
+    <!-- BACK ARM (Pumping with Spilling Coffee Mug) -->
     <g class="back-arm">
       <path d="M 284 182 C 260 186, 246 176, 234 184" class="ink-heavy" stroke-width="3.5"/>
       <circle cx="232" cy="185" r="4" fill="#FFFFFF" stroke="#18181B" stroke-width="2.5"/>
+      <!-- Coffee Mug -->
       <g transform="translate(220, 174) rotate(-22)">
         <path d="M 0 0 L 16 0 L 13 18 L 3 18 Z" fill="#FFFFFF" stroke="#18181B" stroke-width="2.5"/>
         <path d="M 16 4 C 22 8, 20 14, 13 14" stroke="#18181B" stroke-width="2" fill="none"/>
-        <text x="3" y="12" class="mono-code" font-size="6" fill="#D97706" font-weight="900">DEV</text>
-        <path d="M 2 0 C -4 -6, -10 -4, -14 -2" class="ink-light" stroke="#D97706"/>
-        <circle cx="-16" cy="0" r="2.5" fill="#D97706" class="coffee-splat"/>
-        <circle cx="-22" cy="6" r="1.8" fill="#D97706" class="coffee-splat"/>
+        <text x="3" y="12" class="mono-code" font-size="6" fill="#18181B" font-weight="900">DEV</text>
+        <path d="M 2 0 C -4 -6, -10 -4, -14 -2" class="ink-light"/>
+        <circle cx="-16" cy="0" r="2.5" fill="#18181B" class="coffee-splat"/>
+        <circle cx="-22" cy="6" r="1.8" fill="#18181B" class="coffee-splat"/>
       </g>
     </g>
 
-    <!-- FRONT ARM WITH LAPTOP -->
+    <!-- FRONT ARM (Tucking Open Laptop with Code) -->
     <g class="front-arm">
       <path d="M 302 184 C 322 188, 334 182, 348 178" class="ink-heavy" stroke-width="3.5"/>
       <circle cx="350" cy="178" r="4.5" fill="#FFFFFF" stroke="#18181B" stroke-width="2.5"/>
+      <!-- Open Laptop Carried Like Football -->
       <g transform="translate(346, 154) rotate(14)">
         <rect x="0" y="0" width="30" height="22" rx="2" fill="#18181B" stroke="#18181B" stroke-width="2"/>
         <rect x="2" y="2" width="26" height="18" fill="#FFFFFF"/>
-        <line x1="4" y1="6" x2="20" y2="6" stroke="#059669" stroke-width="2" stroke-linecap="round"/>
-        <line x1="4" y1="11" x2="24" y2="11" stroke="#0284C7" stroke-width="1.8" stroke-linecap="round"/>
-        <line x1="4" y1="16" x2="16" y2="16" stroke="#D97706" stroke-width="1.8" stroke-linecap="round"/>
-        <path d="M -4 22 L 34 22 L 30 28 L 0 28 Z" fill="#E2E8F0" stroke="#18181B" stroke-width="2"/>
+        <!-- Terminal code lines inside screen (Black ink lines) -->
+        <line x1="4" y1="6" x2="20" y2="6" stroke="#18181B" stroke-width="2" stroke-linecap="round"/>
+        <line x1="4" y1="11" x2="24" y2="11" stroke="#52525B" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="4" y1="16" x2="16" y2="16" stroke="#71717A" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M -4 22 L 34 22 L 30 28 L 0 28 Z" fill="#E4E4E7" stroke="#18181B" stroke-width="2"/>
       </g>
     </g>
 
-    <!-- HEAD -->
+    <!-- HEAD: Bowling-Ball Head, 3 Hairs, Round Nose -->
     <g transform="translate(296, 154)">
-      <circle cx="0" cy="0" r="20" fill="#FFFFFF" stroke="#18181B" stroke-width="3.5"/>
+      <circle cx="0" cy="0" r="20" fill="#FFFFFF" stroke="#18181B" stroke-width="3.6"/>
       <path d="M -9 -18 C -11 -28, -5 -30, -3 -24" class="ink-heavy"/>
       <path d="M -2 -20 C -1 -31, 5 -32, 6 -24" class="ink-heavy"/>
       <path d="M 5 -19 C 7 -29, 13 -29, 12 -22" class="ink-heavy"/>
@@ -354,106 +284,112 @@
       <line x1="8" y1="12" x2="8" y2="14" class="ink-med"/>
       <line x1="12" y1="12" x2="12" y2="14" class="ink-med"/>
       <line x1="15" y1="11" x2="15" y2="13" class="ink-med"/>
-      <g transform="translate(-16, -10)"><path d="M 0 0 C -4 -4, -8 0, 0 6 C 8 0, 4 -4, 0 0 Z" fill="#0284C7" stroke="#18181B" stroke-width="1.2" class="sweat-1"/></g>
-      <g transform="translate(-10, -20)"><path d="M 0 0 C -3 -3, -6 0, 0 5 C 6 0, 3 -3, 0 0 Z" fill="#0284C7" stroke="#18181B" stroke-width="1.2" class="sweat-2"/></g>
-      <g transform="translate(0, -26)"><path d="M 0 0 C -4 -4, -8 0, 0 6 C 8 0, 4 -4, 0 0 Z" fill="#0284C7" stroke="#18181B" stroke-width="1.2" class="sweat-3"/></g>
+      <!-- Wimpy Kid Cartoon Sweat Drops (Authentic Teardrop Beads) -->
+      <g transform="translate(-18, -12)"><path d="M 0 -7 C -4 -3, -4 3, 0 6 C 4 3, 4 -3, 0 -7 Z" fill="#FFFFFF" stroke="#18181B" stroke-width="2" class="sweat-1"/></g>
+      <g transform="translate(-12, -22)"><path d="M 0 -6 C -3 -2, -3 2, 0 5 C 3 2, 3 -2, 0 -6 Z" fill="#FFFFFF" stroke="#18181B" stroke-width="1.8" class="sweat-2"/></g>
     </g>
 
   </g> <!-- END RUNNER GROUP -->
 
   <!-- ======================================================== -->
-  <!-- 4. COMIC SPEECH BUBBLE (NESTED PARENT GROUP, ZERO JUMP)  -->
+  <!-- 4. COMIC SPEECH BUBBLE (MONOCHROME PENCIL ART)           -->
   <!-- ======================================================== -->
   <g transform="translate(340, 56)">
     <g class="bubble-motion">
-      <path d="M 0 0 C 0 -14, 14 -20, 36 -20 L 320 -20 C 342 -20, 352 -10, 352 10 L 352 74 C 352 94, 340 102, 320 102 L 36 102 C 18 102, 8 92, 4 80 L -22 88 L -4 60 C -2 40, 0 20, 0 0 Z" fill="#FFFFFF" stroke="#18181B" stroke-width="3.2" stroke-linejoin="round" filter="url(#postit-shadow)"/>
-      <path d="M 2 -2 C 2 -12, 16 -18, 36 -18 L 318 -18 C 338 -18, 348 -8, 348 10 L 348 72 C 348 90, 336 98, 318 98 L 36 98" class="ink-light" stroke="#A1A1AA"/>
+      <path d="M 0 0 C 0 -14, 14 -20, 36 -20 L 320 -20 C 342 -20, 352 -10, 352 10 L 352 74 C 352 94, 340 102, 320 102 L 36 102 C 18 102, 8 92, 4 80 L -22 88 L -4 60 C -2 40, 0 20, 0 0 Z" fill="#FFFFFF" stroke="#18181B" stroke-width="3.2" stroke-linejoin="round" filter="url(#card-shadow)"/>
+      <path d="M 2 -2 C 2 -12, 16 -18, 36 -18 L 318 -18 C 338 -18, 348 -8, 348 10 L 348 72 C 348 90, 336 98, 318 98 L 36 98" class="ink-light"/>
 
-      <text x="20" y="8" class="comic-title" font-size="13.5" fill="#18181B" letter-spacing="0.2">"5 HOURS TO SHIP A WINNING HACK?"</text>
-      <text x="20" y="32" class="comic-title" font-size="12.5" fill="#DC2626" letter-spacing="0.2">JUST HIT /phase-discover &amp; KEEP SPRINTING!</text>
-      <line x1="20" y1="44" x2="330" y2="44" stroke="#E2E8F0" stroke-width="1.2"/>
-      <text x="20" y="60" class="mono-code" font-size="8.5" fill="#4B5563">[NO OVERTHINKING • RUTHLESS YAGNI • SHIP IT]</text>
-      <text x="20" y="78" class="mono-code" font-size="8" fill="#0284C7">&gt; 21 PLUGINS | 10 MCPS | 34 SKILLS ACTIVE</text>
+      <text x="20" y="8" class="comic-title" font-size="14" fill="#18181B" letter-spacing="0.2">"5 HOURS TO SHIP A WINNING HACK?"</text>
+      <text x="20" y="32" class="comic-title" font-size="13" fill="#18181B" letter-spacing="0.2">JUST HIT /phase-discover &amp; KEEP SPRINTING!</text>
+      <!-- Sketched Underline -->
+      <path d="M 20 38 Q 150 42, 310 38" stroke="#18181B" stroke-width="1.8" fill="none"/>
+      <text x="20" y="60" class="mono-code" font-size="8.5" fill="#52525B">[NO OVERTHINKING • RUTHLESS YAGNI • SHIP IT]</text>
+      <text x="20" y="78" class="mono-code" font-size="8" fill="#18181B">&gt; 21 PLUGINS | 10 MCPS | 34 SKILLS ACTIVE</text>
     </g>
   </g>
 
   <!-- ======================================================== -->
-  <!-- 5. FLUTTERING YAGNI & GRAVITAS POST-IT NOTES (NESTED)    -->
+  <!-- 5. HAND-DRAWN WHITE INDEX CARDS (REPLACING COLORED POSTITS)-->
   <!-- ======================================================== -->
-  <!-- Yellow Post-it: YAGNI! -->
-  <g transform="translate(340, 185)">
+  <!-- Index Card 1: YAGNI! -->
+  <g transform="translate(385, 185)">
     <g class="floating-tag-1">
-      <rect x="0" y="0" width="82" height="56" rx="2" fill="#FEF08A" stroke="#18181B" stroke-width="2" filter="url(#postit-shadow)"/>
-      <rect x="22" y="-4" width="38" height="8" fill="#E2E8F0" opacity="0.8" stroke="#94A3B8" stroke-width="1"/>
-      <text x="12" y="18" class="comic-title" font-size="11.5" fill="#854D0E">YAGNI!</text>
-      <text x="8" y="34" class="mono-code" font-size="7" fill="#18181B">- DELETE CODE</text>
-      <text x="8" y="46" class="mono-code" font-size="7" fill="#18181B">- 0 WRAPPERS</text>
+      <rect x="0" y="0" width="84" height="58" rx="2" fill="#FFFFFF" stroke="#18181B" stroke-width="2.2" filter="url(#card-shadow)"/>
+      <rect x="0" y="0" width="84" height="12" fill="url(#graphite-hatch)" stroke="#18181B" stroke-width="1.5"/>
+      <!-- Tape Doodle -->
+      <rect x="24" y="-5" width="36" height="9" fill="#FFFFFF" stroke="#71717A" stroke-width="1.2" stroke-dasharray="3 2"/>
+      <text x="10" y="24" class="comic-title" font-size="11" fill="#18181B">YAGNI!</text>
+      <text x="8" y="38" class="mono-code" font-size="7" fill="#18181B">- DELETE CODE</text>
+      <text x="8" y="50" class="mono-code" font-size="7" fill="#18181B">- 0 WRAPPERS</text>
     </g>
   </g>
 
-  <!-- Blue Post-it: >= 15 QS -->
-  <g transform="translate(438, 190)">
+  <!-- Index Card 2: >= 15 QS -->
+  <g transform="translate(485, 190)">
     <g class="floating-tag-2">
-      <rect x="0" y="0" width="88" height="60" rx="2" fill="#BAE6FD" stroke="#18181B" stroke-width="2" filter="url(#postit-shadow)"/>
-      <rect x="25" y="-4" width="38" height="8" fill="#E2E8F0" opacity="0.8" stroke="#94A3B8" stroke-width="1"/>
-      <text x="12" y="18" class="comic-title" font-size="11" fill="#0369A1">&gt;= 15 QS</text>
-      <text x="8" y="34" class="mono-code" font-size="7" fill="#18181B">- DEEP DIVE</text>
-      <text x="8" y="46" class="mono-code" font-size="7" fill="#18181B">- NO GUESSING</text>
+      <rect x="0" y="0" width="90" height="62" rx="2" fill="#FFFFFF" stroke="#18181B" stroke-width="2.2" filter="url(#card-shadow)"/>
+      <rect x="0" y="0" width="90" height="12" fill="none" stroke="#18181B" stroke-width="1.5"/>
+      <rect x="26" y="-5" width="38" height="9" fill="#FFFFFF" stroke="#71717A" stroke-width="1.2" stroke-dasharray="3 2"/>
+      <text x="12" y="23" class="comic-title" font-size="11" fill="#18181B">&gt;= 15 QS</text>
+      <text x="8" y="38" class="mono-code" font-size="7" fill="#18181B">- DEEP DIVE</text>
+      <text x="8" y="50" class="mono-code" font-size="7" fill="#18181B">- NO GUESSING</text>
     </g>
   </g>
 
-  <!-- Green Post-it: GRAVITAS VERIFIED -->
-  <g transform="translate(542, 180)">
+  <!-- Index Card 3: GRAVITAS VERIFIED -->
+  <g transform="translate(588, 182)">
     <g class="floating-tag-1">
-      <rect x="0" y="0" width="98" height="66" rx="2" fill="#BBF7D0" stroke="#18181B" stroke-width="2" filter="url(#postit-shadow)"/>
-      <rect x="30" y="-4" width="38" height="8" fill="#E2E8F0" opacity="0.8" stroke="#94A3B8" stroke-width="1"/>
-      <text x="10" y="18" class="comic-title" font-size="10.5" fill="#15803D">GRAVITAS</text>
-      <text x="8" y="34" class="mono-code" font-size="7" fill="#18181B">[x] EXIT CODE 0</text>
-      <text x="8" y="46" class="mono-code" font-size="7" fill="#18181B">[x] DOM VERIFIED</text>
-      <text x="8" y="58" class="mono-code" font-size="7" fill="#18181B">[x] 0 FLUFF</text>
+      <rect x="0" y="0" width="100" height="68" rx="2" fill="#FFFFFF" stroke="#18181B" stroke-width="2.2" filter="url(#card-shadow)"/>
+      <rect x="0" y="0" width="100" height="12" fill="url(#graphite-hatch)" stroke="#18181B" stroke-width="1.5"/>
+      <rect x="30" y="-5" width="40" height="9" fill="#FFFFFF" stroke="#71717A" stroke-width="1.2" stroke-dasharray="3 2"/>
+      <text x="10" y="24" class="comic-title" font-size="10.5" fill="#18181B">GRAVITAS</text>
+      <text x="8" y="38" class="mono-code" font-size="7" fill="#18181B">[x] EXIT CODE 0</text>
+      <text x="8" y="50" class="mono-code" font-size="7" fill="#18181B">[x] DOM VERIFIED</text>
+      <text x="8" y="62" class="mono-code" font-size="7" fill="#18181B">[x] 0 FLUFF</text>
     </g>
   </g>
 
   <!-- ======================================================== -->
-  <!-- 6. RIGHT SIDE: 5-HOUR SPRINT STOPWATCH & CHECKLIST       -->
+  <!-- 6. RIGHT SIDE: SKETCHED STOPWATCH and CHECKLIST            -->
   <!-- ======================================================== -->
   <g transform="translate(710, 50)">
-    <!-- Taped Header Tag -->
+    <!-- Sketched Header Tag -->
     <g transform="translate(35, 0)">
-      <rect x="0" y="0" width="130" height="24" rx="3" fill="#FEE2E2" stroke="#18181B" stroke-width="2" filter="url(#postit-shadow)"/>
-      <rect x="46" y="-4" width="38" height="8" fill="#E2E8F0" opacity="0.8" stroke="#94A3B8" stroke-width="1"/>
-      <text x="14" y="16" class="mono-code" font-size="9" fill="#DC2626" letter-spacing="1">TIME REMAINING</text>
+      <rect x="0" y="0" width="130" height="24" rx="3" fill="#FFFFFF" stroke="#18181B" stroke-width="2.2" filter="url(#card-shadow)"/>
+      <rect x="46" y="-5" width="38" height="9" fill="#FFFFFF" stroke="#71717A" stroke-width="1.2" stroke-dasharray="3 2"/>
+      <text x="14" y="16" class="mono-code" font-size="9" fill="#18181B" letter-spacing="1">TIME REMAINING</text>
     </g>
 
-    <!-- Vintage Pocket Stopwatch -->
+    <!-- Vintage Pocket Stopwatch (Pure Black and White) -->
     <g transform="translate(100, 78)">
-      <circle cx="0" cy="0" r="38" fill="#FFFFFF" stroke="#18181B" stroke-width="3.5" filter="url(#postit-shadow)"/>
+      <circle cx="0" cy="0" r="38" fill="#FFFFFF" stroke="#18181B" stroke-width="3.5" filter="url(#card-shadow)"/>
       <rect x="-8" y="-46" width="16" height="8" rx="2" fill="#FFFFFF" stroke="#18181B" stroke-width="2.5"/>
       <circle cx="0" cy="-48" r="6" fill="none" stroke="#18181B" stroke-width="2.5"/>
-      <circle cx="0" cy="0" r="31" fill="#FFFBEB" stroke="#D97706" stroke-width="1.2"/>
-      <line x1="0" y1="-28" x2="0" y2="-23" stroke="#18181B" stroke-width="2.5"/>
-      <line x1="28" y1="0" x2="23" y2="0" stroke="#18181B" stroke-width="2.5"/>
-      <line x1="0" y1="28" x2="0" y2="23" stroke="#18181B" stroke-width="2.5"/>
-      <line x1="-28" y1="0" x2="-23" y2="0" stroke="#18181B" stroke-width="2.5"/>
-      <circle cx="0" cy="0" r="3" fill="#EF4444" stroke="#18181B" stroke-width="1.2"/>
-      <!-- Rotating Stopwatch Needle (Centered on 0,0) -->
+      <circle cx="0" cy="0" r="31" fill="#FFFFFF" stroke="#18181B" stroke-width="1.5"/>
+      <line x1="0" y1="-28" x2="0" y2="-22" stroke="#18181B" stroke-width="2.5"/>
+      <line x1="28" y1="0" x2="22" y2="0" stroke="#18181B" stroke-width="2.5"/>
+      <line x1="0" y1="28" x2="0" y2="22" stroke="#18181B" stroke-width="2.5"/>
+      <line x1="-28" y1="0" x2="-22" y2="0" stroke="#18181B" stroke-width="2.5"/>
+      <circle cx="0" cy="0" r="3" fill="#18181B"/>
+      <!-- Rotating Stopwatch Needle (Black Ink) -->
       <g class="stopwatch-tick">
-        <line x1="0" y1="0" x2="0" y2="-22" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="0" y1="0" x2="0" y2="-22" stroke="#18181B" stroke-width="2.5" stroke-linecap="round"/>
       </g>
     </g>
 
-    <!-- Large Digital Stopwatch Readout -->
+    <!-- Digital Stopwatch Readout -->
     <text x="100" y="134" class="mono-code" font-size="14" fill="#18181B" text-anchor="middle" font-weight="900" letter-spacing="1">05:00:00</text>
-    <text x="100" y="150" class="comic-title" font-size="10" fill="#DC2626" text-anchor="middle">"SHIP OR GO HOME!"</text>
+    <text x="100" y="150" class="comic-title" font-size="10.5" fill="#18181B" text-anchor="middle">"SHIP OR GO HOME!"</text>
 
-    <!-- Mini Hackathon Milestone Checklist -->
+    <!-- Mini Hackathon Milestone Checklist Card (All 6 Phases) -->
     <g transform="translate(10, 168)">
-      <rect x="0" y="0" width="180" height="74" rx="4" fill="#FFFFFF" stroke="#18181B" stroke-width="2" filter="url(#postit-shadow)"/>
-      <text x="12" y="16" class="mono-code" font-size="8" fill="#059669">[v] 01. SPEC &amp; MOAT</text>
-      <text x="12" y="28" class="mono-code" font-size="8" fill="#059669">[v] 02. FASTAPI + GEMINI</text>
-      <text x="12" y="40" class="mono-code" font-size="8" fill="#059669">[v] 03. LIVE SWARM UI</text>
-      <text x="12" y="52" class="mono-code" font-size="8" fill="#D97706">[~] 04. POLISH &amp; MOTION</text>
-      <text x="12" y="64" class="mono-code" font-size="8" fill="#64748B">[ ] 05. GRAVITAS AUDIT</text>
+      <rect x="0" y="0" width="180" height="88" rx="4" fill="#FFFFFF" stroke="#18181B" stroke-width="2.2" filter="url(#card-shadow)"/>
+      <text x="12" y="16" class="mono-code" font-size="7.5" fill="#18181B">[v] 01. SPEC &amp; MOAT</text>
+      <text x="12" y="29" class="mono-code" font-size="7.5" fill="#18181B">[v] 02. FASTAPI + GEMINI</text>
+      <text x="12" y="42" class="mono-code" font-size="7.5" fill="#18181B">[v] 03. LIVE SWARM UI</text>
+      <text x="12" y="55" class="mono-code" font-size="7.5" fill="#18181B">[~] 04. POLISH &amp; MOTION</text>
+      <text x="12" y="68" class="mono-code" font-size="7.5" fill="#52525B">[ ] 05. GRAVITAS AUDIT</text>
+      <text x="12" y="80" class="mono-code" font-size="7.5" fill="#52525B">[ ] 06. 60s LAUNCH PACK</text>
     </g>
   </g>
 

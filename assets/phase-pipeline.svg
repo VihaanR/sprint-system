@@ -1,12 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 160" width="100%" height="160">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 180" width="100%" height="180">
   <defs>
     <style>
+      /* Non-linear Easing and 12 Principles of Animation - Pure Graphite Pencil Engine */
       @keyframes dash-scroll {
-        to { stroke-dashoffset: -40; }
+        to { stroke-dashoffset: -36; }
       }
-      @keyframes node-pulse {
-        0%, 100% { transform: scale(1); opacity: 0.9; }
-        50% { transform: scale(1.18); opacity: 0.35; }
+      @keyframes node-pulse-pencil {
+        0%, 100% { transform: scale(1); opacity: 0.85; }
+        50% { transform: scale(1.18); opacity: 0.3; }
       }
       @keyframes runner-glide {
         0% { transform: translateX(50px); }
@@ -17,143 +18,158 @@
         83.3% { transform: translateX(890px); }
         100% { transform: translateX(935px); }
       }
-      @keyframes leg-swing {
-        0%, 100% { transform: rotate(0deg); }
-        50% { transform: rotate(-24deg); }
-      }
       @keyframes runner-bounce-bob {
         0%, 100% { transform: translateY(0px) scale(1.05, 0.95); }
         50% { transform: translateY(-5px) scale(0.95, 1.05); }
       }
 
       .flow-track { stroke-dasharray: 8 6; animation: dash-scroll 1.8s linear infinite; }
-      .pulse-ring { animation: node-pulse 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite; transform-origin: center; }
+      .pulse-ring { animation: node-pulse-pencil 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite; transform-origin: center; }
       .running-sprite { animation: runner-glide 12s cubic-bezier(0.25, 1, 0.5, 1) infinite; }
       .sprite-bob { animation: runner-bounce-bob 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) infinite; transform-origin: bottom center; }
-      .doodle-leg { animation: leg-swing 0.32s ease-in-out infinite; transform-origin: 0 0; }
 
-      .phase-text { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 11px; font-weight: 800; }
-      .phase-time { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600; fill: #94A3B8; }
-      .hand-note { font-family: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif; font-size: 9px; font-weight: 700; }
-      .ink-doodle { stroke-linecap: round; stroke-linejoin: round; fill: none; }
+      .phase-text { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 11px; font-weight: 800; fill: #18181B; }
+      .phase-time { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600; fill: #52525B; }
+      .hand-note { font-family: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif; font-size: 9px; font-weight: 700; fill: #18181B; }
+      .ink-heavy { stroke: #18181B; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+      .ink-med { stroke: #18181B; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+      .ink-light { stroke: #71717A; stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
     </style>
 
-    <!-- Grid Background -->
-    <pattern id="pipeGrid" width="20" height="20" patternUnits="userSpaceOnUse">
-      <circle cx="2" cy="2" r="0.8" fill="#334155" opacity="0.35"/>
+    <!-- Subtle Pencil Drop Shadow -->
+    <filter id="pipe-shadow" x="-3%" y="-5%" width="106%" height="112%">
+      <feDropShadow dx="2" dy="5" stdDeviation="6" flood-color="#000000" flood-opacity="0.2"/>
+    </filter>
+
+    <!-- Faint Pencil Ruled Pattern -->
+    <pattern id="pipe-ruling" width="80" height="22" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="22" x2="80" y2="22" stroke="#E4E4E7" stroke-width="0.9"/>
     </pattern>
 
-    <!-- Card Shadow Filter -->
-    <filter id="node-glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000000" flood-opacity="0.6"/>
-    </filter>
+    <!-- Crosshatch Pattern -->
+    <pattern id="pipe-hatch" width="5" height="5" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="0" y2="5" stroke="#18181B" stroke-width="1"/>
+    </pattern>
   </defs>
 
-  <!-- Container Box (Dark OLED Theme matching Hero & Matrix) -->
-  <rect x="2" y="2" width="996" height="156" rx="14" fill="#0B0F19" stroke="#1E293B" stroke-width="1.8"/>
-  <rect x="2" y="2" width="996" height="156" rx="14" fill="url(#pipeGrid)"/>
-
-  <!-- Top Title Banner Badge -->
-  <g transform="translate(36, 14)">
-    <rect x="0" y="0" width="260" height="22" rx="4" fill="#1C1917" stroke="#F59E0B" stroke-width="1.2" stroke-dasharray="4 2"/>
-    <text x="12" y="15" class="phase-text" font-size="9.5" fill="#F59E0B">[THE 5-HOUR ROADMAP : 6 GATES]</text>
-  </g>
-  <text x="740" y="30" class="hand-note" fill="#F43F5E">"SHIP AT HOUR 5 • NO AI EXCUSES"</text>
-
-  <!-- Connecting Backbone Wire -->
-  <path d="M 80 88 C 220 85, 380 91, 520 88 C 660 85, 780 91, 920 88" stroke="#1E293B" stroke-width="4.5" fill="none" stroke-linecap="round"/>
-  <!-- Animated Streaming Dashed Flowline -->
-  <path d="M 80 88 C 220 85, 380 91, 520 88 C 660 85, 780 91, 920 88" stroke="#38BDF8" stroke-width="2.4" class="flow-track ink-doodle" opacity="0.8"/>
-
   <!-- ======================================================== -->
-  <!-- MINI ANIMATED RUNNER SPRITE (Scurrying between phases)   -->
+  <!-- 1. PURE WHITE NOTEBOOK PAGE (PENCIL SCRIBBLE STYLE)      -->
   <!-- ======================================================== -->
-  <g class="running-sprite" transform="translate(0, 0)">
-    <g class="sprite-bob" transform="translate(0, 64)">
-      <!-- Tiny Wimpy Kid Doodle Runner -->
-      <ellipse cx="0" cy="24" rx="8" ry="2" fill="#000000" opacity="0.4"/>
-      <!-- Trailing Leg -->
-      <path d="M -2 12 L -6 19 L -10 19" stroke="#F8FAFC" stroke-width="2" class="ink-doodle"/>
-      <!-- Driving Leg -->
-      <path d="M 2 12 L 6 18 L 9 22" stroke="#F8FAFC" stroke-width="2" class="ink-doodle"/>
-      <!-- Torso with Black Shorts -->
-      <path d="M 0 3 L -1 10" stroke="#F8FAFC" stroke-width="2.5" class="ink-doodle"/>
-      <rect x="-3" y="10" width="5" height="4" fill="#F8FAFC"/>
-      <!-- Pumping Arms -->
-      <path d="M -1 5 L -5 9 L -8 6" stroke="#F8FAFC" stroke-width="1.8" class="ink-doodle"/>
-      <path d="M 0 5 L 5 7 L 7 4" stroke="#F8FAFC" stroke-width="1.8" class="ink-doodle"/>
-      <!-- Head -->
-      <circle cx="2" cy="-4" r="6" fill="#0F172A" stroke="#F8FAFC" stroke-width="1.8"/>
-      <!-- Hair strands -->
-      <path d="M 0 -10 L 0 -13 M 3 -10 L 4 -14 M 5 -9 L 7 -13" stroke="#F8FAFC" stroke-width="1.4"/>
-      <path d="M 7 -4 C 10 -4, 10 0, 6 0" stroke="#F8FAFC" stroke-width="1.4" fill="#0F172A"/>
-      <circle cx="4" cy="-5" r="1" fill="#F8FAFC"/>
-      <!-- Mini Sweat Drop -->
-      <path d="M -6 -7 Q -8 -7, -6 -5 Z" fill="#38BDF8"/>
+  <rect x="16" y="14" width="968" height="152" rx="14" fill="#FFFFFF" stroke="#18181B" stroke-width="2.8" filter="url(#pipe-shadow)"/>
+  <rect x="20" y="18" width="960" height="144" rx="12" fill="none" stroke="#71717A" stroke-width="1" stroke-dasharray="6 3"/>
+
+  <!-- Top Spiral Binder Wire Loops (Black Ink) -->
+  <g transform="translate(48, 10)">
+    <g fill="#F4F4F5" stroke="#18181B" stroke-width="1.6">
+      <rect x="20" y="6" width="12" height="6" rx="3"/>
+      <rect x="120" y="6" width="12" height="6" rx="3"/>
+      <rect x="220" y="6" width="12" height="6" rx="3"/>
+      <rect x="320" y="6" width="12" height="6" rx="3"/>
+      <rect x="420" y="6" width="12" height="6" rx="3"/>
+      <rect x="520" y="6" width="12" height="6" rx="3"/>
+      <rect x="620" y="6" width="12" height="6" rx="3"/>
+      <rect x="720" y="6" width="12" height="6" rx="3"/>
+      <rect x="820" y="6" width="12" height="6" rx="3"/>
+    </g>
+    <g stroke="#18181B" stroke-width="2.2" fill="none" stroke-linecap="round">
+      <path d="M 23 3 C 23 -3, 29 -3, 29 3 L 29 9"/>
+      <path d="M 123 3 C 123 -3, 129 -3, 129 3 L 129 9"/>
+      <path d="M 223 3 C 223 -3, 229 -3, 229 3 L 229 9"/>
+      <path d="M 323 3 C 323 -3, 329 -3, 329 3 L 329 9"/>
+      <path d="M 423 3 C 423 -3, 429 -3, 429 3 L 429 9"/>
+      <path d="M 523 3 C 523 -3, 529 -3, 529 3 L 529 9"/>
+      <path d="M 623 3 C 623 -3, 629 -3, 629 3 L 629 9"/>
+      <path d="M 723 3 C 723 -3, 729 -3, 729 3 L 729 9"/>
+      <path d="M 823 3 C 823 -3, 829 -3, 829 3 L 829 9"/>
     </g>
   </g>
 
+  <!-- Faint Ruled Lines -->
+  <rect x="20" y="36" width="960" height="126" fill="url(#pipe-ruling)"/>
+
+  <!-- Pencil Margin Line -->
+  <line x1="48" y1="16" x2="48" y2="164" stroke="#71717A" stroke-width="1.8"/>
+
+  <!-- Top Title Bar Banner (Sketched Double Line) -->
+  <g transform="translate(60, 24)">
+    <rect x="0" y="0" width="270" height="22" rx="3" fill="#FFFFFF" stroke="#18181B" stroke-width="2"/>
+    <rect x="0" y="0" width="270" height="5" fill="url(#pipe-hatch)"/>
+    <text x="12" y="15" class="phase-text" font-size="9.5">[THE 5-HOUR ROADMAP : 6 GATES]</text>
+  </g>
+  <text x="940" y="38" text-anchor="end" class="hand-note">"SHIP AT HOUR 5 • NO AI EXCUSES"</text>
+
+  <!-- Hand-drawn Connecting Pipeline Wire -->
+  <path d="M 120 102 C 270 98, 420 106, 570 102 C 720 98, 800 106, 880 102" stroke="#E4E4E7" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+  <!-- Animated Streaming Dashed Flowline (Black Ink) -->
+  <path d="M 120 102 C 270 98, 420 106, 570 102 C 720 98, 800 106, 880 102" stroke="#18181B" stroke-width="2.2" class="flow-track" fill="none" stroke-linecap="round"/>
+
   <!-- ======================================================== -->
-  <!-- THE 6 GATES (STATIC X-TRANSLATIONS, IMMUTABLE IN CHROMIUM)-->
+  <!-- THE 6 GATES (PENCIL STATIONS, NO COLLAPSE, PURE B AND W) -->
   <!-- ======================================================== -->
 
   <!-- PHASE 01: DISCOVER -->
-  <g transform="translate(80, 88)">
-    <circle cx="0" cy="0" r="24" fill="#0284C7" opacity="0.18" class="pulse-ring"/>
-    <circle cx="0" cy="0" r="18" fill="#0F172A" stroke="#38BDF8" stroke-width="2.5" filter="url(#node-glow)"/>
-    <circle cx="0" cy="0" r="6" fill="#38BDF8"/>
-    <text x="0" y="-28" text-anchor="middle" fill="#F8FAFC" class="phase-text">01. DISCOVER</text>
+  <g transform="translate(120, 102)">
+    <circle cx="0" cy="0" r="24" fill="none" stroke="#71717A" stroke-width="1.2" stroke-dasharray="3 2" class="pulse-ring"/>
+    <circle cx="0" cy="0" r="18" fill="#FFFFFF" stroke="#18181B" stroke-width="2.8"/>
+    <circle cx="0" cy="0" r="12" fill="url(#pipe-hatch)"/>
+    <circle cx="0" cy="0" r="5" fill="#18181B"/>
+    <text x="0" y="-28" text-anchor="middle" class="phase-text">01. DISCOVER</text>
     <text x="0" y="32" text-anchor="middle" class="phase-time">~60m / SPEC &amp; MOAT</text>
-    <text x="0" y="44" text-anchor="middle" fill="#38BDF8" class="hand-note">&gt;= 15 questions</text>
+    <text x="0" y="44" text-anchor="middle" class="hand-note">&gt;= 15 questions</text>
   </g>
 
   <!-- PHASE 02: BACKEND -->
-  <g transform="translate(248, 88)">
-    <circle cx="0" cy="0" r="24" fill="#4F46E5" opacity="0.18" class="pulse-ring"/>
-    <circle cx="0" cy="0" r="18" fill="#0F172A" stroke="#818CF8" stroke-width="2.5" filter="url(#node-glow)"/>
-    <circle cx="0" cy="0" r="6" fill="#818CF8"/>
-    <text x="0" y="-28" text-anchor="middle" fill="#F8FAFC" class="phase-text">02. BACKEND</text>
+  <g transform="translate(272, 102)">
+    <circle cx="0" cy="0" r="24" fill="none" stroke="#71717A" stroke-width="1.2" stroke-dasharray="3 2" class="pulse-ring"/>
+    <circle cx="0" cy="0" r="18" fill="#FFFFFF" stroke="#18181B" stroke-width="2.8"/>
+    <circle cx="0" cy="0" r="12" fill="url(#pipe-hatch)"/>
+    <circle cx="0" cy="0" r="5" fill="#18181B"/>
+    <text x="0" y="-28" text-anchor="middle" class="phase-text">02. BACKEND</text>
     <text x="0" y="32" text-anchor="middle" class="phase-time">~60m / FASTAPI &amp; AI</text>
-    <text x="0" y="44" text-anchor="middle" fill="#818CF8" class="hand-note">pytest exit 0</text>
+    <text x="0" y="44" text-anchor="middle" class="hand-note">pytest exit 0</text>
   </g>
 
   <!-- PHASE 03: FRONTEND -->
-  <g transform="translate(416, 88)">
-    <circle cx="0" cy="0" r="24" fill="#9333EA" opacity="0.18" class="pulse-ring"/>
-    <circle cx="0" cy="0" r="18" fill="#0F172A" stroke="#C084FC" stroke-width="2.5" filter="url(#node-glow)"/>
-    <circle cx="0" cy="0" r="6" fill="#C084FC"/>
-    <text x="0" y="-28" text-anchor="middle" fill="#F8FAFC" class="phase-text">03. FRONTEND</text>
+  <g transform="translate(424, 102)">
+    <circle cx="0" cy="0" r="24" fill="none" stroke="#71717A" stroke-width="1.2" stroke-dasharray="3 2" class="pulse-ring"/>
+    <circle cx="0" cy="0" r="18" fill="#FFFFFF" stroke="#18181B" stroke-width="2.8"/>
+    <circle cx="0" cy="0" r="12" fill="url(#pipe-hatch)"/>
+    <circle cx="0" cy="0" r="5" fill="#18181B"/>
+    <text x="0" y="-28" text-anchor="middle" class="phase-text">03. FRONTEND</text>
     <text x="0" y="32" text-anchor="middle" class="phase-time">~60m / LIVE SWARM</text>
-    <text x="0" y="44" text-anchor="middle" fill="#C084FC" class="hand-note">0 console errs</text>
+    <text x="0" y="44" text-anchor="middle" class="hand-note">0 console errs</text>
   </g>
 
   <!-- PHASE 04: POLISH -->
-  <g transform="translate(584, 88)">
-    <circle cx="0" cy="0" r="24" fill="#DB2777" opacity="0.18" class="pulse-ring"/>
-    <circle cx="0" cy="0" r="18" fill="#0F172A" stroke="#F472B6" stroke-width="2.5" filter="url(#node-glow)"/>
-    <circle cx="0" cy="0" r="6" fill="#F472B6"/>
-    <text x="0" y="-28" text-anchor="middle" fill="#F8FAFC" class="phase-text">04. POLISH</text>
+  <g transform="translate(576, 102)">
+    <circle cx="0" cy="0" r="24" fill="none" stroke="#71717A" stroke-width="1.2" stroke-dasharray="3 2" class="pulse-ring"/>
+    <circle cx="0" cy="0" r="18" fill="#FFFFFF" stroke="#18181B" stroke-width="2.8"/>
+    <circle cx="0" cy="0" r="12" fill="url(#pipe-hatch)"/>
+    <circle cx="0" cy="0" r="5" fill="#18181B"/>
+    <text x="0" y="-28" text-anchor="middle" class="phase-text">04. POLISH</text>
     <text x="0" y="32" text-anchor="middle" class="phase-time">~45m / ANTI-SLOP</text>
-    <text x="0" y="44" text-anchor="middle" fill="#F472B6" class="hand-note">12 motion laws</text>
+    <text x="0" y="44" text-anchor="middle" class="hand-note">12 motion laws</text>
   </g>
 
   <!-- PHASE 05: AUDIT -->
-  <g transform="translate(752, 88)">
-    <circle cx="0" cy="0" r="24" fill="#D97706" opacity="0.18" class="pulse-ring"/>
-    <circle cx="0" cy="0" r="18" fill="#0F172A" stroke="#F59E0B" stroke-width="2.5" filter="url(#node-glow)"/>
-    <circle cx="0" cy="0" r="6" fill="#F59E0B"/>
-    <text x="0" y="-28" text-anchor="middle" fill="#F8FAFC" class="phase-text">05. AUDIT</text>
+  <g transform="translate(728, 102)">
+    <circle cx="0" cy="0" r="24" fill="none" stroke="#71717A" stroke-width="1.2" stroke-dasharray="3 2" class="pulse-ring"/>
+    <circle cx="0" cy="0" r="18" fill="#FFFFFF" stroke="#18181B" stroke-width="2.8"/>
+    <circle cx="0" cy="0" r="12" fill="url(#pipe-hatch)"/>
+    <circle cx="0" cy="0" r="5" fill="#18181B"/>
+    <text x="0" y="-28" text-anchor="middle" class="phase-text">05. AUDIT</text>
     <text x="0" y="32" text-anchor="middle" class="phase-time">~45m / HARDENING</text>
-    <text x="0" y="44" text-anchor="middle" fill="#F59E0B" class="hand-note">gravitas proof</text>
+    <text x="0" y="44" text-anchor="middle" class="hand-note">gravitas proof</text>
   </g>
 
   <!-- PHASE 06: LAUNCH -->
-  <g transform="translate(920, 88)">
-    <circle cx="0" cy="0" r="24" fill="#059669" opacity="0.18" class="pulse-ring"/>
-    <circle cx="0" cy="0" r="18" fill="#0F172A" stroke="#10B981" stroke-width="2.5" filter="url(#node-glow)"/>
-    <circle cx="0" cy="0" r="6" fill="#10B981"/>
-    <text x="0" y="-28" text-anchor="middle" fill="#F8FAFC" class="phase-text">06. LAUNCH</text>
+  <g transform="translate(880, 102)">
+    <circle cx="0" cy="0" r="24" fill="none" stroke="#71717A" stroke-width="1.2" stroke-dasharray="3 2" class="pulse-ring"/>
+    <circle cx="0" cy="0" r="18" fill="#FFFFFF" stroke="#18181B" stroke-width="2.8"/>
+    <circle cx="0" cy="0" r="12" fill="url(#pipe-hatch)"/>
+    <circle cx="0" cy="0" r="5" fill="#18181B"/>
+    <text x="0" y="-28" text-anchor="middle" class="phase-text">06. LAUNCH</text>
     <text x="0" y="32" text-anchor="middle" class="phase-time">~30m / DEMO VIDEO</text>
-    <text x="0" y="44" text-anchor="middle" fill="#10B981" class="hand-note">remotion 60s</text>
+    <text x="0" y="44" text-anchor="middle" class="hand-note">remotion 60s</text>
   </g>
 </svg>
