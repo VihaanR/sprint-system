@@ -1,6 +1,6 @@
 ---
 name: phase-launch
-description: Phase 6 of the 5-Hour Hackathon Sprint. Packages the judge-ready submission: 60s launch video via brag, deployments via vercel/railway/firebase, Postman collections, Swagger docs, and winning README via mermaid-expert.
+description: Phase 6 of the 5-Hour Hackathon Sprint. Packages the judge-ready submission: 60s launch video via brag, deployments via vercel/railway/firebase, gravitas proof of deployment, Postman collections, Swagger docs, and winning README via mermaid-expert.
 ---
 
 # Phase 6: Judge-Ready Pitch & Launch (Deployment & Demo Pack)
@@ -12,13 +12,14 @@ description: Phase 6 of the 5-Hour Hackathon Sprint. Packages the judge-ready su
 
 ## Pre-Phase Interrogation Gate
 
-Before execution starts, the system delivers the **Phase 5 Executive Scorecard** (zero OWASP vulnerabilities, clean Playwright E2E pass, Sentry telemetry confirmed), followed by the **Devil's Advocate 15-Point Interrogation** via `ask_question`. The user must confirm deployment target, demo credentials, pitch video hooks, and judge presentation narrative before launch operations begin.
+Before execution starts, the system delivers the **Phase 5 Executive Scorecard** (zero OWASP vulnerabilities, clean Playwright E2E pass, Sentry telemetry confirmed), followed by the **Devil's Advocate 15-Point Interrogation** (mandatory >= 15 deep-dive questions across 5 dimensions). The user must confirm deployment target, demo credentials, pitch video hooks, and judge presentation narrative before launch operations begin.
 
 ---
 
 ## Active Tooling & Capabilities
 
 - **`brag` (Hyperframes)**: Generates a 60-second polished, shareable product launch video directly from the project code.
+- **`gravitas`**: Reliability runtime. Verifies that live deployment URLs return HTTP 200 and video artifacts exist on disk before claiming launch completion.
 - **`vercel-plugin`**: Instant production deployment for Next.js/React frontends.
 - **`railway` plugin & `docker` MCP**: Instant hosting for FastAPI backends, PostgreSQL/Redis, and Docker services.
 - **`firebase` plugin**: Deploys Firebase Hosting, Cloud Functions, and security rules.
@@ -32,18 +33,19 @@ Before execution starts, the system delivers the **Phase 5 Executive Scorecard**
 
 ## Execution Checklist
 
-1. **Pre-Phase Gate**:
+1. **Pre-Phase Gate (>= 15 Questions)**:
    - Deliver Phase 5 Executive Scorecard.
    - Run Devil's Advocate interrogation probing for deployment cold-starts, broken live demo links, and video storytelling punch.
-2. **Production Deployment**:
+2. **Production Deployment & Gravitas URL Verification**:
    - Deploy frontend via `vercel-plugin` or Firebase Hosting.
    - Deploy backend to Railway / container host and bind production environment variables.
-   - Confirm the live URL loads with zero errors.
+   - Probe live URL using `curl` / `fetch`: observe HTTP 200 response with zero error payloads.
 3. **Interactive Judge Tools (Swagger & Postman)**:
    - Verify `/docs` Swagger UI is accessible with pre-filled test payloads.
    - Publish a shared Postman collection link.
 4. **60-Second Demo Video (`brag`)**:
    - Run `brag` to generate the Hyperframes launch video summarizing the problem, solution, and live feature walkthrough.
+   - Mechanically verify video file exists on disk.
 5. **The Winning Pitch `README.md`**:
    - Write a judge-facing `README.md` containing:
      - **Elevator Pitch & Hero Screenshots**: Headline and UI preview.
@@ -51,6 +53,6 @@ Before execution starts, the system delivers the **Phase 5 Executive Scorecard**
      - **Architecture Flowchart (`mermaid-expert`)**: Full visual data flow.
      - **Live Demo Links**: Deployed web app, Swagger API docs, Postman link, video demo.
      - **Judge Test Credentials**: Pre-seeded accounts to bypass signup friction.
-6. **Phase Checkpoint**:
+6. **Phase Checkpoint & Git Release Tag**:
    - Push release tag (`v1.0.0-hackathon`) via `git-advanced-workflows` and `github-mcp-server`.
-   - Finalize `SPRINT.md`: Mark all 6 phases complete. Hackathon submission ready!
+   - Finalize `SPRINT.md`: Mark all 6 phases complete with mechanical proofs. Hackathon submission ready!

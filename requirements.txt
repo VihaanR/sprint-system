@@ -1,7 +1,7 @@
 # ==============================================================================
 # SPRINT SYSTEM: MASTER DEPENDENCY & TOOLCHAIN SPECIFICATION
 # The 5-Hour Global Hackathon Operating System for AI Coding Agents
-# Coordinates: 21 Installed Plugins | 10 MCP Servers | 25 Global Skills
+# Coordinates: 21 Installed Plugins | 10 MCP Servers | 30 Global Skills | 4 AAS Elite Skills
 # Architecture: Python 3.11+ / Node.js 20+ / Zero-Conflict Production Stack
 # ==============================================================================
 #
@@ -47,22 +47,32 @@
 # 10. api-anything       -> npx -y api-anything mcp (Direct Web-to-API engine)
 #
 # ------------------------------------------------------------------------------
-# 25 GLOBAL SKILLS ORCHESTRATED:
+# 30 GLOBAL SKILLS ORCHESTRATED:
 # ------------------------------------------------------------------------------
 # Core Pipeline:
 # - sprint-orchestrator, phase-discover, phase-backend, phase-frontend,
 #   phase-polish, phase-audit, phase-launch
-# Specialized Domain Engines:
-# - api-anything, devils-advocate, impeccable, live-swarm-coding, fastapi-pro,
-#   async-python-patterns, rag-implementation, sql-optimization-patterns,
-#   security-auditor, python-testing-patterns, e2e-testing-patterns,
-#   tailwind-design-system, react-state-management, react-modernization,
-#   mobile-developer, indian-gov-web-ui, ui-visual-validator,
-#   git-advanced-workflows
+# Specialized Domain & Reliability Engines:
+# - gravitas (Reliability Kernel & Evidence Verification)
+# - ponytail (Ruthless YAGNI & Negative LOC Audit)
+# - code-simplify (Addy Osmani Complexity Reduction & Anti-Rationalization)
+# - understand-anything (Post-Graphify AST Architecture Tree & Viewer)
+# - caveman (Hybrid 65-75% Token Compression Protocol)
+# - api-anything, devils-advocate (Mandatory >= 15 Questions), impeccable,
+#   live-swarm-coding, fastapi-pro, async-python-patterns, rag-implementation,
+#   sql-optimization-patterns, security-auditor, python-testing-patterns,
+#   e2e-testing-patterns, tailwind-design-system, react-state-management,
+#   react-modernization, mobile-developer, indian-gov-web-ui,
+#   ui-visual-validator, git-advanced-workflows
+#
+# Curated Elite AAS Skills (skills/aas/):
+# - security-hardening.md, chaos-testing.md, micro-benchmark.md, memory-leak-hunter.md
 #
 # CLI & Engine Runtimes:
-# - api-anything CLI     -> npx -y api-anything call <site> <op> (Sub-second HTTP data)
-# - impeccable detector  -> npx impeccable detect src/ (Anti-slop design scanner)
+# - api-anything CLI        -> npx -y api-anything call <site> <op> (Sub-second HTTP data)
+# - impeccable detector     -> npx impeccable detect src/ (Anti-slop design scanner)
+# - AAS Core CLI            -> npx agentic-awesome-skills (On-demand playbook discovery)
+# - understand-anything UI  -> npx understand-anything-viewer (Interactive AST visualizer)
 # ==============================================================================
 
 # ==============================================================================
