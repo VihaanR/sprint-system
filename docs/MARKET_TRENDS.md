@@ -1,77 +1,86 @@
 # [MARKET TREND RAG REPORT: EMERGING TOOLS & SKILLS]
-**Generated**: 2026-11-13 07:40:56Z
-**Total Signals Scanned**: 44 items from Hacker News & GitHub
+**Generated**: 2026-11-13 08:08:26Z
+**Total Signals Scanned**: 60 items from Trendshift.io, Hacker News & GitHub
 
 ---
 
-## [HIGH-VALUE SIGNALS BY SPRINT PHASE]
+## [HIGH-MOMENTUM SIGNALS BY SPRINT PHASE]
 
 ### Phase 1: Discover (Spec, Moats & Contracts)
-- **[stablyai/orca](https://github.com/stablyai/orca)** (`GitHub Trending / Recent` | Score: 123806)
-  *Summary*: Orca lets you run a fleet of coding agents (e.g. Claude Code, Codex) with your own subscription. Available on desktop, mobile and remote runtime. agent-ide ai-agents automation bot claude-code codex ghostty grok-bot hermes-agent mobile-app
+- **[LodyAI/Lody](https://github.com/LodyAI/Lody)** (`GitHub Search (Active Velocity)` | Momentum Score: 1737)
+  *Summary*: Share coding agents with your team on phone and desktop agent agentic-workflow coding-agent collaboration local-first multi-agent multiplayer orchestration vibe-coding
   *Sprint Adaptation Action*: Evaluate integration as an on-demand plugin or Phase checklist rule.
-- **[macro-inc/macro](https://github.com/macro-inc/macro)** (`GitHub Trending / Recent` | Score: 6292)
-  *Summary*: Macro is a unified workspace for teams: email, chat, docs, tasks, agents, calls, and CRM — @-linked together with shared AI memory. agent ai ai-agents all-in-one crm crm-system email linear mcp messaging notes notion office rust slack slack
+- **[kuafuai/andee [Kotlin]](https://github.com/kuafuai/andee)** (`Trendshift.io (Momentum Leader)` | Momentum Score: 930)
+  *Summary*: Andee lives on your phone or Mac and uses any app like you do—no integrations, no root, any model; memory and passwords never leave your device | Andee 住进你的手机或 Mac，像你一样操作任何 App——无需集成、无需 Root、支持任意模型，记忆和密码绝不离开设备。
   *Sprint Adaptation Action*: Evaluate integration as an on-demand plugin or Phase checklist rule.
-- **[NVIDIA/SkillEvaluator](https://github.com/NVIDIA/SkillEvaluator)** (`GitHub Trending / Recent` | Score: 946)
-  *Summary*: Multi-tier framework for evaluating AI agent skills with quality gates, semantic overlap detection, synthetic evaluation dataset generation, and live agent evaluation that measures how skills affect agent behavior. agent-evaluation agent-pl
+- **[Edge0-AI/Edge0 [Python]](https://github.com/Edge0-AI/Edge0)** (`Trendshift.io (Momentum Leader)` | Momentum Score: 755)
+  *Summary*: Run 35B MoE models in ~2.5 GB of RAM. Weights stream from SSD; a trained router predicts loads a step ahead. Mac, iPhone, Android, Windows supported
   *Sprint Adaptation Action*: Evaluate integration as an on-demand plugin or Phase checklist rule.
-- **[harbor-framework/terminal-bench-science](https://github.com/harbor-framework/terminal-bench-science)** (`GitHub Trending / Recent` | Score: 902)
-  *Summary*: Terminal-Bench-Science: Evaluating AI agents on research workflows across scientific domains agentic-ai ai-for-science ai4science
+- **[aws/aws-emulator [Rust]](https://github.com/aws/aws-emulator)** (`Trendshift.io (Momentum Leader)` | Momentum Score: 545)
+  *Summary*: Trending on Trendshift
+  *Sprint Adaptation Action*: Evaluate integration as an on-demand plugin or Phase checklist rule.
+- **[heartleo/zlib [Go]](https://github.com/heartleo/zlib)** (`Trendshift.io (Momentum Leader)` | Momentum Score: 510)
+  *Summary*: A command-line tool for Z-Library. Search, download, send to Kindle and WeRead, and integrate with AI agents.
   *Sprint Adaptation Action*: Evaluate integration as an on-demand plugin or Phase checklist rule.
 
 ### Phase 2: Backend (Monolith, RAG, Inference & Billing)
-- **[strukto-ai/mirage](https://github.com/strukto-ai/mirage)** (`GitHub Trending / Recent` | Score: 3783)
-  *Summary*: The World's First Virtual Terminal for AI Agents agent-sandbox agent-tools ai-agents bash claude-code dsh-plugin expressjs fastapi fuse llm-agents openai-agents python shell ssh terminal typescript vfs virtual-filesystem virtual-terminal
+- **[volcengine/OpenViking](https://github.com/volcengine/OpenViking)** (`GitHub Search (Active Velocity)` | Momentum Score: 42143)
+  *Summary*: Self-evolving Context Database for AI Agents. Unify Agent Memory, Knowledge RAG and Skills. agent-context agent-memory agent-plugins agentic-rag context-database dsh-plugin knowledge-base memory memory-management self-evolving vector-databa
   *Sprint Adaptation Action*: Evaluate integration as an on-demand plugin or Phase checklist rule.
-- **[rome-os/rome](https://github.com/rome-os/rome)** (`GitHub Trending / Recent` | Score: 899)
-  *Summary*: A compounding agent OS for recursive agents. Also an open source alternative to Grok Bot and Meta's Muse. agent agent-os ai-agent ai-assistant claude-code codex grok-bot-alternative llm muse-alternative open-source personal-ai self-hosted w
+- **[airbytehq/airbyte](https://github.com/airbytehq/airbyte)** (`GitHub Search (Active Velocity)` | Momentum Score: 22370)
+  *Summary*: Open-source data movement for ELT pipelines and AI agents — from APIs, databases & files to warehouses, lakes, and AI applications. Both self-hosted and Cloud. bigquery change-data-capture data data-analysis data-collection data-engineering
   *Sprint Adaptation Action*: Evaluate integration as an on-demand plugin or Phase checklist rule.
-- **[Show HN: Patchwork – Open-source framework to automate development gruntwork](https://github.com/patched-codes/patchwork)** (`Hacker News (Show HN)` | Score: 116)
-  *Summary*: Hi HN! We’re Asankhaya and Rohan and we are building Patchwork.<p>Patchwork tackles development gruntwork—like reviews, docs, linting, and security fixes—through customizable, code-first &#x27;patchflows&#x27; using LLMs and modular code ma
+- **[google/elephant-goldfish-model](https://github.com/google/elephant-goldfish-model)** (`GitHub Search (Active Velocity)` | Momentum Score: 18321)
+  *Summary*: Open-source plugin for designing and reviewing software with agents agent-skills ai-agents antigravity claude-code claude-code-plugin claude-skills codex codex-plugin coding-agents context-engineering developer-tools gemini llm multi-agent
   *Sprint Adaptation Action*: Evaluate integration as an on-demand plugin or Phase checklist rule.
-- **[hproxy-com/free-proxy-list](https://github.com/hproxy-com/free-proxy-list)** (`GitHub Trending / Recent` | Score: 90)
-  *Summary*: Free proxy list, verified around the clock: HTTP, HTTPS, SOCKS4 and SOCKS5 proxies with country, anonymity, latency and uptime on every row, updated several times a day. Live list, proxy checker, keyless API and MCP server at hproxy.com. ai
+- **[apache/doris](https://github.com/apache/doris)** (`GitHub Search (Active Velocity)` | Momentum Score: 16213)
+  *Summary*: Apache Doris is a real-time analytics and hybrid search database for AI agents. agent ai bigquery database delta-lake hudi iceberg lakehouse observability olap paimon query-engine real-time redshift search snowflake sql vector
+  *Sprint Adaptation Action*: Evaluate integration as an on-demand plugin or Phase checklist rule.
+- **[KevRojo/Dulus [Python]](https://github.com/KevRojo/Dulus)** (`Trendshift.io (Momentum Leader)` | Momentum Score: 580)
+  *Summary*: Dulus Ai — Agentic AI, 100% cache hit rate, Dulus is made to save you money [Gui, Web, Cli, Telegram, 2,000 MCP, 100K Skills . LiteLLM (100+ providers), local models via Ollama, /lang in 34 languages, Mesa Redonda, I create the first utilit
   *Sprint Adaptation Action*: Evaluate integration as an on-demand plugin or Phase checklist rule.
 
 ### Phase 3: Frontend (Zero-Slop UI & Layout Engines)
-- **[lexmount/moli](https://github.com/lexmount/moli)** (`GitHub Trending / Recent` | Score: 23605)
-  *Summary*: Best headless browser for AI agents. Lite, Fast, High-Compatibility. Built in Rust ai-agents ai-tools browser browser-automation cloud-browser headless headless-browser kitesurf playwright puppeteer rust servo web-crawler web-crawling web-s
+- **[get-bb/bb](https://github.com/get-bb/bb)** (`GitHub Search (Active Velocity)` | Momentum Score: 5467)
+  *Summary*: The agent IDE that builds itself ade agent-ide claude-code codex devtools ide
   *Sprint Adaptation Action*: Evaluate integration as an on-demand plugin or Phase checklist rule.
-- **[agent-of-empires/agent-of-empires](https://github.com/agent-of-empires/agent-of-empires)** (`GitHub Trending / Recent` | Score: 4258)
-  *Summary*: Manage multiple Claude Code, OpenCode agents from either TUI or Web for easy access on mobile. Also supports Mistral Vibe, Codex CLI, Gemini CLI, Pi.dev, Copilot CLI, Factory Droid Coding. ai-coding claude claude-code cli codex cursor facto
+- **[wuyoscar/AISafetyHot](https://github.com/wuyoscar/AISafetyHot)** (`GitHub Search (Active Velocity)` | Momentum Score: 2124)
+  *Summary*: AI Safety HOT: daily AI safety news, papers and incidents in one place — jailbreaks, prompt injection, alignment, evals, governance. Website, daily digest, RSS and MCP. ai-alignment ai-governance ai-safety arxiv-papers daily-papers jailbrea
   *Sprint Adaptation Action*: Evaluate integration as an on-demand plugin or Phase checklist rule.
-- **[glincker/thesvg](https://github.com/glincker/thesvg)** (`GitHub Trending / Recent` | Score: 3002)
-  *Summary*: The open SVG brand library: 7,600+ brand logos and cloud icons (AWS, Azure, GCP) as official SVG. Search, copy, ship via npm, CDN, CLI, React, Vue, Svelte, Figma, VS Code, Raycast and MCP. Free, MIT, no gatekeeping. aws brand-assets brand-l
+- **[vercel-labs/ui [TypeScript]](https://github.com/vercel-labs/ui)** (`Trendshift.io (Momentum Leader)` | Momentum Score: 965)
+  *Summary*: A library of behaviors for agents to build the next generation of user interfaces.
   *Sprint Adaptation Action*: Evaluate integration as an on-demand plugin or Phase checklist rule.
-- **[slothflowlabs/duckle](https://github.com/slothflowlabs/duckle)** (`GitHub Trending / Recent` | Score: 1564)
-  *Summary*: Open-source ETL/ELT you deploy on your own servers or cloud. Built on DuckDB: no-code/low-code visual pipelines or SQL, 426 components, dbt, CDC, data quality, reverse ETL, lineage, MCP for AI agents. No vendor cloud, no per-row billing. cd
+- **[GoogleChrome/modern-web-guidance-src [TypeScript]](https://github.com/GoogleChrome/modern-web-guidance-src)** (`Trendshift.io (Momentum Leader)` | Momentum Score: 895)
+  *Summary*: Trending on Trendshift
+  *Sprint Adaptation Action*: Evaluate integration as an on-demand plugin or Phase checklist rule.
+- **[zxsos/HGhubX [TypeScript]](https://github.com/zxsos/HGhubX)** (`Trendshift.io (Momentum Leader)` | Momentum Score: 860)
+  *Summary*: YellowFruit third-party client
   *Sprint Adaptation Action*: Evaluate integration as an on-demand plugin or Phase checklist rule.
 
 ### Phase 4: Polish (Motion, Spatial Depth & Anti-Slop)
-- **[meta/astryx](https://github.com/meta/astryx)** (`GitHub Trending / Recent` | Score: 26918)
+- **[meta/astryx](https://github.com/meta/astryx)** (`GitHub Search (Active Velocity)` | Momentum Score: 26944)
   *Summary*: An open source design system that's fully customizable and agent ready
+  *Sprint Adaptation Action*: Evaluate integration as an on-demand plugin or Phase checklist rule.
+- **[simpsoka/zigzag [Rust]](https://github.com/simpsoka/zigzag)** (`Trendshift.io (Momentum Leader)` | Momentum Score: 405)
+  *Summary*: Free, open-source embroidery software for Mac and Windows. Turn SVG artwork into machine embroidery, edit stitches visually, and create designs with AI agents via MCP.
   *Sprint Adaptation Action*: Evaluate integration as an on-demand plugin or Phase checklist rule.
 
 ### Phase 5: Audit (Zero-Trust Security, Testing & Telemetry)
-- **[RLinf/RLinf](https://github.com/RLinf/RLinf)** (`GitHub Trending / Recent` | Score: 5646)
-  *Summary*: RLinf: Reinforcement Learning Infrastructure for Embodied and Agentic AI agentic-ai embodied-ai reinforcement-learning rl-infra rlinf vla-rl
+- **[openai/codex-security [TypeScript]](https://github.com/openai/codex-security)** (`Trendshift.io (Momentum Leader)` | Momentum Score: 650)
+  *Summary*: OpenAI's Codex Security CLI and TypeScript SDK for finding, validating, and fixing security vulnerabilities. npm: https://www.npmjs.com/package/@openai/codex-security
   *Sprint Adaptation Action*: Evaluate integration as an on-demand plugin or Phase checklist rule.
-- **[Show HN: Super AI Markets – Testing Ground for AI Shopping Agent Security](https://superaimarkets.com/)** (`Hacker News (Show HN)` | Score: 2)
+- **[Show HN: Super AI Markets – Testing Ground for AI Shopping Agent Security](https://superaimarkets.com/)** (`Hacker News (Show HN)` | Momentum Score: 2)
   *Summary*: I built Super AI Markets (<a href="https:&#x2F;&#x2F;superaimarkets.com" rel="nofollow">https:&#x2F;&#x2F;superaimarkets.com</a>) to test how AI shopping agents handle adversarial e-commerce environments. With agents increasingly handling f
   *Sprint Adaptation Action*: Evaluate integration as an on-demand plugin or Phase checklist rule.
 
 ### Phase 6: Launch (Zero-Localhost Deploy & Video Demos)
-- **[edgehero/pi-dispatch](https://github.com/edgehero/pi-dispatch)** (`GitHub Trending / Recent` | Score: 197)
-  *Summary*: Go from sitting next to one AI coding agent to running many in the background. Dark engineering with the pi coding agent: self-hosted, each job in a sealed Docker or Podman container, spending limits checked before anything is spent, and on
-  *Sprint Adaptation Action*: Evaluate integration as an on-demand plugin or Phase checklist rule.
-- **[Show HN: Rustchain – Rust toolchain AI agent framework universal transpilation](https://rustchain.dev)** (`Hacker News (Show HN)` | Score: 2)
+- **[Show HN: Rustchain – Rust toolchain AI agent framework universal transpilation](https://rustchain.dev)** (`Hacker News (Show HN)` | Momentum Score: 2)
   *Summary*: Show HN Community Launch
   *Sprint Adaptation Action*: Evaluate integration as an on-demand plugin or Phase checklist rule.
 
 ---
 ## [AUTONOMOUS SKILL EVOLUTION RECOMMENDATIONS]
-1. **Frontend / Agentic UI**: Keep monitoring trending headless UI primitives and container query toolkits.
-2. **Local Model Routing**: Evaluate new local MoE / quantized backends via zero-code `OPENAI_BASE_URL` redirection.
+1. **Trendshift Momentum Tracking**: Prioritize tools holding Rank #1-#5 on Trendshift (e.g. `vercel-labs/ui`, `modern-web-guidance`).
+2. **Frontend / Agentic UI**: Absorb modern container query and headless browser automation standards.
 3. **Anti-Slop Linter**: Continuously append newly emerging AI marketing clichés to `anti-slop/no-banned-lexicon`.
 

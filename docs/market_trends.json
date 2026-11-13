@@ -1,10 +1,260 @@
 [
   {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "vercel-labs/ui [TypeScript]",
+    "url": "https://github.com/vercel-labs/ui",
+    "score": 965,
+    "rank": 1,
+    "summary": "A library of behaviors for agents to build the next generation of user interfaces.",
+    "target_phase": "phase-03-frontend",
+    "relevance_score": 1
+  },
+  {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "kuafuai/andee [Kotlin]",
+    "url": "https://github.com/kuafuai/andee",
+    "score": 930,
+    "rank": 2,
+    "summary": "Andee lives on your phone or Mac and uses any app like you do\u2014no integrations, no root, any model; memory and passwords never leave your device | Andee \u4f4f\u8fdb\u4f60\u7684\u624b\u673a\u6216 Mac\uff0c\u50cf\u4f60\u4e00\u6837\u64cd\u4f5c\u4efb\u4f55 App\u2014\u2014\u65e0\u9700\u96c6\u6210\u3001\u65e0\u9700 Root\u3001\u652f\u6301\u4efb\u610f\u6a21\u578b\uff0c\u8bb0\u5fc6\u548c\u5bc6\u7801\u7edd\u4e0d\u79bb\u5f00\u8bbe\u5907\u3002",
+    "target_phase": "phase-01-discover",
+    "relevance_score": 1
+  },
+  {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "GoogleChrome/modern-web-guidance-src [TypeScript]",
+    "url": "https://github.com/GoogleChrome/modern-web-guidance-src",
+    "score": 895,
+    "rank": 3,
+    "summary": "Trending on Trendshift",
+    "target_phase": "phase-03-frontend",
+    "relevance_score": 2
+  },
+  {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "zxsos/HGhubX [TypeScript]",
+    "url": "https://github.com/zxsos/HGhubX",
+    "score": 860,
+    "rank": 4,
+    "summary": "YellowFruit third-party client",
+    "target_phase": "phase-03-frontend",
+    "relevance_score": 1
+  },
+  {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "GoogleChrome/modern-web-guidance [Code]",
+    "url": "https://github.com/GoogleChrome/modern-web-guidance",
+    "score": 825,
+    "rank": 5,
+    "summary": "Keep your coding agent up to date with the latest web best practices",
+    "target_phase": "phase-03-frontend",
+    "relevance_score": 2
+  },
+  {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "wici-ai/inferssd [C++]",
+    "url": "https://github.com/wici-ai/inferssd",
+    "score": 790,
+    "rank": 6,
+    "summary": "Run models larger than your RAM or VRAM by streaming MoE experts from SSD. Built on llama.cpp.",
+    "target_phase": "phase-03-frontend",
+    "relevance_score": 2
+  },
+  {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "Edge0-AI/Edge0 [Python]",
+    "url": "https://github.com/Edge0-AI/Edge0",
+    "score": 755,
+    "rank": 7,
+    "summary": "Run 35B MoE models in ~2.5 GB of RAM. Weights stream from SSD; a trained router predicts loads a step ahead. Mac, iPhone, Android, Windows supported",
+    "target_phase": "phase-01-discover",
+    "relevance_score": 1
+  },
+  {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "h4ckf0r0day/obscura [Rust]",
+    "url": "https://github.com/h4ckf0r0day/obscura",
+    "score": 720,
+    "rank": 8,
+    "summary": "The headless browser for AI agents and web scraping",
+    "target_phase": "phase-03-frontend",
+    "relevance_score": 3
+  },
+  {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "dream-num/univer [TypeScript]",
+    "url": "https://github.com/dream-num/univer",
+    "score": 685,
+    "rank": 9,
+    "summary": "Build your own AI office with Univer Office SDK. Bring editing, calculation, collaboration, and file processing into your product for people and AI agents. Built on an extensible open-source core.",
+    "target_phase": "phase-03-frontend",
+    "relevance_score": 1
+  },
+  {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "openai/codex-security [TypeScript]",
+    "url": "https://github.com/openai/codex-security",
+    "score": 650,
+    "rank": 10,
+    "summary": "OpenAI's Codex Security CLI and TypeScript SDK for finding, validating, and fixing security vulnerabilities. npm: https://www.npmjs.com/package/@openai/codex-security",
+    "target_phase": "phase-05-audit",
+    "relevance_score": 1
+  },
+  {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "CopilotKit/OpenBot [TypeScript]",
+    "url": "https://github.com/CopilotKit/OpenBot",
+    "score": 615,
+    "rank": 11,
+    "summary": "Open-source AI coworkers that each get a computer of their own: a browser, files and tools, with every action decided before it happens and recorded after. Bring any AG-UI agent.",
+    "target_phase": "phase-03-frontend",
+    "relevance_score": 2
+  },
+  {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "KevRojo/Dulus [Python]",
+    "url": "https://github.com/KevRojo/Dulus",
+    "score": 580,
+    "rank": 12,
+    "summary": "Dulus Ai \u2014 Agentic AI, 100% cache hit rate, Dulus is made to save you money [Gui, Web, Cli, Telegram, 2,000 MCP, 100K Skills . LiteLLM (100+ providers), local models via Ollama, /lang in 34 languages, Mesa Redonda, I create the first utilit",
+    "target_phase": "phase-02-backend",
+    "relevance_score": 2
+  },
+  {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "aws/aws-emulator [Rust]",
+    "url": "https://github.com/aws/aws-emulator",
+    "score": 545,
+    "rank": 13,
+    "summary": "Trending on Trendshift",
+    "target_phase": "phase-01-discover",
+    "relevance_score": 1
+  },
+  {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "heartleo/zlib [Go]",
+    "url": "https://github.com/heartleo/zlib",
+    "score": 510,
+    "rank": 14,
+    "summary": "A command-line tool for Z-Library. Search, download, send to Kindle and WeRead, and integrate with AI agents.",
+    "target_phase": "phase-01-discover",
+    "relevance_score": 1
+  },
+  {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "serveroshq/panel [PHP]",
+    "url": "https://github.com/serveroshq/panel",
+    "score": 475,
+    "rank": 15,
+    "summary": "The open source ServerOS panel: one place to run the Linux servers you already own.",
+    "target_phase": "phase-02-backend",
+    "relevance_score": 1
+  },
+  {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "QwenLM/qwen-code [TypeScript]",
+    "url": "https://github.com/QwenLM/qwen-code",
+    "score": 440,
+    "rank": 16,
+    "summary": "An open-source AI coding agent that lives in your terminal.",
+    "target_phase": "phase-01-discover",
+    "relevance_score": 1
+  },
+  {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "simpsoka/zigzag [Rust]",
+    "url": "https://github.com/simpsoka/zigzag",
+    "score": 405,
+    "rank": 17,
+    "summary": "Free, open-source embroidery software for Mac and Windows. Turn SVG artwork into machine embroidery, edit stitches visually, and create designs with AI agents via MCP.",
+    "target_phase": "phase-04-polish",
+    "relevance_score": 1
+  },
+  {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "Alishahryar1/free-claude-code [Python]",
+    "url": "https://github.com/Alishahryar1/free-claude-code",
+    "score": 370,
+    "rank": 18,
+    "summary": "Use Claude Code, Codex, Antigravity, VSCode, Pi, and OpenCode (and 6 other harnesses) for free (1.3B+ free tokens) from your terminal, app, IDE, or phone, and now from the browser with native browser sessions (multi-harness + multi-model) l",
+    "target_phase": "phase-03-frontend",
+    "relevance_score": 1
+  },
+  {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "we-promise/sure [Ruby]",
+    "url": "https://github.com/we-promise/sure",
+    "score": 335,
+    "rank": 19,
+    "summary": "The personal finance app for everyone (by everyone)",
+    "target_phase": "phase-01-discover",
+    "relevance_score": 1
+  },
+  {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "fetchai/innovation-lab-examples [Python]",
+    "url": "https://github.com/fetchai/innovation-lab-examples",
+    "score": 300,
+    "rank": 20,
+    "summary": "80+ production-ready AI agent examples in Python \u2014 build autonomous agents, multi-agent systems and agentic AI with uAgents, ASI:One, MCP, A2A, LangChain, CrewAI, Gemini, Claude and OpenAI.",
+    "target_phase": "phase-02-backend",
+    "relevance_score": 1
+  },
+  {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "anefzaoui/misterdownloadmanager [Rust]",
+    "url": "https://github.com/anefzaoui/misterdownloadmanager",
+    "score": 265,
+    "rank": 21,
+    "summary": "misterdownloadmanager: The ultimate open-source, clean-room download manager written from scratch in pure Rust for Windows, Mac, and Linux",
+    "target_phase": "phase-03-frontend",
+    "relevance_score": 1
+  },
+  {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "hyperionaidev/smolmaxxing [C]",
+    "url": "https://github.com/hyperionaidev/smolmaxxing",
+    "score": 230,
+    "rank": 22,
+    "summary": "maxxing the ability to run different LLMs on the smallest devices possible",
+    "target_phase": "phase-02-backend",
+    "relevance_score": 1
+  },
+  {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "yetone/magpie [Go]",
+    "url": "https://github.com/yetone/magpie",
+    "score": 195,
+    "rank": 23,
+    "summary": "Every agent's model. One place. Codex on DeepSeek, Claude Code on Kimi, from the menu bar.",
+    "target_phase": "phase-01-discover",
+    "relevance_score": 1
+  },
+  {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "storytold/craft-anything [Rust]",
+    "url": "https://github.com/storytold/craft-anything",
+    "score": 160,
+    "rank": 24,
+    "summary": "Craft Anything: understand how any software works, and craft your own.",
+    "target_phase": "phase-01-discover",
+    "relevance_score": 1
+  },
+  {
+    "source": "Trendshift.io (Momentum Leader)",
+    "title": "stablyai/orca [TypeScript]",
+    "url": "https://github.com/stablyai/orca",
+    "score": 125,
+    "rank": 25,
+    "summary": "Orca lets you run a fleet of coding agents (e.g. Claude Code, Codex) with your own subscription. Available on desktop, mobile and remote runtime.",
+    "target_phase": "phase-01-discover",
+    "relevance_score": 1
+  },
+  {
     "source": "Hacker News (Show HN)",
     "title": "Show HN: Rustchain \u2013 Rust toolchain AI agent framework universal transpilation",
     "url": "https://rustchain.dev",
     "score": 2,
-    "comments": 1,
+    "rank": 0,
     "summary": "Show HN Community Launch",
     "target_phase": "phase-06-launch",
     "relevance_score": 1
@@ -14,7 +264,7 @@
     "title": "Show HN: Super AI Markets \u2013 Testing Ground for AI Shopping Agent Security",
     "url": "https://superaimarkets.com/",
     "score": 2,
-    "comments": 0,
+    "rank": 0,
     "summary": "I built Super AI Markets (<a href=\"https:&#x2F;&#x2F;superaimarkets.com\" rel=\"nofollow\">https:&#x2F;&#x2F;superaimarkets.com</a>) to test how AI shopping agents handle adversarial e-commerce environments. With agents increasingly handling f",
     "target_phase": "phase-05-audit",
     "relevance_score": 2
@@ -24,7 +274,7 @@
     "title": "Show HN: VoltAgent \u2013 Open-Source Observability-First TS AI Agent Framework",
     "url": "https://github.com/VoltAgent/voltagent",
     "score": 32,
-    "comments": 6,
+    "rank": 0,
     "summary": "Hi HN,<p>I&#x27;m founder of VoltAgent, a new open-source TypeScript-based framework for building AI agents.<p>We know there are many frameworks out there. Our short story of why we built VoltAgent goes like this:<p>We were developing an AI",
     "target_phase": "phase-03-frontend",
     "relevance_score": 1
@@ -34,7 +284,7 @@
     "title": "Show HN: Upsonic: An AI agent framework with client-server architecture",
     "url": "https://github.com/Upsonic/Upsonic",
     "score": 9,
-    "comments": 5,
+    "rank": 0,
     "summary": "Three months ago, we started developing an open source agent framework. We previously tried existing frameworks in our enterprise product but faced challenges in certain areas.<p>Problems we experienced:<p>* We risked our stateless architec",
     "target_phase": "phase-01-discover",
     "relevance_score": 1
@@ -44,17 +294,17 @@
     "title": "Show HN: EchoKit \u2013 open-source voice AI agent framework",
     "url": "https://github.com/second-state/echokit_server",
     "score": 3,
-    "comments": 2,
+    "rank": 0,
     "summary": "We built a voice AI agent in Rust.<p>EchoKit server is an open-source framework that connects speech input, LLM reasoning, and speech output \u2014 so you can build local or hybrid voice assistants with real-time interaction. It&#x27;s super eas",
     "target_phase": "phase-02-backend",
-    "relevance_score": 1
+    "relevance_score": 2
   },
   {
     "source": "Hacker News (Show HN)",
     "title": "Show HN: Boucle \u2013 A self-dogfooding autonomous AI agent framework in Rus",
     "url": "https://github.com/Bande-a-Bonnot/Boucle-framework",
     "score": 3,
-    "comments": 0,
+    "rank": 0,
     "summary": "Hi HN. I&#x27;m Boucle, an autonomous AI agent. ElFitz (my human) is posting this because my HN account has no karma yet.<p>I built a framework for running autonomous AI agents in a loop \u2014 structured memory, lifecycle hooks, audit trails, a",
     "target_phase": "phase-03-frontend",
     "relevance_score": 1
@@ -64,7 +314,7 @@
     "title": "Show HN: Self-Evolving Agents \u2013 interactive evolving AI agent list",
     "url": "https://github.com/EvoAgentX/Awesome-Self-Evolving-Agents",
     "score": 2,
-    "comments": 1,
+    "rank": 0,
     "summary": "Hello HN,<p>I\u2019m the creator of *Awesome-Self-Evolving-Agents*, a curated GitHub repository that compiles the latest papers, frameworks, and tools on *self-evolving AI agents*\u2014systems capable of autonomously improving themselves based on int",
     "target_phase": "phase-01-discover",
     "relevance_score": 1
@@ -74,7 +324,7 @@
     "title": "Show HN: OpenMolt \u2013 A programmatic AI agent framework for Node.js",
     "url": "https://openmolt.dev",
     "score": 1,
-    "comments": 0,
+    "rank": 0,
     "summary": "Hi HN!<p>I built OpenMolt, an open-source framework for creating programmatic AI agents in Node.js.<p>Instead of wiring complex workflows (that can break), you define agents in code with instructions, tools, integrations, and memory. The ag",
     "target_phase": "phase-03-frontend",
     "relevance_score": 1
@@ -84,7 +334,7 @@
     "title": "Show HN: Agentu Minimalist Python AI agent framework",
     "url": "https://news.ycombinator.com/item?id=46495628",
     "score": 1,
-    "comments": 0,
+    "rank": 0,
     "summary": "After building dozens of agents, I kept hitting the same wall.<p>So I built agentu.<p>The core is simple: \n\u2192 &gt;&gt; chains steps sequentially\n\u2192 &amp; runs them in parallel<p>But it&#x27;s grown into a full stack:<p>- Sessions: stateful co",
     "target_phase": "phase-03-frontend",
     "relevance_score": 1
@@ -94,7 +344,7 @@
     "title": "Show HN: Patchwork \u2013 Open-source framework to automate development gruntwork",
     "url": "https://github.com/patched-codes/patchwork",
     "score": 116,
-    "comments": 24,
+    "rank": 0,
     "summary": "Hi HN! We\u2019re Asankhaya and Rohan and we are building Patchwork.<p>Patchwork tackles development gruntwork\u2014like reviews, docs, linting, and security fixes\u2014through customizable, code-first &#x27;patchflows&#x27; using LLMs and modular code ma",
     "target_phase": "phase-02-backend",
     "relevance_score": 1
@@ -104,7 +354,7 @@
     "title": "Show HN: Open-Source SDK for AI Knowledge Work",
     "url": "https://github.com/ClioAI/kw-sdk",
     "score": 21,
-    "comments": 1,
+    "rank": 0,
     "summary": "GitHub: <a href=\"https:&#x2F;&#x2F;github.com&#x2F;ClioAI&#x2F;kw-sdk\" rel=\"nofollow\">https:&#x2F;&#x2F;github.com&#x2F;ClioAI&#x2F;kw-sdk</a><p>Most AI agent frameworks target code. Write code, run tests, fix errors, repeat. That works bec",
     "target_phase": "phase-01-discover",
     "relevance_score": 1
@@ -114,7 +364,7 @@
     "title": "Show HN: Automated, hosted UI tests with AI test discovery (octomind.dev)",
     "url": "https://www.octomind.dev/",
     "score": 13,
-    "comments": 4,
+    "rank": 0,
     "summary": "I am Marc, the co-founder of octomind.dev. I am a former chess player turned machine learner turned entrepreneur. I always wanted to develop products based on the latest AI research. I did it at my previous startup with computer vision and",
     "target_phase": "phase-01-discover",
     "relevance_score": 1
@@ -124,7 +374,7 @@
     "title": "Show HN: Syne \u2013 AI agent that remembers everything, built on PostgreSQL",
     "url": "https://news.ycombinator.com/item?id=47084365",
     "score": 7,
-    "comments": 1,
+    "rank": 0,
     "summary": "I built Syne because I was tired of AI assistants that forget everything after each conversation.<p>Syne is a self-hosted AI agent framework where memory is a first-class citizen \u2014 stored as semantic vectors in PostgreSQL, searchable across",
     "target_phase": "phase-02-backend",
     "relevance_score": 1
@@ -134,7 +384,7 @@
     "title": "Show HN: Composable middleware for LLM inference Optimization Passes",
     "url": "https://github.com/liquidos-ai/AutoAgents",
     "score": 7,
-    "comments": 0,
+    "rank": 0,
     "summary": "Hey HN,<p>I&#x27;ve been building AutoAgents, an AI agent framework in Rust. Today I&#x27;m sharing a feature I haven&#x27;t seen done well elsewhere: composable middleware layers for LLM inference pipelines.<p>The problem Every agent frame",
     "target_phase": "phase-02-backend",
     "relevance_score": 2
@@ -144,7 +394,7 @@
     "title": "Show HN: AgentScript AI \u2013 Build Agents that think in code",
     "url": "https://github.com/AgentScript-AI/agentscript",
     "score": 4,
-    "comments": 3,
+    "rank": 0,
     "summary": "AgentScript is a new AI Agent framework with a novel architecture to build reliable and secure agents.<p>Our framework has LLMs generate a plan upfront in code (javascript) which we then parse into an AST and execute in a managed runtime, s",
     "target_phase": "phase-01-discover",
     "relevance_score": 1
@@ -154,7 +404,7 @@
     "title": "Show HN: Praval Agentic AI Framework",
     "url": "https://github.com/aiexplorations/praval",
     "score": 3,
-    "comments": 0,
+    "rank": 0,
     "summary": "Praval started as a small side project to build a light weight AI framework, and is evolving into a multi-agent AI framework with lots of features.<p>Praval can be used to build a multi-agent system today with native agent-to-agent communic",
     "target_phase": "phase-03-frontend",
     "relevance_score": 1
@@ -164,7 +414,7 @@
     "title": "Show HN: OpenLegion \u2013 AI agent fleet with container isolation and vault proxy",
     "url": "https://www.openlegion.ai",
     "score": 2,
-    "comments": 0,
+    "rank": 0,
     "summary": "I built OpenLegion because every AI agent framework I tried had the same problems in production: API keys sitting in config files inside the agent&#x27;s environment, no way to set hard spend limits, and LLM-as-CEO task routing that&#x27;s",
     "target_phase": "phase-02-backend",
     "relevance_score": 2
@@ -174,7 +424,7 @@
     "title": "Show HN: Oh-My-OpenClaw \u2013 agent orchestration for coding, from Discord/Telegram",
     "url": "https://github.com/happycastle114/oh-my-openclaw",
     "score": 2,
-    "comments": 0,
+    "rank": 0,
     "summary": "I&#x27;ve been using Oh-My-OpenCode (OmO) \u2014 a multi-agent orchestration plugin for terminal-based AI coding \u2014 and it&#x27;s great. But being terminal-only kept bugging me:<p>- Can&#x27;t kick off work from my phone. I&#x27;d want to say &qu",
     "target_phase": "phase-01-discover",
     "relevance_score": 1
@@ -184,259 +434,169 @@
     "title": "Show HN: Local DNA analysis skill for OpenClaw",
     "url": "https://github.com/wkyleg/personal-genomics",
     "score": 2,
-    "comments": 0,
+    "rank": 0,
     "summary": "I built a skill for OpenClaw (open source AI agent framework) that lets agents analyze raw genetic data from 23andMe, AncestryDNA, and similar services.<p>The motivation was privacy. Most genetic analysis tools require uploading your data t",
     "target_phase": "phase-03-frontend",
     "relevance_score": 1
   },
   {
     "source": "Hacker News (Show HN)",
-    "title": "Show HN: OpenVerb \u2013 A deterministic action layer for AI agents",
-    "url": "https://www.openverb.org/",
+    "title": "Show HN: A 3-line wrapper that enforces deterministic security for AI agents",
+    "url": "https://news.ycombinator.com/item?id=47365599",
     "score": 1,
-    "comments": 0,
-    "summary": "Hi HN,<p>I\u2019ve been working on a project called OpenVerb, which explores an architectural idea for AI systems: separating reasoning from execution.<p>Most AI agent frameworks today focus on improving reasoning loops, planning, and orchestrat",
-    "target_phase": "phase-01-discover",
-    "relevance_score": 1
-  },
-  {
-    "source": "Hacker News (Show HN)",
-    "title": "Show HN: Hackable Skinny Clawdbot for Telegram",
-    "url": "https://github.com/vseplet/smith",
-    "score": 1,
-    "comments": 0,
-    "summary": "A hackable AI agent framework for Telegram. ~4K lines of TypeScript, 6 LLM providers, 16 tools, full agent loop with memory",
-    "target_phase": "phase-02-backend",
-    "relevance_score": 1
-  },
-  {
-    "source": "Hacker News (Show HN)",
-    "title": "Show HN: Beelzebub (OSS) \u2013 MCP \"canary tools\" for AI agents",
-    "url": "https://news.ycombinator.com/item?id=45158776",
-    "score": 8,
-    "comments": 1,
-    "summary": "We\u2019re open-sourcing a simple way to add \u201ccanary tools\u201d to AI agents via MCP honeypots. These are functions your agent should never call during normal operation. If a canary is invoked, you get a high-fidelity signal of prompt-injection, too",
-    "target_phase": "phase-01-discover",
-    "relevance_score": 1
-  },
-  {
-    "source": "Hacker News (Show HN)",
-    "title": "Show HN: ADK-Studio \u2013 a visual builder for creating AI agent workflows with Rust",
-    "url": "https://news.ycombinator.com/item?id=46430090",
-    "score": 3,
-    "comments": 0,
-    "summary": "Hi HN,<p>I\u2019ve been working on ADK-Rust, an open-source framework for building and deploying AI agents in Rust.<p>The motivation came from building agent systems where performance, safety, and predictable behavior mattered more than rapid pr",
-    "target_phase": "phase-02-backend",
-    "relevance_score": 1
-  },
-  {
-    "source": "Hacker News (Show HN)",
-    "title": "Show HN: RLM-based local debugger for AI agent traces",
-    "url": "https://github.com/context-labs/halo",
-    "score": 27,
-    "comments": 10,
-    "summary": "We built HALO (Hierarchal Agent Loop Optimizer), an open-source tool for debugging and optimizing AI agents using their execution traces.<p>It\u2019s a loop. Run your agent, feed the traces to HALO, get the report, apply the fixes, then re-run y",
-    "target_phase": "phase-03-frontend",
-    "relevance_score": 1
-  },
-  {
-    "source": "GitHub Trending / Recent",
-    "title": "meta/astryx",
-    "url": "https://github.com/meta/astryx",
-    "score": 26918,
-    "comments": 2086,
-    "summary": "An open source design system that's fully customizable and agent ready",
-    "target_phase": "phase-04-polish",
-    "relevance_score": 1
-  },
-  {
-    "source": "GitHub Trending / Recent",
-    "title": "tiobeharxi1987/blender-ai-copilot-flow",
-    "url": "https://github.com/tiobeharxi1987/blender-ai-copilot-flow",
-    "score": 77,
-    "comments": 1,
-    "summary": "A controlled AI workflow for Blender: every copilot edit is a supervised tool call\u2014proposed, approved, executed in sequence, cancellable after the current step and undoable by name\u2014inside a visual studio with a built-in MCP server. \u00b7 blende",
-    "target_phase": "phase-03-frontend",
-    "relevance_score": 1
-  },
-  {
-    "source": "GitHub Trending / Recent",
-    "title": "flyl1u/fly-island",
-    "url": "https://github.com/flyl1u/fly-island",
-    "score": 579,
-    "comments": 55,
-    "summary": "A lightweight PC Dynamic Island that integrates QQ, WeChat, and email notifications, clipboard history, quick translation, a Codex status light, media controls, daily to-dos, and more. | \u8f7b\u91cf\u7684PC\u7075\u52a8\u5c9b\uff0c\u96c6\u6210QQ\u3001\u5fae\u4fe1\u53ca\u90ae\u7bb1\u901a\u77e5\u3001\u526a\u8d34\u5386\u53f2\u3001\u5feb\u6377\u7ffb\u8bd1\u3001Agent\u72b6\u6001\u706f\u3001\u5a92\u4f53\u63a7\u5236\u3001\u6bcf\u65e5\u5f85\u529e\u7b49\u529f\u80fd",
-    "target_phase": "phase-03-frontend",
-    "relevance_score": 1
-  },
-  {
-    "source": "GitHub Trending / Recent",
-    "title": "StaysUp/agentbus",
-    "url": "https://github.com/StaysUp/agentbus",
-    "score": 37,
-    "comments": 0,
-    "summary": "Cross-vendor middleware for coding agents: every model call, its cost and the full conversation, through one gateway. ai-agents claude-code codex golang llm middleware observability",
-    "target_phase": "phase-02-backend",
-    "relevance_score": 1
-  },
-  {
-    "source": "GitHub Trending / Recent",
-    "title": "slothflowlabs/duckle",
-    "url": "https://github.com/slothflowlabs/duckle",
-    "score": 1564,
-    "comments": 121,
-    "summary": "Open-source ETL/ELT you deploy on your own servers or cloud. Built on DuckDB: no-code/low-code visual pipelines or SQL, 426 components, dbt, CDC, data quality, reverse ETL, lineage, MCP for AI agents. No vendor cloud, no per-row billing. cd",
+    "rank": 0,
+    "summary": "If you are building AI agents with frameworks like browser-use, LangChain, or OpenClaw, you&#x27;ve likely hit the &quot;blast radius&quot; problem.<p>A misconfigured prompt or hallucination can cause an agent to navigate to a phishing doma",
     "target_phase": "phase-03-frontend",
     "relevance_score": 2
   },
   {
-    "source": "GitHub Trending / Recent",
-    "title": "hproxy-com/free-proxy-list",
-    "url": "https://github.com/hproxy-com/free-proxy-list",
-    "score": 90,
-    "comments": 7,
-    "summary": "Free proxy list, verified around the clock: HTTP, HTTPS, SOCKS4 and SOCKS5 proxies with country, anonymity, latency and uptime on every row, updated several times a day. Live list, proxy checker, keyless API and MCP server at hproxy.com. ai",
-    "target_phase": "phase-02-backend",
-    "relevance_score": 1
-  },
-  {
-    "source": "GitHub Trending / Recent",
-    "title": "rome-os/rome",
-    "url": "https://github.com/rome-os/rome",
-    "score": 899,
-    "comments": 68,
-    "summary": "A compounding agent OS for recursive agents. Also an open source alternative to Grok Bot and Meta's Muse. agent agent-os ai-agent ai-assistant claude-code codex grok-bot-alternative llm muse-alternative open-source personal-ai self-hosted w",
-    "target_phase": "phase-02-backend",
-    "relevance_score": 1
-  },
-  {
-    "source": "GitHub Trending / Recent",
-    "title": "macro-inc/macro",
-    "url": "https://github.com/macro-inc/macro",
-    "score": 6292,
-    "comments": 591,
-    "summary": "Macro is a unified workspace for teams: email, chat, docs, tasks, agents, calls, and CRM \u2014 @-linked together with shared AI memory. agent ai ai-agents all-in-one crm crm-system email linear mcp messaging notes notion office rust slack slack",
-    "target_phase": "phase-01-discover",
-    "relevance_score": 1
-  },
-  {
-    "source": "GitHub Trending / Recent",
+    "source": "GitHub Search (Active Velocity)",
     "title": "stablyai/orca",
     "url": "https://github.com/stablyai/orca",
-    "score": 123806,
-    "comments": 7828,
+    "score": 123833,
+    "rank": 0,
     "summary": "Orca lets you run a fleet of coding agents (e.g. Claude Code, Codex) with your own subscription. Available on desktop, mobile and remote runtime. agent-ide ai-agents automation bot claude-code codex ghostty grok-bot hermes-agent mobile-app",
     "target_phase": "phase-01-discover",
     "relevance_score": 1
   },
   {
-    "source": "GitHub Trending / Recent",
-    "title": "harbor-framework/terminal-bench-science",
-    "url": "https://github.com/harbor-framework/terminal-bench-science",
-    "score": 902,
-    "comments": 546,
-    "summary": "Terminal-Bench-Science: Evaluating AI agents on research workflows across scientific domains agentic-ai ai-for-science ai4science",
-    "target_phase": "phase-01-discover",
-    "relevance_score": 1
-  },
-  {
-    "source": "GitHub Trending / Recent",
-    "title": "lexmount/moli",
-    "url": "https://github.com/lexmount/moli",
-    "score": 23605,
-    "comments": 665,
-    "summary": "Best headless browser for AI agents. Lite, Fast, High-Compatibility. Built in Rust ai-agents ai-tools browser browser-automation cloud-browser headless headless-browser kitesurf playwright puppeteer rust servo web-crawler web-crawling web-s",
-    "target_phase": "phase-03-frontend",
-    "relevance_score": 2
-  },
-  {
-    "source": "GitHub Trending / Recent",
-    "title": "sudosubin/agents.nix",
-    "url": "https://github.com/sudosubin/agents.nix",
-    "score": 21,
-    "comments": 3,
-    "summary": "Nixpkgs overlay for AI agent skills from skills.sh and skillsdirectory.com",
-    "target_phase": "phase-01-discover",
-    "relevance_score": 1
-  },
-  {
-    "source": "GitHub Trending / Recent",
-    "title": "glincker/thesvg",
-    "url": "https://github.com/glincker/thesvg",
-    "score": 3002,
-    "comments": 253,
-    "summary": "The open SVG brand library: 7,600+ brand logos and cloud icons (AWS, Azure, GCP) as official SVG. Search, copy, ship via npm, CDN, CLI, React, Vue, Svelte, Figma, VS Code, Raycast and MCP. Free, MIT, no gatekeeping. aws brand-assets brand-l",
-    "target_phase": "phase-03-frontend",
-    "relevance_score": 2
-  },
-  {
-    "source": "GitHub Trending / Recent",
-    "title": "RLinf/RLinf",
-    "url": "https://github.com/RLinf/RLinf",
-    "score": 5646,
-    "comments": 841,
-    "summary": "RLinf: Reinforcement Learning Infrastructure for Embodied and Agentic AI agentic-ai embodied-ai reinforcement-learning rl-infra rlinf vla-rl",
-    "target_phase": "phase-05-audit",
-    "relevance_score": 1
-  },
-  {
-    "source": "GitHub Trending / Recent",
-    "title": "edgehero/pi-dispatch",
-    "url": "https://github.com/edgehero/pi-dispatch",
-    "score": 197,
-    "comments": 10,
-    "summary": "Go from sitting next to one AI coding agent to running many in the background. Dark engineering with the pi coding agent: self-hosted, each job in a sealed Docker or Podman container, spending limits checked before anything is spent, and on",
-    "target_phase": "phase-06-launch",
-    "relevance_score": 1
-  },
-  {
-    "source": "GitHub Trending / Recent",
-    "title": "strukto-ai/mirage",
-    "url": "https://github.com/strukto-ai/mirage",
-    "score": 3783,
-    "comments": 284,
-    "summary": "The World's First Virtual Terminal for AI Agents agent-sandbox agent-tools ai-agents bash claude-code dsh-plugin expressjs fastapi fuse llm-agents openai-agents python shell ssh terminal typescript vfs virtual-filesystem virtual-terminal",
+    "source": "GitHub Search (Active Velocity)",
+    "title": "BeppeTemp/cartographer",
+    "url": "https://github.com/BeppeTemp/cartographer",
+    "score": 66,
+    "rank": 0,
+    "summary": "A shared, git-backed wiki your team's AI agents maintain but can't break \u2014 Claude Code, Codex, OpenCode and any MCP client. agent-memory ai-agents claude-code codex go knowledge-base knowledge-graph llm-agents mcp mcp-server obsidian",
     "target_phase": "phase-02-backend",
-    "relevance_score": 4
-  },
-  {
-    "source": "GitHub Trending / Recent",
-    "title": "Maneek21/Deft",
-    "url": "https://github.com/Maneek21/Deft",
-    "score": 596,
-    "comments": 23,
-    "summary": "Self-hostable AGPL workspace where humans and AI agents share chat, tasks, knowledge, approvals, and MCP context. agent-platform agpl ai-agents ai-workspace byoa chat claude drizzle-orm hono human-ai-collaboration mcp mcp-server nextjs open",
-    "target_phase": "phase-03-frontend",
-    "relevance_score": 1
-  },
-  {
-    "source": "GitHub Trending / Recent",
-    "title": "agent-of-empires/agent-of-empires",
-    "url": "https://github.com/agent-of-empires/agent-of-empires",
-    "score": 4258,
-    "comments": 411,
-    "summary": "Manage multiple Claude Code, OpenCode agents from either TUI or Web for easy access on mobile. Also supports Mistral Vibe, Codex CLI, Gemini CLI, Pi.dev, Copilot CLI, Factory Droid Coding. ai-coding claude claude-code cli codex cursor facto",
-    "target_phase": "phase-03-frontend",
     "relevance_score": 2
   },
   {
-    "source": "GitHub Trending / Recent",
-    "title": "NVIDIA/SkillEvaluator",
-    "url": "https://github.com/NVIDIA/SkillEvaluator",
-    "score": 946,
-    "comments": 114,
-    "summary": "Multi-tier framework for evaluating AI agent skills with quality gates, semantic overlap detection, synthetic evaluation dataset generation, and live agent evaluation that measures how skills affect agent behavior. agent-evaluation agent-pl",
+    "source": "GitHub Search (Active Velocity)",
+    "title": "SinanTufekci/agent-intern",
+    "url": "https://github.com/SinanTufekci/agent-intern",
+    "score": 31,
+    "rank": 0,
+    "summary": "Give Claude Code or Antigravity an intern: drive Gemini (Antigravity), Codex, Copilot, Cursor and opencode as sub-agents, plus experimental Grok, Kimi and Muse. Text answers, image generation, real repo work and parallel swarms, on quota yo",
+    "target_phase": "phase-02-backend",
+    "relevance_score": 1
+  },
+  {
+    "source": "GitHub Search (Active Velocity)",
+    "title": "henkisdabro/wookstar-claude-plugins",
+    "url": "https://github.com/henkisdabro/wookstar-claude-plugins",
+    "score": 93,
+    "rank": 0,
+    "summary": "An opinionated Claude Code Plugin Pack. Skills, Agents, Hooks, MCPs. Examples: Email draft preview assistance & humanisation. Agents for Codex and Gemini \"outsourcing\". Skills for Google Analytics & Google Tag Manager, Shopify and much more",
+    "target_phase": "phase-02-backend",
+    "relevance_score": 1
+  },
+  {
+    "source": "GitHub Search (Active Velocity)",
+    "title": "LodyAI/Lody",
+    "url": "https://github.com/LodyAI/Lody",
+    "score": 1737,
+    "rank": 0,
+    "summary": "Share coding agents with your team on phone and desktop agent agentic-workflow coding-agent collaboration local-first multi-agent multiplayer orchestration vibe-coding",
     "target_phase": "phase-01-discover",
     "relevance_score": 1
   },
   {
-    "source": "GitHub Trending / Recent",
-    "title": "KCNyu/clawock",
-    "url": "https://github.com/KCNyu/clawock",
-    "score": 23,
-    "comments": 0,
-    "summary": "Stock investment and portfolio decision workflows for AI agents: Claude Code, Codex, OpenClaw, DeepSeek Harness (dsh plugin) or your own script. Agents argue bull vs bear on HK and US stocks; Python reconciles the book, gates risk and score",
+    "source": "GitHub Search (Active Velocity)",
+    "title": "google/elephant-goldfish-model",
+    "url": "https://github.com/google/elephant-goldfish-model",
+    "score": 18321,
+    "rank": 0,
+    "summary": "Open-source plugin for designing and reviewing software with agents agent-skills ai-agents antigravity claude-code claude-code-plugin claude-skills codex codex-plugin coding-agents context-engineering developer-tools gemini llm multi-agent",
+    "target_phase": "phase-02-backend",
+    "relevance_score": 2
+  },
+  {
+    "source": "GitHub Search (Active Velocity)",
+    "title": "hproxy-com/free-proxy-list",
+    "url": "https://github.com/hproxy-com/free-proxy-list",
+    "score": 90,
+    "rank": 0,
+    "summary": "Free proxy list, verified around the clock: HTTP, HTTPS, SOCKS4 and SOCKS5 proxies with country, anonymity, latency and uptime on every row, updated several times a day. Live list, proxy checker, keyless API and MCP server at hproxy.com. ai",
+    "target_phase": "phase-02-backend",
+    "relevance_score": 2
+  },
+  {
+    "source": "GitHub Search (Active Velocity)",
+    "title": "openaccountants/openaccountants",
+    "url": "https://github.com/openaccountants/openaccountants",
+    "score": 487,
+    "rank": 0,
+    "summary": "Open tax skills for AI: 2,000+ skills for 190+ countries and states, every figure cited to the law. Works in ChatGPT, Claude, Cursor and any MCP client. accountant accounting agent-skills ai ai-agents chatgpt claude compliance cpa gst incom",
     "target_phase": "phase-01-discover",
+    "relevance_score": 1
+  },
+  {
+    "source": "GitHub Search (Active Velocity)",
+    "title": "mrveiss/AutoBot-AI",
+    "url": "https://github.com/mrveiss/AutoBot-AI",
+    "score": 41,
+    "rank": 0,
+    "summary": "Self-hosted, agentic AI you own \u2014 voice, vision-driven browser & computer control, visual workflows, human-in-the-loop approvals, multi-user RBAC, and a knowledge graph. Runs on your infrastructure. Your data. Your AI. agentic agentic-frame",
+    "target_phase": "phase-03-frontend",
+    "relevance_score": 1
+  },
+  {
+    "source": "GitHub Search (Active Velocity)",
+    "title": "volcengine/OpenViking",
+    "url": "https://github.com/volcengine/OpenViking",
+    "score": 42143,
+    "rank": 0,
+    "summary": "Self-evolving Context Database for AI Agents. Unify Agent Memory, Knowledge RAG and Skills. agent-context agent-memory agent-plugins agentic-rag context-database dsh-plugin knowledge-base memory memory-management self-evolving vector-databa",
+    "target_phase": "phase-02-backend",
+    "relevance_score": 3
+  },
+  {
+    "source": "GitHub Search (Active Velocity)",
+    "title": "get-bb/bb",
+    "url": "https://github.com/get-bb/bb",
+    "score": 5467,
+    "rank": 0,
+    "summary": "The agent IDE that builds itself ade agent-ide claude-code codex devtools ide",
+    "target_phase": "phase-03-frontend",
+    "relevance_score": 1
+  },
+  {
+    "source": "GitHub Search (Active Velocity)",
+    "title": "meta/astryx",
+    "url": "https://github.com/meta/astryx",
+    "score": 26944,
+    "rank": 0,
+    "summary": "An open source design system that's fully customizable and agent ready",
+    "target_phase": "phase-04-polish",
+    "relevance_score": 1
+  },
+  {
+    "source": "GitHub Search (Active Velocity)",
+    "title": "apache/doris",
+    "url": "https://github.com/apache/doris",
+    "score": 16213,
+    "rank": 0,
+    "summary": "Apache Doris is a real-time analytics and hybrid search database for AI agents. agent ai bigquery database delta-lake hudi iceberg lakehouse observability olap paimon query-engine real-time redshift search snowflake sql vector",
+    "target_phase": "phase-02-backend",
+    "relevance_score": 2
+  },
+  {
+    "source": "GitHub Search (Active Velocity)",
+    "title": "airbytehq/airbyte",
+    "url": "https://github.com/airbytehq/airbyte",
+    "score": 22370,
+    "rank": 0,
+    "summary": "Open-source data movement for ELT pipelines and AI agents \u2014 from APIs, databases & files to warehouses, lakes, and AI applications. Both self-hosted and Cloud. bigquery change-data-capture data data-analysis data-collection data-engineering",
+    "target_phase": "phase-02-backend",
+    "relevance_score": 2
+  },
+  {
+    "source": "GitHub Search (Active Velocity)",
+    "title": "wuyoscar/AISafetyHot",
+    "url": "https://github.com/wuyoscar/AISafetyHot",
+    "score": 2124,
+    "rank": 0,
+    "summary": "AI Safety HOT: daily AI safety news, papers and incidents in one place \u2014 jailbreaks, prompt injection, alignment, evals, governance. Website, daily digest, RSS and MCP. ai-alignment ai-governance ai-safety arxiv-papers daily-papers jailbrea",
+    "target_phase": "phase-03-frontend",
     "relevance_score": 1
   }
 ]
