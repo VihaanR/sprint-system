@@ -57,6 +57,8 @@ Sprint System v2.0 replaces 20-minute sequential chat interrogations with an asy
    - Launch async shadow threat modeling sidecar.
 2. **Scoping & The Winning Hook**:
    - Query `mobbin` MCP for top competitor UI/UX teardowns in this category.
+   - Reverse-Engineer Competitor Data Models (`morluto/rea` pattern): Inspect competitor web app network payloads and API responses in browser DevTools to map clean schemas in 60s without guesswork.
+   - Signature Split-View Hero Moment (`DeepTutor` pattern): For interactive AI applications, architect a split-view workspace (interactive data canvas/workspace on the left, streaming reasoning/controls on the right) rather than a boring single-column chat bubble feed.
    - Query `science` databases if domain involves biotech, chemistry, genomics, or healthcare.
    - Run `browse` to verify live competitive intelligence.
    - Run `impeccable init` and `impeccable shape` to establish information architecture.

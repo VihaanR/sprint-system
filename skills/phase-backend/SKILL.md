@@ -33,6 +33,10 @@ description: Phase 2 of the 5-Hour Hackathon Sprint. Implements backend services
    - Calculate downstream dependents before mutating shared data models or schemas:
      $$\text{Risk Score} = \min\left(100, \; \text{Complexity} \times (\text{Dependents} + 1) \times 5\right)$$
    - If Risk Score > 80 or Blast Radius > 5 files, in-place breaking changes are strictly forbidden; enforce append-only non-breaking extensions.
+9. **Semantic Schema & Entity Annotations (`NVIDIA/auto-ontology` pattern)**:
+   - Decorate Pydantic V2 and SQLAlchemy fields with semantic `Field(description="...")` tags and clear relational foreign keys. Eliminates LLM Text-to-SQL hallucinations without heavy RDF/OWL ontology bloat.
+10. **Stealth Fallback Web Fetching (`D4Vinci/Scrapling` pattern)**:
+    - If external live web data extraction via `api-anything` hits bot gates, use `scrapling` as a direct Python fallback instead of writing fragile multi-file browser automation scripts.
 
 ---
 

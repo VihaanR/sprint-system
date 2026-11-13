@@ -21,6 +21,7 @@ description: Phase 3 of the 5-Hour Hackathon Sprint. Assembles frontend componen
      - *Dev Tools*: stark dark canvas (`#09090B`), JetBrains Mono, 1px neutral borders.
      - *Healthcare / Ops*: clinical high-contrast light canvas (`#FFFFFF`, `#F8FAFC`), deep slate typography, tabular nums.
      - *Fintech*: dense data grids, audit timestamps, subtle border highlights (`1px solid rgba(255,255,255,0.08)`).
+   - Theme Signature Pre-Flight (`Nutlope/hallmark` pattern): In addition to colors, lock in verified font pairings, strict border radius tokens, and subtle elevation tokens to guarantee handcrafted visual identity over generic AI templates.
    - Zero default shadcn palettes or generic Tailwind templates.
 3. **Native Semantic HTML5 Primitives (Zero npm Bloat)**:
    - Replace heavy npm modal wrappers with native `<dialog>` and the HTML Popover API (`popover="auto"`).
