@@ -34,6 +34,10 @@ description: Phase 3 of the 5-Hour Hackathon Sprint. Assembles frontend componen
    - Dimensioned skeleton loaders rendered during async fetches to prevent layout jumps.
 6. **Pre-Commit Anti-Slop Linter**:
    - Auto-Fix with Hard Failback: automatically replaces banned gradients and buzzwords; if unfixable, blocks build with Exit Code 1.
+7. **Frontend Blast Radius Protection (Wednesday Solutions Pattern)**:
+   - Parallel workers in `workspace: "share"` must compute blast radius before editing shared files (`index.css`, `theme.ts`, `App.tsx`). If downstream components > 5, edits must use localized component props without mutating global tokens.
+8. **Art Direction & Reference Image Verification (Taste-Skill Pattern)**:
+   - Before writing markup, compare component specifications against visual design references (`mobbin` MCP or `gdrive` mockups) to guarantee high-taste visual layout over generic AI defaults.
 
 ---
 

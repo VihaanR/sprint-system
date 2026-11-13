@@ -28,7 +28,8 @@ flowchart TD
         R1["egm-implementation-readiness: Audit Stubs, Broken TODOs, Missing Routes"]
         R2["ponytail (/ponytail-review): Negative LOC Audit (Deletes Dead Code)"]
         R3["understand-anything: AST Architecture Tree & Cycle Audit"]
-        R4["sentry: Distributed Error Telemetry & Tracing Pre-Flight"]
+        R4["Blast Radius Audit: Zero Uncontracted High-Risk Regressions (Wednesday Pattern)"]
+        R5["sentry: Distributed Error Telemetry & Tracing Pre-Flight"]
     end
 
     P1 --> P2 --> SCORE["Consolidated Scorecard Flushed to docs/AUDIT_REPORT.md"]

@@ -27,6 +27,12 @@ description: Phase 2 of the 5-Hour Hackathon Sprint. Implements backend services
    - Security Rules: If using Firebase Firestore, rules authoring is MANDATORILY delegated to `firestore-rules-author`. Wildcard rules (`allow read, write: if true;`) are strictly banned.
 6. **Commercial Monetization Gate**:
    - Implement `/api/v1/billing/create-checkout-session` using `stripe` plugin. Generates live `cs_test_...` URLs for test payment verification.
+7. **On-Demand FastMCP Scaffolding (Anthropics Pattern)**:
+   - When custom tools or external hardware/API bridges are required without existing MCP servers, scaffold a typed FastMCP Python server (`from mcp.server.fastmcp import FastMCP`) with Pydantic schema validation in < 60s. Ad-hoc bash/curl wrappers are banned.
+8. **Blast Radius & Risk Scoring Gate (Wednesday Solutions Pattern)**:
+   - Calculate downstream dependents before mutating shared data models or schemas:
+     $$\text{Risk Score} = \min\left(100, \; \text{Complexity} \times (\text{Dependents} + 1) \times 5\right)$$
+   - If Risk Score > 80 or Blast Radius > 5 files, in-place breaking changes are strictly forbidden; enforce append-only non-breaking extensions.
 
 ---
 

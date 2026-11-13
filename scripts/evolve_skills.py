@@ -78,7 +78,7 @@ def synthesize_evolution():
     target_skills = [
         "sprint-orchestrator", "phase-discover", "phase-backend",
         "phase-frontend", "phase-polish", "phase-audit", "phase-launch",
-        "sprint-recursive-optimizer", "blast-radius-risk-scoring", "mcp-builder"
+        "sprint-recursive-optimizer"
     ]
     for s in target_skills:
         src = os.path.join(SKILLS_DIR, s, "SKILL.md")
