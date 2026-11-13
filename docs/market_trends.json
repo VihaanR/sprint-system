@@ -451,63 +451,13 @@
   },
   {
     "source": "GitHub Search (Active Velocity)",
-    "title": "stablyai/orca",
-    "url": "https://github.com/stablyai/orca",
-    "score": 123833,
+    "title": "hostinger/api-mcp-server",
+    "url": "https://github.com/hostinger/api-mcp-server",
+    "score": 171,
     "rank": 0,
-    "summary": "Orca lets you run a fleet of coding agents (e.g. Claude Code, Codex) with your own subscription. Available on desktop, mobile and remote runtime. agent-ide ai-agents automation bot claude-code codex ghostty grok-bot hermes-agent mobile-app",
-    "target_phase": "phase-01-discover",
-    "relevance_score": 1
-  },
-  {
-    "source": "GitHub Search (Active Velocity)",
-    "title": "BeppeTemp/cartographer",
-    "url": "https://github.com/BeppeTemp/cartographer",
-    "score": 66,
-    "rank": 0,
-    "summary": "A shared, git-backed wiki your team's AI agents maintain but can't break \u2014 Claude Code, Codex, OpenCode and any MCP client. agent-memory ai-agents claude-code codex go knowledge-base knowledge-graph llm-agents mcp mcp-server obsidian",
+    "summary": "ai api claude cursor gemini-cli-extension hostinger mcp",
     "target_phase": "phase-02-backend",
-    "relevance_score": 2
-  },
-  {
-    "source": "GitHub Search (Active Velocity)",
-    "title": "SinanTufekci/agent-intern",
-    "url": "https://github.com/SinanTufekci/agent-intern",
-    "score": 31,
-    "rank": 0,
-    "summary": "Give Claude Code or Antigravity an intern: drive Gemini (Antigravity), Codex, Copilot, Cursor and opencode as sub-agents, plus experimental Grok, Kimi and Muse. Text answers, image generation, real repo work and parallel swarms, on quota yo",
-    "target_phase": "phase-02-backend",
-    "relevance_score": 1
-  },
-  {
-    "source": "GitHub Search (Active Velocity)",
-    "title": "henkisdabro/wookstar-claude-plugins",
-    "url": "https://github.com/henkisdabro/wookstar-claude-plugins",
-    "score": 93,
-    "rank": 0,
-    "summary": "An opinionated Claude Code Plugin Pack. Skills, Agents, Hooks, MCPs. Examples: Email draft preview assistance & humanisation. Agents for Codex and Gemini \"outsourcing\". Skills for Google Analytics & Google Tag Manager, Shopify and much more",
-    "target_phase": "phase-02-backend",
-    "relevance_score": 1
-  },
-  {
-    "source": "GitHub Search (Active Velocity)",
-    "title": "LodyAI/Lody",
-    "url": "https://github.com/LodyAI/Lody",
-    "score": 1737,
-    "rank": 0,
-    "summary": "Share coding agents with your team on phone and desktop agent agentic-workflow coding-agent collaboration local-first multi-agent multiplayer orchestration vibe-coding",
-    "target_phase": "phase-01-discover",
-    "relevance_score": 1
-  },
-  {
-    "source": "GitHub Search (Active Velocity)",
-    "title": "google/elephant-goldfish-model",
-    "url": "https://github.com/google/elephant-goldfish-model",
-    "score": 18321,
-    "rank": 0,
-    "summary": "Open-source plugin for designing and reviewing software with agents agent-skills ai-agents antigravity claude-code claude-code-plugin claude-skills codex codex-plugin coding-agents context-engineering developer-tools gemini llm multi-agent",
-    "target_phase": "phase-02-backend",
-    "relevance_score": 2
+    "relevance_score": 3
   },
   {
     "source": "GitHub Search (Active Velocity)",
@@ -521,52 +471,72 @@
   },
   {
     "source": "GitHub Search (Active Velocity)",
-    "title": "openaccountants/openaccountants",
-    "url": "https://github.com/openaccountants/openaccountants",
-    "score": 487,
+    "title": "tiobeharxi1987/blender-ai-copilot-flow",
+    "url": "https://github.com/tiobeharxi1987/blender-ai-copilot-flow",
+    "score": 79,
     "rank": 0,
-    "summary": "Open tax skills for AI: 2,000+ skills for 190+ countries and states, every figure cited to the law. Works in ChatGPT, Claude, Cursor and any MCP client. accountant accounting agent-skills ai ai-agents chatgpt claude compliance cpa gst incom",
+    "summary": "A controlled AI workflow for Blender: every copilot edit is a supervised tool call\u2014proposed, approved, executed in sequence, cancellable after the current step and undoable by name\u2014inside a visual studio with a built-in MCP server. \u00b7 blende",
+    "target_phase": "phase-02-backend",
+    "relevance_score": 1
+  },
+  {
+    "source": "GitHub Search (Active Velocity)",
+    "title": "heygen-com/hyperframes",
+    "url": "https://github.com/heygen-com/hyperframes",
+    "score": 83597,
+    "rank": 0,
+    "summary": "Write HTML. Render video. Built for agents. ai ai-agents animation claude-code ffmpeg framework gsap html html-to-video mcp motion-graphics puppeteer rendering typescript video-editor",
+    "target_phase": "phase-04-polish",
+    "relevance_score": 3
+  },
+  {
+    "source": "GitHub Search (Active Velocity)",
+    "title": "higress-group/HiRoute",
+    "url": "https://github.com/higress-group/HiRoute",
+    "score": 449,
+    "rank": 0,
+    "summary": "Make Codex and Claude Code subscriptions go further: a local model router that gives routine agent work to economical models and keeps your strongest model for the hard parts. ai-gateway claude-code codex coding-agent cost-optimization loca",
     "target_phase": "phase-01-discover",
     "relevance_score": 1
   },
   {
     "source": "GitHub Search (Active Velocity)",
-    "title": "mrveiss/AutoBot-AI",
-    "url": "https://github.com/mrveiss/AutoBot-AI",
-    "score": 41,
+    "title": "expo/exact",
+    "url": "https://github.com/expo/exact",
+    "score": 3551,
     "rank": 0,
-    "summary": "Self-hosted, agentic AI you own \u2014 voice, vision-driven browser & computer control, visual workflows, human-in-the-loop approvals, multi-user RBAC, and a knowledge graph. Runs on your infrastructure. Your data. Your AI. agentic agentic-frame",
+    "summary": "Write an app once. It runs natively on the web, macOS, iOS, and Linux, and an AI agent can build it, run it, see it, and test it on every one of them. ai-agents appkit coding-agents cross-platform css ios linux macos native-apps rust swift",
     "target_phase": "phase-03-frontend",
-    "relevance_score": 1
+    "relevance_score": 2
   },
   {
     "source": "GitHub Search (Active Velocity)",
-    "title": "volcengine/OpenViking",
-    "url": "https://github.com/volcengine/OpenViking",
-    "score": 42143,
+    "title": "n8n-io/n8n",
+    "url": "https://github.com/n8n-io/n8n",
+    "score": 210355,
     "rank": 0,
-    "summary": "Self-evolving Context Database for AI Agents. Unify Agent Memory, Knowledge RAG and Skills. agent-context agent-memory agent-plugins agentic-rag context-database dsh-plugin knowledge-base memory memory-management self-evolving vector-databa",
+    "summary": "Fair-code workflow automation platform with native AI capabilities. Combine visual building with custom code, self-host or cloud, 400+ integrations. ai apis automation cli data-flow development integration-framework integrations ipaas low-c",
     "target_phase": "phase-02-backend",
-    "relevance_score": 3
-  },
-  {
-    "source": "GitHub Search (Active Velocity)",
-    "title": "get-bb/bb",
-    "url": "https://github.com/get-bb/bb",
-    "score": 5467,
-    "rank": 0,
-    "summary": "The agent IDE that builds itself ade agent-ide claude-code codex devtools ide",
-    "target_phase": "phase-03-frontend",
     "relevance_score": 1
   },
   {
     "source": "GitHub Search (Active Velocity)",
-    "title": "meta/astryx",
-    "url": "https://github.com/meta/astryx",
-    "score": 26944,
+    "title": "infiniflow/ragflow",
+    "url": "https://github.com/infiniflow/ragflow",
+    "score": 94106,
     "rank": 0,
-    "summary": "An open source design system that's fully customizable and agent ready",
-    "target_phase": "phase-04-polish",
+    "summary": "RAGFlow is an agent-native database: a Retrieval-Augmented Generation (RAG) engine that grew into context infrastructure. agent-harness agent-native-database agentic-ai agentic-retrieval agentic-search ai ai-agents context-engine context-en",
+    "target_phase": "phase-02-backend",
+    "relevance_score": 2
+  },
+  {
+    "source": "GitHub Search (Active Velocity)",
+    "title": "stablyai/orca",
+    "url": "https://github.com/stablyai/orca",
+    "score": 123836,
+    "rank": 0,
+    "summary": "Orca lets you run a fleet of coding agents (e.g. Claude Code, Codex) with your own subscription. Available on desktop, mobile and remote runtime. agent-ide ai-agents automation bot claude-code codex ghostty grok-bot hermes-agent mobile-app",
+    "target_phase": "phase-01-discover",
     "relevance_score": 1
   },
   {
@@ -581,22 +551,52 @@
   },
   {
     "source": "GitHub Search (Active Velocity)",
-    "title": "airbytehq/airbyte",
-    "url": "https://github.com/airbytehq/airbyte",
-    "score": 22370,
+    "title": "Bike4Mind/bike4mind",
+    "url": "https://github.com/Bike4Mind/bike4mind",
+    "score": 97,
     "rank": 0,
-    "summary": "Open-source data movement for ELT pipelines and AI agents \u2014 from APIs, databases & files to warehouses, lakes, and AI applications. Both self-hosted and Cloud. bigquery change-data-capture data data-analysis data-collection data-engineering",
+    "summary": "The open-core AI workbench \u2014 notebooks, agents, RAG, voice, and images across any model: OpenAI, Anthropic, Google, xAI, or local via Ollama/vLLM. BSL 1.1,  auto-converting to Apache-2.0 on a two-year clock. Your AI keeps running when their",
+    "target_phase": "phase-02-backend",
+    "relevance_score": 3
+  },
+  {
+    "source": "GitHub Search (Active Velocity)",
+    "title": "dataelement/bisheng",
+    "url": "https://github.com/dataelement/bisheng",
+    "score": 12303,
+    "rank": 0,
+    "summary": "BISHENG is an open-source enterprise Agent platform for building, deploying, and managing AI applications. It combines AI agents, workflows, RAG and knowledge management, desktop agent integration, and vibecoding app hosting with unified mo",
+    "target_phase": "phase-02-backend",
+    "relevance_score": 1
+  },
+  {
+    "source": "GitHub Search (Active Velocity)",
+    "title": "bytebase/bytebase",
+    "url": "https://github.com/bytebase/bytebase",
+    "score": 14713,
+    "rank": 0,
+    "summary": "Database governance built for humans and agents \u2014 controlling changes and access across every major database. cicd data-governance data-masking data-security database-access database-governance devops devsecops flyway gitops liquibase mongo",
+    "target_phase": "phase-02-backend",
+    "relevance_score": 1
+  },
+  {
+    "source": "GitHub Search (Active Velocity)",
+    "title": "BeppeTemp/cartographer",
+    "url": "https://github.com/BeppeTemp/cartographer",
+    "score": 66,
+    "rank": 0,
+    "summary": "A shared, git-backed wiki your team's AI agents maintain but can't break \u2014 Claude Code, Codex, OpenCode and any MCP client. agent-memory ai-agents claude-code codex go knowledge-base knowledge-graph llm-agents mcp mcp-server obsidian",
     "target_phase": "phase-02-backend",
     "relevance_score": 2
   },
   {
     "source": "GitHub Search (Active Velocity)",
-    "title": "wuyoscar/AISafetyHot",
-    "url": "https://github.com/wuyoscar/AISafetyHot",
-    "score": 2124,
+    "title": "Sma1lboy/rove",
+    "url": "https://github.com/Sma1lboy/rove",
+    "score": 185,
     "rank": 0,
-    "summary": "AI Safety HOT: daily AI safety news, papers and incidents in one place \u2014 jailbreaks, prompt injection, alignment, evals, governance. Website, daily digest, RSS and MCP. ai-alignment ai-governance ai-safety arxiv-papers daily-papers jailbrea",
-    "target_phase": "phase-03-frontend",
+    "summary": "All your coding agents, in one place. Claude Code, Codex, Copilot and more, side by side in your terminal. agentic-ai ai ai-agents ai-coding-assistant anthropic bun claude-code cli codex coding-agent developer-tools git-worktree github-copi",
+    "target_phase": "phase-01-discover",
     "relevance_score": 1
   }
 ]
