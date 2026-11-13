@@ -137,6 +137,7 @@ All visual components and motion timelines follow strict organic engineering sta
 | `/caveman [tier]` | `caveman` | Auto-recommended at >70% tokens | Manual token compression (`lite`, `full`, `ultra`, `off`) to save 65-75% tokens. |
 | `/impeccable polish` | `impeccable` | Auto-executed in Phase 4 (Polish) | Anti-slop design polish stripping generic AI templates and balancing spacing. |
 | `/grill-me` | `devils-advocate` | Auto-executed before Phase 1 | Triggers the 45-second interactive gate with native `ask_question` modal card. |
+| `/sprint-evolve` | `sprint-recursive-optimizer` | Post-Phase 6 / On-Demand | Market Trend RAG & Autonomous Skill Self-Evolver polling Hacker News & GitHub. |
 
 ---
 
