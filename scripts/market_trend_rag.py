@@ -175,6 +175,40 @@ def harvest_github_trending() -> list:
 
     return items
 
+def harvest_github_agent_skills() -> list:
+    print("[ACTION] Querying GitHub API specifically for viral 'agent skills' repositories...")
+    url = (
+        "https://api.github.com/search/repositories?"
+        "q=agent+skills+stars:>50&sort=stars&order=desc&per_page=12"
+    )
+    raw = fetch_url(url)
+    items = []
+    if not raw:
+        return items
+
+    try:
+        data = json.loads(raw)
+        for repo in data.get("items", []):
+            name = repo.get("full_name", "")
+            desc = repo.get("description") or ""
+            url_link = repo.get("html_url", "")
+            stars = repo.get("stargazers_count", 0)
+            topics = repo.get("topics", [])
+            
+            items.append({
+                "source": "GitHub Agent Skills Ecosystem",
+                "title": f"Skill: {name}",
+                "url": url_link,
+                "score": stars,
+                "rank": 0,
+                "summary": (desc + " " + " ".join(topics))[:240].strip()
+            })
+    except Exception as e:
+        print(f"[WARN] Error parsing Agent Skills data: {e}", file=sys.stderr)
+
+    print(f"[DONE] Harvested {len(items)} top online agent skills repositories.")
+    return items
+
 def classify_and_score(item: dict) -> dict:
     combined_text = (item["title"] + " " + item["summary"]).lower()
     phase_scores = {}
@@ -262,9 +296,10 @@ def main():
         output_path = sys.argv[2]
         
     trendshift_items = harvest_trendshift()
+    skills_items = harvest_github_agent_skills()
     hn_items = harvest_hacker_news()
     gh_items = harvest_github_trending()
-    all_items = [classify_and_score(it) for it in (trendshift_items + hn_items + gh_items)]
+    all_items = [classify_and_score(it) for it in (trendshift_items + skills_items + hn_items + gh_items)]
     
     generate_market_report(all_items, output_path)
     
