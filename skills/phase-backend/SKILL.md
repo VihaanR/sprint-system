@@ -3,58 +3,74 @@ name: phase-backend
 description: Phase 2 of the 5-Hour Hackathon Sprint. Implements backend services, Gemini AI/RAG models, databases, and APIs using fastapi-pro, ponytail (YAGNI), gemini-api, rag-implementation, api-anything MCP, sqlite/fetch/docker MCPs, firebase, postman, and gravitas.
 ---
 
-# Phase 2: Core Engine, AI & Backend (Complete API & Data Layer)
+# Phase 2: Core Engine, AI & Backend (Concrete Monolith Architecture v2.0)
 
 **Target Time Budget**: ~60 minutes  
-**Goal**: Build a fully operational, test-passing backend with persistent storage, Gemini LLM/RAG integration, live web data feeds, clean endpoints, and mechanical live response verification.
+**Goal**: Build a fully operational, test-passing monolith backend with persistent storage, Gemini LLM/RAG integration, instant auth, Stripe monetization proof, clean endpoints, and mechanical live response verification.
 
 ---
 
-## Pre-Phase Interrogation Gate
+## Architectural Principles & Gating
 
-Before execution starts, the system delivers the **Phase 1 Executive Scorecard** (spec finalized, ERD schema locked, moat defined, architecture tree mapped), followed by the **Devil's Advocate 15-Point Interrogation** (mandatory >= 15 deep-dive questions across 5 dimensions). The user must confirm database engine, AI model temperature/caching, and endpoint edge cases before code execution begins.
+1. **Dynamic Archetype Selection**:
+   - **AI, Scientific, Biotech, or Data Engineering Projects**: FastAPI (Python 3.11) monolith with Pydantic V2 and SQLite/LibSQL. Provides zero-friction integration with Python data/science packages (`rdkit`, `pandas`, `torch`).
+   - **Pure Consumer SaaS or Web-First Apps**: Next.js 15 (TypeScript) fullstack monolith with Route Handlers, React Server Components, and Drizzle ORM.
+2. **Ponytail Invariant 01 (Concrete First)**:
+   - Absolutely zero generic repository interfaces, abstract service factories, or premature microservice divisions.
+   - Collocate route logic, query execution, and validation in concrete handlers.
+3. **Karpathy Core Rule 2 (Minimum Code)**:
+   - Target <= 450 lines of total backend core code. The best code is code you never had to write.
+4. **Minute-1 Immutable Kernel Contract**:
+   - Before parallel frontend subagents dispatch in Phase 3, the backend MUST lock and export `types.ts` (or OpenAPI JSON schema). Subagents code against this immutable contract without shared git lock contention.
+5. **Declarative Security & Mandatory Delegation**:
+   - Identity: Zero-boilerplate auth via `auth0` or `firebase`.
+   - Security Rules: If using Firebase Firestore, rules authoring is MANDATORILY delegated to `firestore-rules-author`. Wildcard rules (`allow read, write: if true;`) are strictly banned.
+6. **Commercial Monetization Gate**:
+   - Implement `/api/v1/billing/create-checkout-session` using `stripe` plugin. Generates live `cs_test_...` URLs for test payment verification.
 
 ---
 
 ## Active Tooling & Capabilities
 
 - **`fastapi-pro`**: Async FastAPI 0.100+, Pydantic V2 models, dependency injection, background tasks.
-- **`ponytail`**: Ruthless YAGNI engine. Strictly enforces concrete code first, bans speculative wrappers, prevents premature microservice splitting, and keeps codebase lean.
-- **`gravitas`**: Engineering reliability runtime. Prohibits blind file edits; requires quoting mechanical evidence (pytest outputs, exit code 0, curl status 200).
-- **`gemini-api` & `prompt-engineering-patterns`**: Integrates Google Gemini models (Flash, Pro, Live API, multimodal processing).
+- **`ponytail`**: Ruthless YAGNI engine. Bans speculative wrappers and bloated boilerplate.
+- **`gravitas`**: Reliability runtime. Cites mechanical evidence (pytest outputs, exit code 0, curl status 200).
+- **`gemini-api` & `prompt-engineering-patterns`**: Integrates Google Gemini 2.0 Flash/Pro with structured output.
 - **`rag-implementation`**: Embeddings, vector similarity search, document chunking, and grounded responses.
-- **`api-anything` MCP**: Calls websites over plain HTTP (`call_operation`, `learn_site`), feeding live external web data into backend routes without third-party API keys.
-- **`google-antigravity-sdk`**: Constructs autonomous multi-agent pipelines and tools in Python.
-- **`data-agent-kit-plugin`**: Advanced data engineering, BigQuery queries, transformations, and notebook tasks.
-- **`firebase` & `firebase-mcp-server`**: Firebase Auth, Firestore, Realtime Database, and Security Rules.
-- **`google_maps_platform`**: Geolocation, reverse geocoding, directions, and places API integration.
-- **`postman` plugin**: API contract testing, mocking, and collection generation.
-- **`sqlite` MCP**: Inspects tables, seeds mock rows, and validates SQL queries directly in `chatbot.db` or project db.
+- **`science` plugin**: RDKit physicochemical descriptors, PDB coordinates, Boltz-2 co-folding API.
+- **`auth0` & `firebase` plugins**: Instant authenticated sessions and token verification.
+- **`firestore-rules-author` subagent**: Mandatory specialist for generating tested `firestore.rules`.
+- **`stripe` plugin**: Checkout sessions, customer portal, and webhook listener.
+- **`api-anything` MCP**: Ingests external web data over plain HTTP (`call_operation`, `learn_site`) without third-party API keys.
+- **`sqlite` MCP**: Inspects tables, seeds mock rows, and validates SQL queries directly.
 - **`fetch` MCP (`--allow-private-ips`)**: Makes live HTTP requests to local endpoints (`http://127.0.0.1:8000`).
-- **`docker` MCP**: Manages multi-container compose services and database containers.
-- **`async-python-patterns` & `sql-optimization-patterns`**: Concurrency and query optimization.
-- **`python-testing-patterns` / `test-driven-development`**: Pytest fixtures, async test loops, and TDD.
+- **`docker` MCP**: Manages container compose services and persistent databases.
 - **`uv-package-manager`**: Ultrafast dependency management via `uv`.
 
 ---
 
 ## Execution Checklist
 
-1. **Pre-Phase Gate (>= 15 Questions)**:
+1. **Pre-Phase Gate**:
    - Deliver Phase 1 Executive Scorecard.
-   - Run Devil's Advocate interrogation probing for concurrency locks, API latency, and data persistence models.
+   - Confirm backend archetype (FastAPI or Next.js 15) and data model.
 2. **Environment & Scaffolding**:
-   - Initialize with `uv` (`uv venv`, `uv pip install`).
-3. **Database & Data Layer (Ponytail YAGNI Enforced)**:
-   - Declare direct SQLAlchemy 2.0 models or configure Firebase Firestore without unnecessary repository wrappers.
-   - Seed initial mock data; verify schemas with `sqlite` MCP or `firebase-mcp-server`.
-4. **AI, External Data & Core Intelligence**:
-   - Connect `gemini-api` with optimized system prompts (`prompt-engineering-patterns`).
-   - If document Q&A or search is needed, wire up `rag-implementation`.
-   - If third-party live data is required (e.g. flight searches, community sentiment, pricing catalogs), call `api-anything` over plain HTTP instead of writing scrapers.
-5. **API Endpoints & Postman Collections**:
-   - Implement routes with Pydantic validation.
-   - Run `postman` collection verification and test live endpoints with `fetch` MCP.
-6. **Phase Checkpoint & Gravitas Evidence Pass**:
-   - Run test suite (`pytest`) and observe exit code 0.
-   - Update `SPRINT.md` and prepare Executive Scorecard with mechanical test logs for gate approval into **Phase 3 (Visual Swarm & Frontend)**.
+   - Initialize with `uv` (`uv venv`, `uv pip install fastapi uvicorn pydantic sqlalchemy`) or `pnpm create next-app`.
+3. **Database & Data Layer (Concrete First)**:
+   - Declare direct SQLAlchemy / Drizzle models without repository wrappers.
+   - Seed initial mock rows; verify schema with `sqlite` MCP.
+4. **AI & Core Intelligence Engine**:
+   - Connect `gemini-api` with optimized system prompts and structured outputs.
+   - If document Q&A is needed, wire up `rag-implementation`.
+   - If scientific/biotech data is needed, call `science` tools (RDKit / Boltz-2).
+   - If external live data is needed, call `api-anything`.
+   - For local LLM inference (e.g. `llama.cpp`), use zero-code `OPENAI_BASE_URL` redirection.
+5. **Identity & Monetization**:
+   - Configure `auth0` or `firebase` authentication routes.
+   - If Firestore is used, dispatch `firestore-rules-author` to write and test `firestore.rules`.
+   - Implement Stripe checkout session endpoint (`/api/v1/billing/create-checkout-session`).
+6. **Lock Kernel Contract**:
+   - Generate and export immutable `types.ts` / OpenAPI schema for Phase 3 frontend consumption.
+7. **Phase Checkpoint & Gravitas Evidence Pass**:
+   - Run test suite (`pytest`) and verify exit code 0.
+   - Update `SPRINT.md` with mechanical test logs for gate approval into **Phase 3 (Frontend Build)**.

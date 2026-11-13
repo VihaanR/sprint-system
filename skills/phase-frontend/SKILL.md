@@ -3,54 +3,79 @@ name: phase-frontend
 description: Phase 3 of the 5-Hour Hackathon Sprint. Assembles frontend components live via live-swarm-coding, ponytail (YAGNI), impeccable (craft-floor/live), browser-code-verifier, chrome-devtools-plugin, StitchMCP, react-state-management, android-cli-plugin, and flutter.
 ---
 
-# Phase 3: Visual Swarm & Frontend Build (Live Component Assembly)
+# Phase 3: Zero-Copy Swarm & Frontend Assembly (v2.0)
 
 **Target Time Budget**: ~75 minutes  
-**Goal**: Assemble a responsive, interactive frontend connected to your Phase 2 API. Runs the multi-agent parallel swarm with Hot Module Replacement, Ponytail YAGNI lean state, Impeccable craft-floor quality rules, and live Chrome DevTools preview.
+**Goal**: Assemble a responsive, tactile, zero-slop frontend connected to the Phase 2 API. Coordinates parallel subagents in native shared worktrees with zero file contention, native HTML5 primitives, domain design tokens, and live Chrome DevTools verification.
 
 ---
 
-## Pre-Phase Interrogation Gate
+## Architectural Principles & Gating
 
-Before execution starts, the system delivers the **Phase 2 Executive Scorecard** (endpoints active, test passes, DB models), followed by the **Devil's Advocate 15-Point Interrogation** (mandatory >= 15 deep-dive questions across 5 dimensions). The user must confirm UI hierarchy, state architecture, and killer feature requirements before subagents write code.
+1. **Zero-Copy Shared Worktrees (`workspace: "share"`)**:
+   - Subagents author independent feature slices concurrently in isolated working directories over shared `.git` object storage.
+   - Central files (`App.tsx`, `routes.ts`, `main.py`) are strictly write-locked to avoid merge races.
+   - Slices are registered via inverted dynamic auto-discovery (`import.meta.glob('./features/*/index.tsx')` or router auto-loaders).
+2. **Domain Design Token Injection (`design-tokens.json`)**:
+   - Before a single line of UI code is written, inject custom domain tokens:
+     - *Dev Tools*: stark dark canvas (`#09090B`), JetBrains Mono, 1px neutral borders.
+     - *Healthcare / Ops*: clinical high-contrast light canvas (`#FFFFFF`, `#F8FAFC`), deep slate typography, tabular nums.
+     - *Fintech*: dense data grids, audit timestamps, subtle border highlights (`1px solid rgba(255,255,255,0.08)`).
+   - Zero default shadcn palettes or generic Tailwind templates.
+3. **Native Semantic HTML5 Primitives (Zero npm Bloat)**:
+   - Replace heavy npm modal wrappers with native `<dialog>` and the HTML Popover API (`popover="auto"`).
+   - Use `<details>` / `<summary>` for collapsibles and `<form method="dialog">` for modal state.
+4. **Pro Ergonomics & Zero-Jank Tactility**:
+   - Global command palette (`Cmd+K` / `Ctrl+K`) for keyboard-first navigation.
+   - Instant optimistic feedback (<16ms perceived response).
+   - Tactile button press feedback (`active:scale-[0.98] transition-transform duration-100 ease-out`).
+5. **Zero Layout Shift (CLS = 0.00)**:
+   - Use Container Queries (`@container`) instead of fragile viewport queries so components adapt directly to allocated parent width.
+   - Dimensioned skeleton loaders rendered during async fetches to prevent layout jumps.
+6. **Pre-Commit Anti-Slop Linter**:
+   - Auto-Fix with Hard Failback: automatically replaces banned gradients and buzzwords; if unfixable, blocks build with Exit Code 1.
 
 ---
 
 ## Active Tooling & Capabilities
 
-- **`live-swarm-coding` (with `resources/swarm-overlay.js`)**: Visual multiplayer swarm engine with glowing cursors, Figma-style selection boxes, and code streamers.
-- **`ponytail`**: Ruthless YAGNI engine. Prohibits over-engineered state machines (e.g. Redux/XState) when simple booleans or React Query suffice; prevents speculative generic wrapper components.
-- **`gravitas`**: Engineering reliability runtime. Prohibits claiming UI completion without launching server, probing port, and observing zero console errors.
-- **`impeccable` (craft-floor & live variants)**: Enforces `reference/craft-floor.md` quality rules from line one, preventing generic AI slop. Enables live browser variant generation (`/impeccable live`, `/impeccable generate`).
-- **`browser-code-verifier`**: Automates live browser testing, network asset integrity, and zero-error verification.
-- **`chrome-devtools-plugin`**: Real-time DOM inspection, console message streaming, and screenshots.
-- **`modern-web-guidance-plugin`**: Enforces modern web standards, semantic HTML, responsive viewport units, and modern CSS.
-- **`StitchMCP`**: Generates and refactors screen components and UI variants.
-- **`react-state-management` & `react-modernization`**: Zustand / React Query for efficient server state sync; React 19 concurrent features.
-- **`android-cli-plugin` & `mobile-developer`**: Jetpack Compose UI rendering, `@Preview` inspections, and `adb` device deployment (for Android).
-- **`flutter` plugin**: Dart/Flutter widget trees and cross-platform compilation (for Flutter).
-- **`google_maps_platform`**: Embeds live interactive maps and location selectors.
+- **`live-swarm-coding`**: Multi-agent parallel assembly with live browser synchronization.
+- **`browser-code-verifier`**: Automates live preview server startup, DOM tree verification, and console error checks.
+- **`chrome-devtools-plugin`**: High-resolution screenshots, layout inspection, and console streaming.
+- **`impeccable` (craft-floor)**: Enforces authentic whitespace rhythm and high-contrast intentional palettes.
+- **`ui-ux-pro-max` & `tailwind-design-system`**: Design tokens, component templates, and dark/light modes.
+- **`modern-web-guidance-plugin`**: Modern container queries, responsive flex/grid, and zero CLS.
+- **`gdrive` plugin**: Live sync of pitch mockups, icons, and image assets.
+- **`StitchMCP`**: Generates and refactors screen variants.
+- **`react-state-management`**: Zustand or React Query for lightweight server state synchronization.
+- **`android-cli-plugin` & `flutter`**: Jetpack Compose and Flutter widget trees for mobile targets.
 
 ---
 
 ## Execution Checklist
 
-1. **Pre-Phase Gate (>= 15 Questions)**:
+1. **Pre-Phase Gate**:
    - Deliver Phase 2 Executive Scorecard.
-   - Run Devil's Advocate interrogation on frontend architecture, state sync, and signature interactions.
-2. **Dev Server & Swarm Overlay Boot**:
-   - Start Vite server (`npm run dev`) or Android emulator as background daemon (`IsDaemon: true`).
-   - Attach `swarm-overlay.js` to render live agent cursors.
+   - Lock in Domain Design Contract (`design-tokens.json`).
+2. **Dev Server Boot & In-Browser Setup**:
+   - Start Vite server (`npm run dev`) or mobile emulator as background daemon (`IsDaemon: true`).
    - Open browser via `chrome-devtools-plugin` at `http://localhost:5173`.
-3. **Parallel Swarm Dispatch (Ponytail YAGNI + Impeccable Craft-Floor)**:
-   - Subagents build layout, styles, and state concurrently (`invoke_subagent`).
-   - Enforce Ponytail: keep state flat; use concrete components before building generic design systems.
-   - Every agent enforces `impeccable/reference/craft-floor.md` (no generic purple gradients, strict line length 45-75ch, intentional padding rhythm).
-   - Use `/impeccable generate` for live browser variant exploration on key components.
-4. **API & Data Binding**:
-   - Connect frontend state stores to Phase 2 endpoints (`fetch` / React Query).
-5. **Interactive Verification & Gravitas DOM Check**:
-   - Test critical buttons, inputs, modals, and dynamic data feeds.
-   - Verify zero unhandled exceptions in browser console.
-6. **Phase Checkpoint**:
-   - Update `SPRINT.md` and prepare Executive Scorecard with DOM snapshot proofs for gate approval into **Phase 4 (Beautification & Polish)**.
+3. **Parallel Subagent Dispatch in Shared Worktrees**:
+   - Launch workers (`workspace: "share"`) for disjoint feature slices (`Navbar`, `Hero`, `DataGrid`, `DetailDrawer`).
+   - Slices register into host application via `import.meta.glob`.
+4. **Implement Ergonomics & Native Primitives**:
+   - Build native `<dialog>` modals with popover API.
+   - Implement global `Cmd+K` command palette.
+   - Enforce active states (`active:scale-[0.98]`) and mechanical focus rings.
+   - Insert skeleton loaders with exact aspect ratios for CLS = 0.00.
+5. **API & Data Binding**:
+   - Connect frontend components to Phase 2 endpoints using the immutable `types.ts` contract.
+   - Verify `DEMO_MODE=offline` fallback toggle renders cached fixtures seamlessly.
+6. **Anti-Slop Pre-Commit Linter Pass**:
+   - Audit code against banned gradients (`bg-gradient-to-r from-purple-* to-indigo-*`) and decorative sparkles.
+   - Apply auto-fix or fail with Exit Code 1.
+7. **Interactive Verification & Gravitas DOM Check**:
+   - Test critical buttons, inputs, modals, and dynamic data feeds in browser.
+   - Verify 0 uncaught exceptions in browser console.
+8. **Phase Checkpoint**:
+   - Update `SPRINT.md` with DOM snapshot proofs for gate approval into **Phase 4 (Sleek Polish & Motion)**.
