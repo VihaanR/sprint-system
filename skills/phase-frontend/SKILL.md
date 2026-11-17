@@ -20,7 +20,7 @@ description: Phase 3 of the 5-Hour Hackathon Sprint. Assembles frontend componen
    - Before a single line of UI code is written, inject custom domain tokens:
      - *Dev Tools*: stark dark canvas (`#09090B`), JetBrains Mono, 1px neutral borders.
      - *Healthcare / Ops*: clinical high-contrast light canvas (`#FFFFFF`, `#F8FAFC`), deep slate typography, tabular nums.
-     - *Fintech*: dense data grids, audit timestamps, subtle border highlights (`1px solid rgba(255,255,255,0.08)`).
+     - *Fintech*: dense data grids, TradingView Lightweight Charts, OHLCV time-series tables, audit timestamps, subtle border highlights (`1px solid rgba(255,255,255,0.08)`).
    - Theme Signature Pre-Flight (`Nutlope/hallmark` pattern): In addition to colors, lock in verified font pairings, strict border radius tokens, and subtle elevation tokens to guarantee handcrafted visual identity over generic AI templates.
    - Zero default shadcn palettes or generic Tailwind templates.
 3. **Native Semantic HTML5 Primitives (Zero npm Bloat)**:
@@ -39,6 +39,8 @@ description: Phase 3 of the 5-Hour Hackathon Sprint. Assembles frontend componen
    - Parallel workers in `workspace: "share"` must compute blast radius before editing shared files (`index.css`, `theme.ts`, `App.tsx`). If downstream components > 5, edits must use localized component props without mutating global tokens.
 8. **Art Direction & Reference Image Verification (Taste-Skill Pattern)**:
    - Before writing markup, compare component specifications against visual design references (`mobbin` MCP or `gdrive` mockups) to guarantee high-taste visual layout over generic AI defaults.
+9. **AG-UI Streaming Event Client Consumption (`ag-ui-protocol/ag-ui` pattern)**:
+   - Consume backend SSE streams (`event: ui_delta`, `event: tool_call`, `event: agent_thought`) via native `EventSource` or `fetch()` readable stream directly into React state or vanilla Web Components. Zero heavy client wrapper libraries or complex state machines.
 
 ---
 

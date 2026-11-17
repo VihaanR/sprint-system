@@ -59,6 +59,9 @@ Sprint System v2.0 replaces 20-minute sequential chat interrogations with an asy
    - Query `mobbin` MCP for top competitor UI/UX teardowns in this category.
    - Reverse-Engineer Competitor Data Models (`morluto/rea` pattern): Inspect competitor web app network payloads and API responses in browser DevTools to map clean schemas in 60s without guesswork.
    - Signature Split-View Hero Moment (`DeepTutor` pattern): For interactive AI applications, architect a split-view workspace (interactive data canvas/workspace on the left, streaming reasoning/controls on the right) rather than a boring single-column chat bubble feed.
+   - 30-Day Recency & Prediction Market Grounding (`mvanhorn/last30days-skill` pattern): Filter competitor search queries with strict 30-day temporal windows (`tbs=qdr:m`) and cross-reference Polymarket/HN consensus to discard obsolete pre-2025 AI assumptions.
+   - Conditional Fintech & Quant Archetype (`tradermonty/claude-trading-skills` pattern): If the domain is financial, mandate time-series schemas, OHLCV candle models, and ISO 8601 audit timestamps in the spec.
+   - Anti-Sycophancy Objective Scoping (`p-e-w/heretic` pattern): In Tier 2 and Devil's Advocate intake, ban conversational flattery and sycophantic agreement; enforce cold, quantitative technical trade-off evaluation.
    - Query `science` databases if domain involves biotech, chemistry, genomics, or healthcare.
    - Run `browse` to verify live competitive intelligence.
    - Run `impeccable init` and `impeccable shape` to establish information architecture.

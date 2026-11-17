@@ -37,6 +37,9 @@ description: Phase 2 of the 5-Hour Hackathon Sprint. Implements backend services
    - Decorate Pydantic V2 and SQLAlchemy fields with semantic `Field(description="...")` tags and clear relational foreign keys. Eliminates LLM Text-to-SQL hallucinations without heavy RDF/OWL ontology bloat.
 10. **Stealth Fallback Web Fetching (`D4Vinci/Scrapling` pattern)**:
     - If external live web data extraction via `api-anything` hits bot gates, use `scrapling` as a direct Python fallback instead of writing fragile multi-file browser automation scripts.
+11. **Standardized AG-UI Streaming Protocol (`ag-ui-protocol/ag-ui` pattern)**:
+    - Standardize real-time agent-to-client streaming via native Server-Sent Events (`StreamingResponse(stream(), media_type="text/event-stream")`).
+    - Emit typed event frames: `event: agent_thought`, `event: tool_call`, `event: ui_delta`, and `event: complete`. Eliminates complex bi-directional WebSocket wrappers.
 
 ---
 

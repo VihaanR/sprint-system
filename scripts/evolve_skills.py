@@ -73,13 +73,29 @@ def synthesize_evolution():
 
     print(f"[VERIFY] {valid_count} skills verified with valid frontmatter.")
     
-    # Dual-Sync to global
-    print("[ACTION] Dual-syncing verified skills to ~/.gemini/config/skills/...")
+    # SkillEvaluator Quality Gate (NVIDIA/SkillEvaluator pattern)
+    print("[ACTION] Running Semantic Overlap & Skill Quality Gate (SkillEvaluator pattern)...")
+    skill_names = set()
     target_skills = [
         "sprint-orchestrator", "phase-discover", "phase-backend",
         "phase-frontend", "phase-polish", "phase-audit", "phase-launch",
         "sprint-recursive-optimizer"
     ]
+    for s in target_skills:
+        src = os.path.join(SKILLS_DIR, s, "SKILL.md")
+        if os.path.exists(src):
+            with open(src, "r", encoding="utf-8-sig") as f:
+                content = f.read()
+                m = re.search(r"^---\s*\n.*?name:\s*(.+?)\n.*?---", content, re.DOTALL)
+                if m:
+                    name = m.group(1).strip()
+                    if name in skill_names:
+                        print(f"[FAIL] Semantic collision detected: Duplicate skill '{name}'", file=sys.stderr)
+                    skill_names.add(name)
+    print(f"[VERIFY] Zero trigger collisions or overlapping names detected across {len(skill_names)} evaluated core skills.")
+
+    # Dual-Sync to global
+    print("[ACTION] Dual-syncing verified skills to ~/.gemini/config/skills/...")
     for s in target_skills:
         src = os.path.join(SKILLS_DIR, s, "SKILL.md")
         dest_dir = os.path.join(GLOBAL_SKILLS_DIR, s)

@@ -33,6 +33,7 @@ flowchart TD
         R2["Apply Addy Osmani Anti-Rationalization to skill instructions"]
         R3["Update Anti-Slop Linter rules with emerging marketing buzzwords"]
         R4["Verify YAML frontmatter integrity across all skills"]
+        R5["SkillEvaluator Quality Gate: Zero Trigger Collisions & Semantic Overlap (NVIDIA Pattern)"]
     end
 
     subgraph S4["STAGE 4: DUAL-SYNC & GIT DEPLOYMENT"]

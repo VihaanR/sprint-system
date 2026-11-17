@@ -22,6 +22,7 @@ flowchart TD
         M3["firestore-rules-author: Firebase Emulator Unit Tests"]
         M4["Anti-Slop Linter: Banned Gradients & Lexicon (Exit Code 0)"]
         M5["Headless Chrome + axe-core: 0 Accessibility Violations"]
+        M6["alibaba/open-code-review: Deterministic 4-Vector AST Checklist"]
     end
 
     subgraph P2["PASS 2: IMPLEMENTATION READINESS INSPECTION"]
@@ -65,6 +66,7 @@ flowchart TD
    - Run backend test suite (`pytest`): verify exit code 0.
    - Run `AgentShield` / `security-auditor`: AST scan for exposed keys, unescaped queries, and open CORS.
    - Run Anti-Slop Linter: verify exit code 0 on banned gradients, sparkles, and fake metrics.
+   - Run Deterministic 4-Vector AST Checklist (`alibaba/open-code-review` pattern): static check for (1) null/undefined dereferences, (2) concurrency race conditions, (3) raw DOM injection, and (4) unparameterized SQL queries.
    - Run Headless Chrome visual sniff test: verify `window.__hasError === false` and 0 accessibility violations via `axe-core`.
 3. **Pass 2: Implementation Readiness & Negative LOC**:
    - Dispatch `egm-implementation-readiness`: inspect code for broken TODOs or incomplete endpoints.

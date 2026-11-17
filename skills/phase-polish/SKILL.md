@@ -30,9 +30,10 @@ description: Phase 4 of the 5-Hour Hackathon Sprint. Applies impeccable anti-slo
    - Genuine squash-and-stretch dynamics on click/hover states.
 4. **Out-of-Band 3D Sidecars (`sidecar://`)**:
    - For scientific or complex spatial projects, surface sidecar pills (`sidecar://science_biomolecular_structure_viewer_mcp`). Renders interactive 3D WebGL structures in the side pane at **zero agent context-token cost**.
-5. **The `egm-style` Copywriting Purge**:
+5. **The `egm-style` Copywriting Purge & Heretic Anti-Sycophancy Filter (`p-e-w/heretic` pattern)**:
    - Strip all marketing fluff, hype words, and buzzwords: *"seamlessly"*, *"elevate"*, *"supercharge"*, *"unleash"*, *"cutting-edge"*, *"next-generation"*.
-   - Replace with objective, measurable technical statements.
+   - Strip conversational flattery, sycophantic agreement, and performative enthusiasm: *"Certainly!"*, *"I'd be glad to help!"*, *"Great question!"*, *"I apologize for that error"*.
+   - Strip unprompted echo-chamber summaries of user instructions; enforce cold, factual, concise technical statements.
 6. **Addy Osmani Complexity Reduction (`code-simplify`)**:
    - Flatten control flow with early returns; maximum nesting depth <= 2.
    - Eliminate promise chains in favor of `async/await`.
