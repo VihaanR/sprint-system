@@ -9,12 +9,15 @@ import os
 import sys
 import json
 import re
+import shutil
 import subprocess
 from datetime import datetime
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SKILLS_DIR = os.path.join(REPO_ROOT, "skills")
 GLOBAL_SKILLS_DIR = os.path.expanduser("~/.gemini/config/skills")
+CLAUDE_SKILLS_DIR = os.path.expanduser("~/.claude/skills")
+SYNC_TARGETS = [GLOBAL_SKILLS_DIR, CLAUDE_SKILLS_DIR]
 MARKET_JSON = os.path.join(REPO_ROOT, "docs", "market_trends.json")
 SPRINT_LOG = os.path.join(REPO_ROOT, "SPRINT.md")
 
@@ -60,6 +63,7 @@ def synthesize_evolution():
     # Frontmatter validation pass
     print("[ACTION] Validating skill YAML frontmatter across all skills...")
     valid_count = 0
+    valid_skills = set()
     for root, _, files in os.walk(SKILLS_DIR):
         for file in files:
             if file == "SKILL.md":
@@ -68,6 +72,7 @@ def synthesize_evolution():
                     txt = f.read()
                     if re.search(r"^---\s*\n.*?name:\s*.+?\n.*?---", txt, re.DOTALL):
                         valid_count += 1
+                        valid_skills.add(os.path.basename(root))
                     else:
                         print(f"[FAIL] Frontmatter invalid in {full_path}", file=sys.stderr)
 
@@ -94,16 +99,20 @@ def synthesize_evolution():
                     skill_names.add(name)
     print(f"[VERIFY] Zero trigger collisions or overlapping names detected across {len(skill_names)} evaluated core skills.")
 
-    # Dual-Sync to global
-    print("[ACTION] Dual-syncing verified skills to ~/.gemini/config/skills/...")
+    # Dual-Sync: validated skills go to both the Gemini and Claude global skill dirs (byte-exact copy keeps frontmatter intact)
+    print("[ACTION] Dual-syncing validated skills to ~/.gemini/config/skills/ and ~/.claude/skills/...")
     for s in target_skills:
         src = os.path.join(SKILLS_DIR, s, "SKILL.md")
-        dest_dir = os.path.join(GLOBAL_SKILLS_DIR, s)
-        dest = os.path.join(dest_dir, "SKILL.md")
-        if os.path.exists(src):
+        if not os.path.exists(src):
+            continue
+        if s not in valid_skills:
+            print(f"[SKIPPED] {s}: frontmatter not validated", file=sys.stderr)
+            continue
+        for target_dir in SYNC_TARGETS:
+            dest_dir = os.path.join(target_dir, s)
+            dest = os.path.join(dest_dir, "SKILL.md")
             os.makedirs(dest_dir, exist_ok=True)
-            with open(src, "r", encoding="utf-8") as sf, open(dest, "w", encoding="utf-8") as df:
-                df.write(sf.read())
+            shutil.copyfile(src, dest)
             print(f"[SYNCED] {s} -> {dest}")
 
     print("[DONE] Recursive evolution cycle completed successfully.")
