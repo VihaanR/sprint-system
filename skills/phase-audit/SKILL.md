@@ -45,7 +45,7 @@ flowchart TD
 - **`firestore-rules-author`**: Mechanical validation of declarative Firestore security rules against local emulators.
 - **`egm-implementation-readiness`**: Pragmatic auditor ensuring zero placeholder stubs, unhandled edge cases, or broken API contracts remain.
 - **`ponytail` (`/ponytail-review`)**: Negative LOC audit. Deletes dead code, single-use abstractions, and unneeded wrapper utilities.
-- **`understand-anything`**: AST architecture tree audit. Confirms zero circular dependencies in `docs/ARCHITECTURE_TREE.md`.
+- **`understand-anything`**: AST architecture tree audit. Confirms zero circular dependencies (`docs/ARCHITECTURE_TREE.md` only when `gates.architectureTreeRequired` is true).
 - **`aas` elite bundle**:
   - `skills/aas/security-hardening.md`: Timing-safe comparisons, security headers, input sanitization.
   - `skills/aas/chaos-testing.md`: Latency injection, simulated service drop fallbacks.
@@ -71,7 +71,7 @@ flowchart TD
 3. **Pass 2: Implementation Readiness & Negative LOC**:
    - Dispatch `egm-implementation-readiness`: inspect code for broken TODOs or incomplete endpoints.
    - Run `/ponytail-review`: eliminate unused imports, dead functions, and redundant wrappers.
-   - Run `understand-anything`: confirm zero circular imports in `docs/ARCHITECTURE_TREE.md`.
+   - Run `understand-anything`: confirm zero circular imports (write `docs/ARCHITECTURE_TREE.md` only if `gates.architectureTreeRequired`).
 4. **Telemetry & Error Pre-Flight**:
    - Confirm Sentry DSN configuration and trigger test event.
 5. **Flush Disk Artifacts (ACP Protocol)**:

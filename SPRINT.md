@@ -41,7 +41,7 @@
 
 - [ ] **Phase 4: Beautification & Polish** (~45 min)
   - [ ] Pre-Phase Gate: Phase 3 Scorecard + Devil's Advocate Interrogation
-  - [ ] Impeccable anti-slop pass (npx impeccable detect + polish/bolder/typeset)
+  - [ ] Impeccable anti-slop pass (`scripts/impeccable context`, read PRODUCT.md + DESIGN.md + skills/impeccable/reference/craft-floor.md, then polish/typeset)
   - [ ] UI/UX Pro Max design intelligence applied (OLED Dark / Glassmorphism)
   - [ ] Semantic typography & Phosphor SVG icons
   - [ ] CSS micro-interactions & button active states
@@ -60,10 +60,10 @@
 - [ ] **Phase 6: Judge-Ready Pitch & Launch** (~45 min)
   - [ ] Pre-Phase Gate: Phase 5 Scorecard + Devil's Advocate Interrogation
   - [ ] Live production deployment (Vercel / Railway)
-  - [ ] 60-second product demo video (`brag` / Hyperframes)
+  - [ ] 15-25s product demo video (`brag`, `gates.videoDurationSec` in sprint.config.json)
   - [ ] Interactive Swagger UI (`/docs`) & Postman collection
   - [ ] Winning `README.md` with pitch, architecture & demo accounts
-  *Deliverable*: Live URL + 60s video + submission package
+  *Deliverable*: Live URL + 15-25s video + submission package
 
 ---
 

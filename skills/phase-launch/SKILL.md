@@ -1,12 +1,12 @@
 ---
 name: phase-launch
-description: Phase 6 of the 5-Hour Hackathon Sprint. Packages the judge-ready submission: 60s launch video via brag, deployments via vercel/railway/firebase, gravitas proof of deployment, Postman collections, Swagger docs, and winning README via mermaid-expert.
+description: Phase 6 of the 5-Hour Hackathon Sprint. Packages the judge-ready submission: 15-25s launch video via brag, deployments via vercel/railway/firebase, gravitas proof of deployment, Postman collections, Swagger docs, and winning README via mermaid-expert.
 ---
 
 # Phase 6: Zero-Localhost Deployment & Remotion Launch (v2.0)
 
 **Target Time Budget**: ~45 minutes  
-**Goal**: Package the completed project into an irresistible, submission-ready hackathon package: live deployed URL, verified Stripe monetization checkout, 60-second programmatic Remotion launch video, interactive API documentation, and a compelling pitch README.
+**Goal**: Package the completed project into an irresistible, submission-ready hackathon package: live deployed URL, a Stripe test checkout only when `gates.stripeEnabled` is true, a 15-25s `brag` launch video (`gates.videoDurationSec`), interactive API documentation, and a compelling pitch README.
 
 ---
 
@@ -23,7 +23,7 @@ description: Phase 6 of the 5-Hour Hackathon Sprint. Packages the judge-ready su
 3. **Commercial Monetization Gate**:
    - Mechanical execution against `/api/v1/billing/create-checkout-session` returning an active `cs_test_...` Stripe checkout session URL.
 4. **Programmatic Remotion React Video**:
-   - Render code-driven 60-second video directly from React components (`remotion-best-practices` + `brag`) with Spring physics (`cubic-bezier(0.25, 1, 0.5, 1)`).
+   - Render code-driven 15-25s video directly from React components (`remotion-best-practices` + `brag`) with Spring physics (`cubic-bezier(0.25, 1, 0.5, 1)`).
    - If headless Chromium rendering times out in CI, fall back gracefully to animated WebP/GIF screencast.
 
 ---
@@ -33,8 +33,8 @@ description: Phase 6 of the 5-Hour Hackathon Sprint. Packages the judge-ready su
 - **`vercel-plugin`**: Instant edge production deployment (`vercel --prod --yes`).
 - **`railway` plugin & `docker` MCP**: Instant hosting for FastAPI backends, PostgreSQL/Redis, and Docker services.
 - **`firebase` plugin**: Deploys Firebase Hosting, Cloud Functions, and security rules.
-- **`remotion-best-practices` & `brag`**: Programmatic 60s React code-video production with spring physics.
-- **`stripe` plugin**: Verifies live test checkout session creation.
+- **`remotion-best-practices` & `brag`**: Programmatic 15-25s code-video production with spring physics.
+- **`stripe` plugin**: Only when `gates.stripeEnabled` is true; verifies test checkout session creation.
 - **`gravitas`**: Reliability runtime. Verifies live URLs return HTTP 200 and video artifacts exist on disk before claiming launch completion.
 - **`postman` plugin & `openapi-spec-generation`**: Generates interactive Swagger docs and public Postman collections for judges.
 - **`git-advanced-workflows` & `github-mcp-server`**: Creates clean commit history, writes release notes, and tags release (`git tag v1.0.0-hackathon`).
@@ -55,13 +55,13 @@ description: Phase 6 of the 5-Hour Hackathon Sprint. Packages the judge-ready su
      curl -s -f -o /dev/null -w "%{http_code}" $PRODUCTION_DEPLOYED_URL
      ```
      Assert returns `200`.
-3. **Verify Stripe Monetization Gate**:
+3. **Verify Stripe Monetization Gate (skip unless `gates.stripeEnabled` is true)**:
    - Trigger test checkout session:
      ```bash
      curl -s -X POST "$PRODUCTION_DEPLOYED_URL/api/v1/billing/create-checkout-session"
      ```
      Verify response contains active `cs_test_...` URL.
-4. **Compile 60-Second Demo Video**:
+4. **Compile 15-25s Demo Video (`brag`)**:
    - Run Remotion compilation script via `remotion-best-practices` / `brag`.
    - Verify `artifacts/launch_demo.mp4` exists with non-zero byte size (or fall back to animated WebP/GIF).
 5. **Interactive Judge Tools (Swagger & Postman)**:

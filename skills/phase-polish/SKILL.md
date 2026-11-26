@@ -12,11 +12,10 @@ description: Phase 4 of the 5-Hour Hackathon Sprint. Applies impeccable anti-slo
 
 ## Architectural Principles & Gating
 
-1. **Spatial Depth & Calibrated Glassmorphism**:
-   - Multi-layer Z-axis elevation: canvas (`bg-slate-950` / `zinc-950`), secondary containers (`bg-slate-900/80`), floating interactive surfaces (`bg-slate-800/60`).
-   - High-density backdrop filters (`backdrop-filter: blur(16px)`).
-   - Sub-pixel border specular highlights (`1px solid rgba(255,255,255,0.08)` dark / `1px solid rgba(0,0,0,0.06)` light).
-   - 3D perspective transforms (`perspective: 1000px`, `rotateX`, `rotateY`) on active cards.
+1. **DESIGN.md Is the Source of Truth (impeccable preflight)**:
+   - Before any UI edit: run `scripts/impeccable context`, read `PRODUCT.md`, `DESIGN.md`, `skills/impeccable/reference/craft-floor.md`, then create `.sprint/impeccable.ok` (the PreToolUse hook blocks UI edits without it).
+   - Surfaces, color, depth and type come from DESIGN.md tokens. No stock dark-glass template (no default `slate-950` canvas, blanket backdrop blur, or decorative 3D tilt).
+   - axe-core runs in Phase 3 (auditor walkthrough); Phase 4 must keep violations at 0.
 2. **The 12 Laws of Code-Driven Motion**:
    - Absolute ban on `linear` transitions and naive browser `ease-in-out`.
    - Deceleration curve: `cubic-bezier(0.25, 1, 0.5, 1)` for high-velocity entry into resting position.
@@ -59,11 +58,10 @@ description: Phase 4 of the 5-Hour Hackathon Sprint. Applies impeccable anti-slo
 1. **Pre-Phase Gate**:
    - Deliver Phase 3 Executive Scorecard.
    - Confirm visual archetype and motion requirements.
-2. **Layer Spatial Depth & Glassmorphism**:
-   - Inject calibrated border specular highlights (`1px solid rgba(255,255,255,0.08)`).
-   - Apply backdrop blurs (`backdrop-filter: blur(16px)`).
-   - Add 3D perspective tilt (`perspective: 1000px`) on hero cards.
-   - If sketch mode is active, apply authentic cream notebook styling (`#FCFBF7`).
+2. **Apply DESIGN.md Tokens**:
+   - Replace any hardcoded colors, shadows and radii with DESIGN.md tokens.
+   - Run `/impeccable critique` then `/impeccable polish`; fix what the craft floor flags.
+   - Re-run axe-core on changed views; 0 violations.
 3. **Implement 12 Laws of Motion**:
    - Replace linear transitions with `cubic-bezier(0.25, 1, 0.5, 1)` and `cubic-bezier(0.34, 1.56, 0.64, 1)`.
    - Apply 50ms stagger cascades to list and card grids.
