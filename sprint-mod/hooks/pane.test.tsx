@@ -167,7 +167,7 @@ test('hold off: a side-agent note is still queued but also goes on to Claude', a
   await $.prompt.submit({ text: NOTE })
   expect(sent).toEqual([NOTE])
   const r: any = await $.command.run({ command: 'sprint-critiques' })
-  expect(r.text).toContain('1. cache-tax spends usage during your breaks')
+  expect(r.text).toContain('No open critiques.')
   expect(r.text).toContain('Hold: off')
 })
 
@@ -230,7 +230,7 @@ test('an urgent note reaches Claude during a sprint and is still listed', async 
   await $.prompt.submit({ text: urgent })
   expect(sent).toEqual([urgent])
   const r: any = await $.command.run({ command: 'sprint-critiques' })
-  expect(r.text).toContain('about to push to main')
+  expect(r.text).toContain('No open critiques.')
 })
 
 test('briefOf and parseJobs', () => {

@@ -364,9 +364,10 @@ export const register: Register = on => {
     if (!isNote || !e.text.trim()) return next(e)
     const now = await $.clock.now()
     const text = e.text.slice(0, 4000)
-    await saveCritiques($, l => (l.some(c => c.text === text) ? l : [...l, { id: `c${now}`, at: now, title: critiqueTitle(text), text, status: 'open' as const }].slice(-30)))
     const mode = await read($, hold), st = await read($, snap)
-    if (!isUrgent(text) && !hasOwnWords(text) && (mode === 'always' || (mode === 'sprint' && st?.active))) {
+    const held = !isUrgent(text) && !hasOwnWords(text) && (mode === 'always' || (mode === 'sprint' && !!st?.active))
+    await saveCritiques($, l => (l.some(c => c.text === text) ? l : [...l, { id: `c${now}`, at: now, title: critiqueTitle(text), text, status: held ? 'open' as const : 'sent' as const }].slice(-30)))
+    if (held) {
       return { drop: 'Queued for ponytail review, not sent to Claude. p in the sprint sidebar or /sprint-critiques apply reviews now; /sprint-critiques hold off sends notes straight through.' }
     }
     return next(e)
