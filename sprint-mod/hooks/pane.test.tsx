@@ -111,7 +111,27 @@ test('effort routing leaves agents alone outside a sprint', async ($, on) => {
 })
 
 
-import { briefOf, critiqueTitle, hasOwnWords, isUrgent, keepAction, parseJobs } from './register'
+import { briefOf, critiqueTitle, hasOwnWords, isUrgent, keepAction, parseJobs, phaseWindow } from './register'
+
+test('phaseWindow: floor wait, open window, over budget', () => {
+  const w = (usedMin: number, floorMin = 25) => phaseWindow({ phase: 1, phaseBudgets: [30, 60, 75, 45, 45, 45], phaseStartedAtMs: NOW - usedMin * 60000, floorMin, readAtMs: NOW })
+  expect(w(5)).toEqual({ text: 'floor in 20m', tone: 'wait' })
+  expect(w(27)).toEqual({ text: 'window open', tone: 'open' })
+  expect(w(33)).toEqual({ text: 'over budget 3m', tone: 'over' })
+  expect(w(2, 0)).toEqual({ text: 'window open', tone: 'open' }) // floor lifted by "skip floor"
+})
+
+test('pane shows the phase window under the phase bar', async ($, on) => {
+  const files = { ...FILES,
+    '/repo/.sprint-state.json': JSON.stringify({ active: true, phase: 1, startedAt: '2026-11-26T09:50:00Z', phaseStartedAt: '2026-11-26T09:50:00Z', skillsLoaded: ['phase-discover'] }),
+    '/repo/sprint.config.json': JSON.stringify({ timeBudgetMinutes: 300, phases: { 1: { budgetMin: 30 } }, gates: { phaseFloorLeadMin: 5 } }) }
+  engine(on, [], [], files)
+  await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  expect(await ui.find({ type: 'Text', text: /floor in 15m/ })).toBeTruthy()
+  expect(await ui.find({ type: 'Text', text: /floor 25m of 30m/ })).toBeTruthy()
+  await ui.unmount()
+})
 
 test('keepAction: arms once per sprint, turns off only its own window', () => {
   const T0 = NOW - 60 * 60000, live = { active: true, budgetMin: 300, startedAtMs: T0, readAtMs: NOW }

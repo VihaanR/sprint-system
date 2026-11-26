@@ -12,7 +12,7 @@ const NAMES = ['discover', 'backend', 'frontend', 'polish', 'audit', 'launch']
 const SPIN = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
 const SPRINT_REPO = 'V:/Projects/sprint'
 
-const snap = atom({ plugin: 'sprint-mod', key: 'snap' } as const, null, { shape: 'snap-4' })
+const snap = atom({ plugin: 'sprint-mod', key: 'snap' } as const, null, { shape: 'snap-5' })
 const frame = atom({ plugin: 'sprint-mod', key: 'frame' } as const, 0)
 const note = atom({ plugin: 'sprint-mod', key: 'note' } as const, '')
 const compact = atom({ plugin: 'sprint-mod', key: 'compact' } as const, false)
@@ -50,8 +50,16 @@ const C = { mauve: '#cba6f7', blue: '#89b4fa', sky: '#89dceb', green: '#a6e3a1',
 
 type $T = Parameters<Parameters<Register>[0]>[2] extends (...a: infer A) => unknown ? A[0] : never
 type Health = { executors?: Record<string, { state?: string; until?: string | null; reason?: string; runs?: { ts: string; outcome: string }[] }> }
-type State = { active?: boolean; phase?: number; startedAt?: string; skillsLoaded?: string[] }
-type Config = { timeBudgetMinutes?: number; phases?: Record<string, { budgetMin?: number }> }
+type State = { active?: boolean; phase?: number; startedAt?: string; phaseStartedAt?: string; floorSkippedPhase?: number; skillsLoaded?: string[] }
+type Config = { timeBudgetMinutes?: number; phases?: Record<string, { budgetMin?: number }>; gates?: { phaseFloorLeadMin?: number } }
+
+// The phase window the gate enforces (scripts/hooks/sprint-gate.js): may not end before the floor, should end by the budget.
+export function phaseWindow(s: Pick<Snapshot, 'phase' | 'phaseBudgets' | 'phaseStartedAtMs' | 'floorMin' | 'readAtMs'>): { text: string; tone: 'wait' | 'open' | 'over' } {
+  const used = (s.readAtMs - s.phaseStartedAtMs) / 60000, budget = s.phaseBudgets[s.phase - 1] ?? 0
+  if (budget && used >= budget) return { text: `over budget ${Math.round(used - budget)}m`, tone: 'over' }
+  if (used < s.floorMin) return { text: `floor in ${Math.ceil(s.floorMin - used)}m`, tone: 'wait' }
+  return { text: 'window open', tone: 'open' }
+}
 
 async function readJson<T>($: $T, path: string): Promise<T | null> {
   try { return JSON.parse(await $.fs.read(path)) as T } catch { return null }
@@ -284,6 +292,8 @@ async function refresh($: $T): Promise<Snapshot> {
     active: !!st.active, phase: st.phase ?? 0, startedAtMs: st.startedAt ? Date.parse(st.startedAt) : now,
     budgetMin: cfg.timeBudgetMinutes ?? 300,
     phaseBudgets: [1, 2, 3, 4, 5, 6].map(n => cfg.phases?.[n]?.budgetMin ?? 0),
+    phaseStartedAtMs: Date.parse(st.phaseStartedAt ?? st.startedAt ?? '') || now,
+    floorMin: st.floorSkippedPhase === st.phase ? 0 : Math.max(0, (cfg.phases?.[st.phase ?? 0]?.budgetMin ?? 0) - (cfg.gates?.phaseFloorLeadMin ?? 5)),
     skillsLoaded: st.skillsLoaded ?? [],
     execs: execRows((await readJson<Health>($, `${ab}/health.json`)) ?? {}, now),
     trees: (trees?.stdout ?? '').split(/\n\n/).filter(b => /refs\/heads\/route\//.test(b) && !/prunable/.test(b)).length,
@@ -300,7 +310,7 @@ async function refresh($: $T): Promise<Snapshot> {
   await update($, snap, () => s)
   // The status line's sprint segment reads this, so each fact is worked out once, here.
   const open = (await read($, critiques)).filter(c => c.status === 'open').length
-  await $.fs.write(`${ab}/sprint-status.json`, JSON.stringify({ at: new Date(now).toISOString(), active: s.active, phase: s.phase, name: s.active ? NAMES[s.phase - 1] : '', leftMin: mins(s.budgetMin * 60000 - (now - s.startedAtMs)), gate: gateState(s.gate), critiques: open })).catch(() => null)
+  await $.fs.write(`${ab}/sprint-status.json`, JSON.stringify({ at: new Date(now).toISOString(), active: s.active, phase: s.phase, name: s.active ? NAMES[s.phase - 1] : '', leftMin: mins(s.budgetMin * 60000 - (now - s.startedAtMs)), window: s.active ? phaseWindow(s) : null, gate: gateState(s.gate), critiques: open })).catch(() => null)
   return s
 }
 
@@ -524,6 +534,7 @@ export const register: Register = on => {
             <Text color={C.sub}> {Math.round(elapsedMin)}/{s.budgetMin}m</Text>
           </Text>
         )}
+        {s.active && (() => { const w = phaseWindow(s); return <Text color={w.tone === 'over' ? C.red : w.tone === 'wait' ? C.yellow : C.green}>{w.text}<Text color={C.sub}> · floor {s.floorMin}m of {s.phaseBudgets[s.phase - 1]}m</Text></Text> })()}
         <Text color={C.sub}>{cut(root.split('/').pop() || root, inner)}{s.active && !skillOk ? ' · load phase skill' : ''}</Text>
       </Box>
     )

@@ -1,79 +1,52 @@
 ---
 name: phase-discover
-description: Phase 1 of the 5-Hour Hackathon Sprint. Leverages research subagents, mobbin, StitchMCP, api-anything MCP, impeccable (init/shape), context7, google-developer-knowledge, api-design-principles, mermaid-expert, graphify, and understand-anything to architect the winning moat, OpenAPI specs, database ERD, and architecture tree.
+description: Phase 1 of the 5-Hour Hackathon Sprint. Interrogates the user with 15+ questions, challenges its own spec until the phase floor, and produces PRODUCT.md, DESIGN.md, a golden fixture and a frozen schema. Uses devil-advocate, impeccable (init/shape), mobbin, context7, api-design-principles and mermaid-expert.
 ---
 
-# Phase 1: Discover & Spec (Complete Research & Architecture v2.0)
+# Phase 1: Discover (budget 30 min, floor 25 min)
 
-**Target Time Budget**: ~30 minutes  
-**Goal**: Transform a problem statement into a bulletproof technical specification with an undeniable hackathon-winning "hook" (moat), concrete API schema, database design, deep architectural tree, and offline demo fixtures.
+Goal: a spec that survives attack. The time is spent asking and challenging, not writing fast.
+The hook refuses `advance` before the floor (budget − `phaseFloorLeadMin`) and makes you keep validating if you
+stop early. Ending in 5 minutes is a failure of this phase, not a win.
 
----
+Record everything in `.sprint/discover-log.json`:
+```json
+{ "userQuestions":   [{ "q": "...", "answer": "...", "topic": "users" }],
+  "challengeRounds": [{ "claim": "...", "attack": "...", "evidence": "...", "verdict": "kept|changed|cut" }] }
+```
+The exit gate needs at least 15 answered questions and 5 challenge rounds (`sprint.config.json` gates).
 
-## The 45-Second Interactive Gate (2-Tier Interrogation Protocol)
+## Step 1: interrogate the user (15+ questions, about 10 min)
+Ask with `AskUserQuestion`, 4 questions per call, in at least 4 rounds. Never answer a question for the user
+when the repo and the brief don't settle it. Write each answer to the log as soon as it arrives.
 
-Sprint System v2.0 replaces 20-minute sequential chat interrogations with an asymmetric 2-tier protocol:
+| Round | Topic | Ask about |
+|---|---|---|
+| 1 | Problem and users | who exactly uses it, the pain today, how they solve it now, what success looks like |
+| 2 | Scope and moat | the one demo moment, what is out of scope, why it is not a thin AI wrapper, judging criteria |
+| 3 | Data and domain | real data sources, edge cases and failure modes, domain rules and thresholds, legal or safety limits |
+| 4 | Constraints and launch | stack and hosting, offline demo needs, accounts and keys, Stripe yes or no, video length |
 
-1. **Tier 1 (Automated Heuristics - 12 Questions Auto-Resolved in < 2s)**:
-   - Scans repository topology, detected dependencies, active MCP servers, and environment credentials.
-   - Automatically resolves target auth scheme, database drivers, deployment targets, rate-limiting, and `DEMO_MODE=offline` local fixture strategies.
-2. **Tier 2 (Irreducible Strategic Decisions - 3 Questions in 1 Interactive Card)**:
-   - Served directly to the developer via native `ask_question` modal card in Antigravity chat:
-     - *Question 1 (The Moat)*: What is the singular technical or domain moat that prevents this app from being dismissed as a shallow ChatGPT wrapper?
-     - *Question 2 (Target Persona)*: Who is the exact high-value persona using this in production?
-     - *Question 3 (The 10-Second Tactile Hero Moment)*: What is the exact signature interaction that commands 1st place in under 15 seconds?
-   - Developer completes the form in 45 seconds flat.
-3. **Async Shadow Threat Modeling**:
-   - Out-of-band subagent sidecar inspects edge cases concurrently and injects offline resilience and security invariants directly into `SPRINT.md`.
+Each answer can raise follow-ups: ask them in a fifth round. Offer concrete options with a recommended first
+option, so each question takes the user seconds. Questions the repo already answers don't count.
 
----
+## Step 2: build the spec
+1. `scripts/impeccable context`, then `impeccable init` → `PRODUCT.md` (user, hero demo, moat, out of scope).
+2. `DESIGN.md`: tokens derived from the product (see `skills/impeccable/reference/craft-floor.md`).
+3. Golden fixture: one realistic record set under `fixtures/` plus `fixtures/*golden*` with computed expected outputs.
+4. `SPRINT.md`: mermaid data flow and ERD (`mermaid-expert`), API contract, `DEMO_MODE=offline` plan.
+5. One domain-expert review (the `discover` agent or a cold subagent) on the fixture and thresholds.
 
-## Active Tooling & Capabilities
+## Step 3: challenge loop until the floor
+Repeat until the floor; each round goes in `challengeRounds` and in a SPRINT.md "Challenge log":
+1. Pick one claim from the spec (a threshold, a data assumption, a user need, the moat).
+2. Attack it: the `devil-advocate` skill, or a cold subagent given only the claim.
+3. Check it against evidence: data, docs (`context7`), competitors (`mobbin`), the golden fixture.
+4. Verdict: kept, changed (edit the spec now) or cut. A changed answer from the user counts as new evidence.
 
-- **`devils-advocate` & Matt Pocock `/grill-me`**: Adversarial systems-thinking critic and structured intake.
-- **`superpowers` (brainstorming)**: Translates vague requirements into concrete architecture.
-- **`impeccable` (init / shape)**: Establishes durable product truth, user personas, design language, and pre-code UX planning.
-- **`science` plugin (10 Curated DBs)**: ChEMBL, PDB, ClinVar, PubMed, EuropePMC, ENCODE, GTEx, Human Protein Atlas, STRING, PubChem for deep-tech domain intelligence.
-- **`browse` plugin**: Real-time competitor teardowns and industry benchmarking.
-- **`api-anything` MCP & skill**: Searches shared catalogs or learns live website APIs over plain HTTP (`find_sites`, `call_operation`).
-- **`mobbin` MCP**: Searches 600,000+ real-world app flows to benchmark industry-leading UX patterns.
-- **`StitchMCP`**: Generates visual layout concepts and wireframe variants.
-- **`context7` & `google-developer-knowledge`**: Fetches verified, up-to-date documentation on target frameworks and APIs.
-- **`graphify`**: Maps codebase architecture and macro dependency graphs (`graphify-out/graph.html`).
-- **`understand-anything`**: Analyzes AST structures post-Graphify to generate hierarchical `docs/ARCHITECTURE_TREE.md`.
-- **`gravitas`**: Enforces scoped reconnaissance (no blind speculation) and evidence-backed specification claims.
-- **`github-mcp-server`**: Inspects related repos, references, and issues.
-- **`api-design-principles` & `openapi-spec-generation`**: Contract-first REST API design with strict schemas.
-- **`mermaid-expert`**: Renders database ERDs and sequence architecture flowcharts directly in markdown.
-- **`gdocs` plugin**: Imports existing PRD/notes or exports initial project briefs to Google Docs.
+Good rounds find something. Five rounds that all say "kept" means the attacks were too soft.
 
----
-
-## Execution Checklist
-
-1. **Execute 45-Second Interactive Gate**:
-   - Run automated heuristic recon (12 questions auto-answered).
-   - Prompt the developer with the 3 strategic choices via native `ask_question` card in chat.
-   - Launch async shadow threat modeling sidecar.
-2. **Scoping & The Winning Hook**:
-   - Query `mobbin` MCP for top competitor UI/UX teardowns in this category.
-   - Reverse-Engineer Competitor Data Models (`morluto/rea` pattern): Inspect competitor web app network payloads and API responses in browser DevTools to map clean schemas in 60s without guesswork.
-   - Signature Split-View Hero Moment (`DeepTutor` pattern): For interactive AI applications, architect a split-view workspace (interactive data canvas/workspace on the left, streaming reasoning/controls on the right) rather than a boring single-column chat bubble feed.
-   - 30-Day Recency & Prediction Market Grounding (`mvanhorn/last30days-skill` pattern): Filter competitor search queries with strict 30-day temporal windows (`tbs=qdr:m`) and cross-reference Polymarket/HN consensus to discard obsolete pre-2025 AI assumptions.
-   - Conditional Fintech & Quant Archetype (`tradermonty/claude-trading-skills` pattern): If the domain is financial, mandate time-series schemas, OHLCV candle models, and ISO 8601 audit timestamps in the spec.
-   - Anti-Sycophancy Objective Scoping (`p-e-w/heretic` pattern): In Tier 2 and Devil's Advocate intake, ban conversational flattery and sycophantic agreement; enforce cold, quantitative technical trade-off evaluation.
-   - Query `science` databases if domain involves biotech, chemistry, genomics, or healthcare.
-   - Run `browse` to verify live competitive intelligence.
-   - Run `impeccable init` and `impeccable shape` to establish information architecture.
-   - Mandate `DEMO_MODE=offline` fixture definitions in `SPRINT.md` so the live demo never fails on stage.
-3. **Macro Knowledge Graph & AST Tree (Post-Graphify Drill-Down)**:
-   - Run `graphify` to map file dependencies and macro god nodes.
-   - Run `understand-anything` post-Graphify to output `docs/ARCHITECTURE_TREE.md`.
-4. **System Architecture & Data Contracts (`SPRINT.md`)**:
-   - Use `mermaid-expert` to render end-to-end data flow (Client -> API -> Database/AI -> Worker).
-   - Model relational entities, foreign keys, and indexes in Mermaid syntax.
-   - Lock in API schema contracts (OpenAPI / Pydantic models).
-5. **Phase Checkpoint & Gravitas Evidence Pass**:
-   - Finalize `SPRINT.md` (single living artifact consolidating spec, contract, and checklist).
-   - ACP check: ensure context memory utilization is < 35%.
-   - Prepare Executive Scorecard for gate approval into **Phase 2 (Core Engine & Backend)**.
+## Step 4: freeze and hand off
+- Freeze the schema (`types.ts`, OpenAPI or Pydantic). Changes after this need the user's go.
+- Post the scorecard with `[TIME] <used> / 30 min (floor 25)` and wait for go.
+- If you are over budget, the hook says so: post the scorecard at once.
