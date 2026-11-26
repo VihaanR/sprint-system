@@ -15,7 +15,7 @@ const FILES: Record<string, string> = {
   '/home/.claude/verify-evidence/repo-20261126-1000.md': 'result: pass\n# verify: repo',
   '/home/.agent-bridge/telemetry.jsonl': JSON.stringify({ ts: '2026-11-26T09:45:00Z', to: 'antigravity', model: 'hydrogen', outcome: 'ok', durS: 40 }) + '\n',
 }
-const USAGE = JSON.stringify({ agy: [{ model: 'Gemini 4 Hydrogen (High)', gens: 10, in: 221461, out: 5456 }], agyRuns: { c1: { gens: 2, in: 61124, out: 1287 } }, deepseek: { steps: 2, in: 0, out: 0 } })
+const USAGE = JSON.stringify({ agy: [{ model: 'Gemini 4 Hydrogen (High)', gens: 10, in: 221461, out: 5456 }], agyRuns: { c1: { gens: 2, in: 61124, out: 1287 } }, agyQuota: [{ pool: 'Gemini Models', window: '5h', remaining: 0.72, reset: '2026-11-26T15:15:32Z' }, { pool: 'Gemini Models', window: 'week', remaining: 0.9, reset: '2026-12-03T10:15:32Z' }, { pool: 'Claude and GPT models', window: '5h', remaining: 1, reset: '2026-11-26T15:17:28Z' }, { pool: 'Claude and GPT models', window: 'week', remaining: 1, reset: '2026-12-03T10:17:28Z' }], deepseek: { steps: 2, in: 0, out: 0 } })
 const AGENT = { id: 'a1', description: 'Research sidebar UI', type: 'general-purpose', status: 'running', kind: 'local_agent', taskStatus: 'running', label: 'research', startTime: NOW, cwd: '/repo', tokenCount: 12000, tokenSamples: [], contextWindowSize: 200000 }
 
 function engine(on: any, agents: unknown[] = [], evidence: unknown[] = [], files: Record<string, string> = FILES, withClock = true) {
@@ -111,7 +111,7 @@ test('effort routing leaves agents alone outside a sprint', async ($, on) => {
 })
 
 
-import { briefOf, critiqueTitle, hasOwnWords, isUrgent, keepAction, parseBudget, parseJobs } from './register'
+import { briefOf, critiqueTitle, hasOwnWords, isUrgent, keepAction, parseJobs } from './register'
 
 test('keepAction: arms once per sprint, turns off only its own window', () => {
   const T0 = NOW - 60 * 60000, live = { active: true, budgetMin: 300, startedAtMs: T0, readAtMs: NOW }
@@ -282,11 +282,11 @@ test('usage: agy pooled total beside its title, tokens per delegated agy job', a
   engine(on, [], [], { ...FILES, '/home/.agent-bridge/telemetry.jsonl': started + '\n' + tele + '\n', '/home/x.log': '▶ antigravity ← task T1\n', '/home/.agent-bridge/tasks/T1/telemetry.json': '{"source":{"conversationId":"c1"}}' })
   mock.store(on)
   await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
-  await $.command.run({ command: 'sprint-budget', args: '1m' })
   await $.command.run({ command: 'sprint' })
   const main = await $.ui.mount({ ...PANE, surface: 'terminal' })
-  expect(await main.find({ type: 'Text', text: /77% left/ })).toBeTruthy()
-  expect(await main.find({ type: 'Text', text: /227k of 1\.0M/ })).toBeTruthy()
+  expect(await main.find({ type: 'Text', text: /72% left/ })).toBeTruthy()
+  expect(await main.find({ type: 'Text', text: /gemini.*72% 5h · 90% wk/ })).toBeTruthy()
+  expect(await main.find({ type: 'Text', text: /claude.*100% 5h · 100% wk/ })).toBeTruthy()
   expect(await main.find({ type: 'Text', text: /today 221k in · 5k out/ })).toBeTruthy()
   await main.unmount()
   const agents = await $.ui.mount({ ...PANE, requestId: 'sprint-agents', surface: 'terminal' })
@@ -294,10 +294,3 @@ test('usage: agy pooled total beside its title, tokens per delegated agy job', a
   await agents.unmount()
 })
 
-
-test('parseBudget reads 2m, 500k and plain numbers', () => {
-  expect(parseBudget('2m')).toBe(2000000)
-  expect(parseBudget('500k')).toBe(500000)
-  expect(parseBudget('1.5M')).toBe(1500000)
-  expect(parseBudget('abc')).toBeNull()
-})

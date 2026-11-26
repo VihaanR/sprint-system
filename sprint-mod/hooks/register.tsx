@@ -140,19 +140,11 @@ async function applyCritiques($: $T): Promise<string> {
 // ---- Delegation view: router jobs, what each subagent is doing, worktrees, model usage, /btw answers ----
 type Job = { id: string; to: string; model: string; task: string; log: string; tree: string | null; state: string; startMs: number; durS: number | null; progress?: string; summary?: string; conv?: string }
 type TreeRow = { path: string; branch: string; prunable: boolean; changed: number }
-type UsageDoc = { agy: { model: string; gens: number; in: number; out: number }[]; agyRuns?: Record<string, { gens: number; in: number; out: number }>; deepseek: { steps: number; in: number; out: number } | null }
+type UsageDoc = { agy: { model: string; gens: number; in: number; out: number }[]; agyRuns?: Record<string, { gens: number; in: number; out: number }>; agyQuota?: { pool: string; window: string; remaining: number; reset: string }[] | null; deepseek: { steps: number; in: number; out: number } | null }
 let jobs: Job[] = []
 let treeRows: TreeRow[] = []
 let modelUsage: UsageDoc | null = null
 let usageError = ''
-// agy has no readable quota, so the sidebar counts today's real agy spend down from a daily budget you set
-// (/sprint-budget 2m), kept across sessions. When agy really runs out, the router's quota trip gives the reset time.
-let agyBudget = 0
-export function parseBudget(arg: string): number | null {
-  const m = /^(\d+(?:\.\d+)?)\s*([km]?)$/i.exec(arg.trim())
-  if (!m) return null
-  return Math.round(Number(m[1]) * ({ k: 1e3, m: 1e6 }[m[2].toLowerCase()] ?? 1))
-}
 const activity = new Map<string, { at: number; tool: string; brief: string }[]>()
 const btwAnswers = new Map<string, string>()
 
@@ -317,7 +309,6 @@ export function gateState(g: Gate): 'clean' | 'stale' | 'fail' | 'none' | 'pass'
 }
 const hhmm = (ms: number) => { const d = new Date(ms); return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}` }
 const mins = (ms: number) => Math.max(0, Math.round(ms / 60000))
-const tone = (o: string) => (o === 'ok' || o === 'advanced' ? 'success' : /quota|stall|breach|exhausted|fail|auth|blocked/.test(o) ? 'error' : 'warning')
 
 async function run($: $T, argv: string[], cwd: string): Promise<string> {
   const r = await $.process.run(argv, { cwd }).catch(e => ({ exitCode: 1, stdout: '', stderr: String(e) }))
@@ -424,9 +415,7 @@ export const register: Register = on => {
     await $.command.register({ name: 'sprint', description: 'Open the sprint sidebar (phases, handovers, executors)' })
     await $.command.register({ name: 'sprint-critiques', description: 'Side-agent critiques: list, apply (ponytail-review pass) or clear' })
     await $.command.register({ name: 'sprint-status', description: 'Sprint status as text (no model call)' })
-    await $.command.register({ name: 'sprint-budget', description: 'Daily agy token budget the sidebar counts down from: /sprint-budget 2m, 500k or off' })
     await $.command.register({ name: 'sprint-agents', description: 'Open the Agents tab: subagents, delegated jobs, worktrees, btw' })
-    agyBudget = Number(await $.store.get('agyBudget').catch(() => 0)) || 0
     const saved = await $.store.get(await critKey($)).catch(() => null)
     if (Array.isArray(saved) && !(await read($, critiques)).length) await update($, critiques, () => saved as Critique[])
     const s = await refresh($)
@@ -455,16 +444,6 @@ export const register: Register = on => {
     await refreshUsage($)
     await $.ui.open({ id: PANE, title: 'Sprint', focus: true, columns: 42 })
     return { text: 'Sprint sidebar opened.' }
-  })
-
-  on('command.run', { command: 'sprint-budget' }, async ($, e) => {
-    const arg = (e.args ?? '').trim()
-    if (arg === 'off') { agyBudget = 0; await $.store.set('agyBudget', 0); return { text: 'agy budget cleared.' } }
-    const n = parseBudget(arg)
-    if (!n) return { text: `agy daily budget: ${agyBudget ? agyBudget.toLocaleString() + ' tokens' : 'not set'}. Set one with /sprint-budget 2m (or 500k, or off).` }
-    agyBudget = n
-    await $.store.set('agyBudget', n)
-    return { text: `agy daily budget set to ${n.toLocaleString()} tokens (in + out). The ANTIGRAVITY header counts down from it.` }
   })
 
   on('command.run', { command: 'sprint-agents' }, async $ => {
@@ -531,9 +510,16 @@ export const register: Register = on => {
     ]
     const pctColor = (p: number) => (p > 0.85 ? C.red : p > 0.6 ? C.yellow : C.green)
     const runningJobs = jobs.filter(j => j.state === 'running').length
-    const agySpent = (modelUsage?.agy ?? []).reduce((n, m) => n + m.in + m.out, 0)
-    const agyTrip = s.execs.filter(x => x.key.startsWith('antigravity') && x.state === 'tripped' && /quota|auth/.test(x.reason)).sort((a, b) => a.untilMs - b.untilMs)[0]
-    const budgetLeft = agyBudget ? Math.max(0, 1 - agySpent / agyBudget) : null
+    // agy's real quota from its own /usage: two pools (Gemini; Claude and GPT), each with a 5-hour and a weekly window.
+    const quota = modelUsage?.agyQuota ?? []
+    const q = (pool: RegExp, w: string) => quota.find(x => pool.test(x.pool) && x.window === w)
+    const gem5 = q(/gemini/i, '5h')
+    const pct = (x?: { remaining: number }) => (x ? `${Math.round(x.remaining * 100)}%` : '–')
+    const qtone = (x?: { remaining: number }) => (!x ? C.sub : x.remaining < 0.15 ? C.red : x.remaining < 0.4 ? C.yellow : C.green)
+    const mini = (x?: { remaining: number }) => { const n = x ? Math.round(x.remaining * 8) : 0; return <Text><Text color={C.track}>▕</Text><Text color={qtone(x)}>{'█'.repeat(n)}</Text><Text color={C.track}>{'░'.repeat(8 - n)}▏</Text></Text> }
+    const poolRow = (key: string, name: string, re: RegExp) => (
+      <Text key={key}><Text color={C.sub}>{name.padEnd(7)}</Text>{mini(q(re, '5h'))} <Text color={qtone(q(re, '5h'))}>{pct(q(re, '5h'))}</Text><Text color={C.sub}> 5h · </Text><Text color={qtone(q(re, 'week'))}>{pct(q(re, 'week'))}</Text><Text color={C.sub}> wk</Text></Text>
+    )
     // Today's tokens per model: agy from its own run databases, DeepSeek from `opencode stats`; auto is not trackable.
     const useRow = (key: string, name: string, n: number, i: number, o: number) => (
       <Text key={key}><Text color={C.sub}>▸ </Text>{cut(name, 18).padEnd(18)} <Text color={C.sub}>{n}× {tok(i)}/{tok(o)}</Text></Text>
@@ -631,10 +617,12 @@ export const register: Register = on => {
 
         {groups.map(([g, c, rows]) => card(g, rows.some(x => x.state === 'tripped') ? C.red : c, [
           title(g, c, [rows.length ? `${rows.filter(x => x.state !== 'tripped').length}/${rows.length} ready` : 'unused',
-            g === 'ANTIGRAVITY' ? (agyTrip ? 'quota hit' : budgetLeft != null ? `${Math.round(budgetLeft * 100)}% left` : '') : ''].filter(Boolean).join(' · ')),
-          ...(g === 'ANTIGRAVITY' && agyTrip ? [<Text key="q-hit">{bar(0, C.red)} <Text color={C.red}>resets {hhmm(agyTrip.untilMs)}</Text></Text>] : []),
-          ...(g === 'ANTIGRAVITY' && !agyTrip && budgetLeft != null ? [<Text key="q-bar">{bar(budgetLeft, budgetLeft < 0.15 ? C.red : budgetLeft < 0.4 ? C.yellow : C.green)} <Text color={C.sub}>{`${tok(agySpent)} of ${tok(agyBudget)}`}</Text></Text>] : []),
-          ...(g === 'ANTIGRAVITY' && !agyBudget ? [<Text key="q-set" color={C.yellow}>{cut('set a daily budget: /sprint-budget 2m', inner)}</Text>] : []),
+            g === 'ANTIGRAVITY' && gem5 ? `${pct(gem5)} left` : ''].filter(Boolean).join(' · ')),
+          ...(g === 'ANTIGRAVITY' && quota.length ? [
+            poolRow('q-gem', 'gemini', /gemini/i),
+            poolRow('q-cg', 'claude', /claude|gpt/i),
+            <Text key="q-reset" color={C.sub}>{cut(`resets 5h ${gem5 ? hhmm(Date.parse(gem5.reset)) : '–'} · week ${q(/gemini/i, 'week') ? new Date(Date.parse(q(/gemini/i, 'week')!.reset)).toDateString().slice(4, 10) : '–'}`, inner)}</Text>,
+          ] : []),
           ...(g === 'ANTIGRAVITY' && modelUsage?.agy.length ? [<Text key="q-spent" color={C.sub}>{`today ${tok(modelUsage.agy.reduce((n, m) => n + m.in, 0))} in · ${tok(modelUsage.agy.reduce((n, m) => n + m.out, 0))} out`}</Text>] : []),
           ...(usageError ? [<Text key="u-err" color={C.yellow}>{cut(`usage: ${usageError}`, inner)}</Text>] : []),
           ...rows.map(x => {
