@@ -19,25 +19,26 @@ description: Phase 2 of the 5-Hour Hackathon Sprint. Implements backend services
    - Absolutely zero generic repository interfaces, abstract service factories, or premature microservice divisions.
    - Collocate route logic, query execution, and validation in concrete handlers.
 3. **Karpathy Core Rule 2 (Minimum Code)**:
-   - Target <= 450 lines of total backend core code. The best code is code you never had to write.
+   - HARD GATE: <= `gates.backendMaxCoreLoc` (450) hand-written core backend LOC (excl. schemas/fixtures/tests), cyclomatic complexity <= 6, no single-implementation ABCs. `node scripts/hooks/sprint-gate.js advance` checks LOC + pytest exit 0.
+   - Core domain/scientific logic (algorithms, matching, scoring) stays with Claude, with measurable acceptance criteria (complexity bound + golden fixture match). Never delegate it to free models.
 4. **Minute-1 Immutable Kernel Contract**:
    - Before parallel frontend subagents dispatch in Phase 3, the backend MUST lock and export `types.ts` (or OpenAPI JSON schema). Subagents code against this immutable contract without shared git lock contention.
-5. **Declarative Security & Mandatory Delegation**:
-   - Identity: Zero-boilerplate auth via `auth0` or `firebase`.
+5. **Declarative Security (opt-in)**:
+   - Identity: auth only when the product needs accounts (`auth0` or `firebase`). Not by default.
    - Security Rules: If using Firebase Firestore, rules authoring is MANDATORILY delegated to `firestore-rules-author`. Wildcard rules (`allow read, write: if true;`) are strictly banned.
-6. **Commercial Monetization Gate**:
+6. **Monetization (only if `gates.stripeEnabled` is true in sprint.config.json)**:
    - Implement `/api/v1/billing/create-checkout-session` using `stripe` plugin. Generates live `cs_test_...` URLs for test payment verification.
-7. **On-Demand FastMCP Scaffolding (Anthropics Pattern)**:
+7. **FastMCP Scaffolding (opt-in, only when the user asked for an MCP server)**:
    - When custom tools or external hardware/API bridges are required without existing MCP servers, scaffold a typed FastMCP Python server (`from mcp.server.fastmcp import FastMCP`) with Pydantic schema validation in < 60s. Ad-hoc bash/curl wrappers are banned.
-8. **Blast Radius & Risk Scoring Gate (Wednesday Solutions Pattern)**:
+8. **Blast Radius Check (opt-in, shared schemas only after the Phase 1 freeze)**:
    - Calculate downstream dependents before mutating shared data models or schemas:
      $$\text{Risk Score} = \min\left(100, \; \text{Complexity} \times (\text{Dependents} + 1) \times 5\right)$$
    - If Risk Score > 80 or Blast Radius > 5 files, in-place breaking changes are strictly forbidden; enforce append-only non-breaking extensions.
 9. **Semantic Schema & Entity Annotations (`NVIDIA/auto-ontology` pattern)**:
    - Decorate Pydantic V2 and SQLAlchemy fields with semantic `Field(description="...")` tags and clear relational foreign keys. Eliminates LLM Text-to-SQL hallucinations without heavy RDF/OWL ontology bloat.
-10. **Stealth Fallback Web Fetching (`D4Vinci/Scrapling` pattern)**:
+10. **Web Fetching Fallback (opt-in, only when the product scrapes live web data)**:
     - If external live web data extraction via `api-anything` hits bot gates, use `scrapling` as a direct Python fallback instead of writing fragile multi-file browser automation scripts.
-11. **Standardized AG-UI Streaming Protocol (`ag-ui-protocol/ag-ui` pattern)**:
+11. **Agent Streaming (opt-in, only when the product streams agent output)**:
     - Standardize real-time agent-to-client streaming via native Server-Sent Events (`StreamingResponse(stream(), media_type="text/event-stream")`).
     - Emit typed event frames: `event: agent_thought`, `event: tool_call`, `event: ui_delta`, and `event: complete`. Eliminates complex bi-directional WebSocket wrappers.
 

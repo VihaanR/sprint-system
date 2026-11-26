@@ -1,0 +1,7 @@
+{
+  "name": "sprint-mod",
+  "version": "1.1.0",
+  "description": "Sprint v3 animated sidebar, live status line and /sprint, /sprint-status",
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

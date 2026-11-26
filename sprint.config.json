@@ -1,0 +1,39 @@
+{
+  "autoTriggerPhrases": ["start a sprint", "run a sprint"],
+  "timeBudgetMinutes": 300,
+  "phases": {
+    "1": { "name": "discover", "budgetMin": 30 },
+    "2": { "name": "backend", "budgetMin": 60 },
+    "3": { "name": "frontend", "budgetMin": 75 },
+    "4": { "name": "polish", "budgetMin": 45 },
+    "5": { "name": "audit", "budgetMin": 45 },
+    "6": { "name": "launch", "budgetMin": 45 }
+  },
+  "router": {
+    "autoRoute": true,
+    "agyModels": ["Gemini 4 Hydrogen (High)", "Gemini 3.8 Flash (Medium)"],
+    "agySessionPrefix": "sprint",
+    "agyStartupStallMs": 180000,
+    "agyOneStrikeDrop": true,
+    "opencodeFallback": "freellmapi/auto",
+    "maxChainWallMs": 600000,
+    "requireStatusPreflight": true
+  },
+  "gates": {
+    "backendMaxCoreLoc": 450,
+    "maxCyclomaticComplexity": 6,
+    "stripeEnabled": false,
+    "architectureTreeRequired": false,
+    "videoDurationSec": "15-25"
+  },
+  "ui": {
+    "requireImpeccable": true,
+    "requirePhase3HumanWalk": true,
+    "requireZeroAxeViolations": true
+  },
+  "telemetry": {
+    "enableOtel": true,
+    "telemetryFile": "~/.agent-bridge/telemetry.jsonl",
+    "dashboardRefreshSec": 10
+  }
+}

@@ -57,3 +57,5 @@ graphify-out/
 # Operating System
 .DS_Store
 Thumbs.db
+.sprint-state.json
+.sprint/
