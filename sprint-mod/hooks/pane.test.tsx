@@ -103,3 +103,17 @@ test('effort routing leaves agents alone outside a sprint', async ($, on) => {
   await $.tool.call({ tool: 'Agent', subagent_type: 'Explore', description: 'd', prompt: 'p' } as any)
   expect(seen).toEqual([undefined])
 })
+
+
+import { keepAction } from './register'
+
+test('keepAction: arms once per sprint, turns off only its own window', () => {
+  const T0 = NOW - 60 * 60000, live = { active: true, budgetMin: 300, startedAtMs: T0, readAtMs: NOW }
+  expect(keepAction(live, 0, 'off')).toEqual({ armed: T0, args: '240m' })
+  expect(keepAction(live, T0, 'off')).toBeNull()
+  expect(keepAction(live, 0, 'on')).toBeNull()
+  expect(keepAction({ ...live, readAtMs: T0 + 250 * 60000 }, 0, 'off')).toBeNull()
+  expect(keepAction({ ...live, active: false }, T0, 'on')).toEqual({ armed: 0, args: 'off' })
+  expect(keepAction({ ...live, readAtMs: T0 + 301 * 60000 }, T0, 'on')).toEqual({ armed: 0, args: 'off' })
+  expect(keepAction({ ...live, active: false }, 0, 'on')).toBeNull()
+})

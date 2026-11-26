@@ -15,6 +15,8 @@ const snap = atom({ plugin: 'sprint-mod', key: 'snap' } as const, null, { shape:
 const frame = atom({ plugin: 'sprint-mod', key: 'frame' } as const, 0)
 const note = atom({ plugin: 'sprint-mod', key: 'note' } as const, '')
 const compact = atom({ plugin: 'sprint-mod', key: 'compact' } as const, false)
+// The sprint (its startedAt) whose keepwarm window this mod armed; 0 when it armed none.
+const keepArmed = atom({ plugin: 'sprint-mod', key: 'keepArmed' } as const, 0)
 
 // Catppuccin Mocha, the palette prismantis defaults to, so the two mods match.
 const C = { mauve: '#cba6f7', blue: '#89b4fa', sky: '#89dceb', green: '#a6e3a1', yellow: '#f9e2af', peach: '#fab387', red: '#f38ba8', text: '#cdd6f4', overlay: '#6c7086', crust: '#11111b' }
@@ -71,6 +73,29 @@ async function doneGate($: $T, root: string, now: number): Promise<Gate> {
 let usageCache: Awaited<ReturnType<$T['session']['usage']>> | null = null
 let agentsCache: Awaited<ReturnType<$T['agent']['list']>> = []
 
+// Keepwarm automation over cache-tax (karanb192/cache-tax). cache-tax pings only after 50 idle minutes and caps
+// each break's ping spend itself (its Ping floor option), so a window shorter than an hour does nothing.
+type KeepStatus = { keepwarm: 'on' | 'stopped' | 'off'; leftMs: number; autoWarm: boolean; stopped: string | null; pingSkipped: boolean; idlePingUsd: number | null; cold: boolean | null }
+let keepCache: KeepStatus | null = null
+async function keepwarm($: $T, s: Snapshot): Promise<void> {
+  // No $.cacheTax where cache-tax is not installed: the call throws and the gauge stays hidden.
+  try { keepCache = await ($ as unknown as { cacheTax: { status: () => Promise<KeepStatus> } }).cacheTax.status() } catch { keepCache = null }
+  if (!keepCache) return
+  const act = keepAction(s, await read($, keepArmed), keepCache.keepwarm)
+  if (!act) return
+  await update($, keepArmed, () => act.armed) // first, so a failed run is not retried every 5 s
+  if (act.args) await $.command.run({ command: 'keepwarm', args: act.args }).catch(() => null)
+}
+
+// Arm once per sprint for the minutes left (at least 60: a shorter window never pings), and switch off at the
+// end only a window this mod armed. A window you armed yourself is never touched.
+export function keepAction(s: Pick<Snapshot, 'active' | 'budgetMin' | 'startedAtMs' | 'readAtMs'>, armed: number, keep: 'on' | 'stopped' | 'off'): { armed: number; args: string | null } | null {
+  const leftMin = Math.floor(s.budgetMin - (s.readAtMs - s.startedAtMs) / 60000)
+  if (s.active && leftMin >= 60 && armed !== s.startedAtMs && keep !== 'on') return { armed: s.startedAtMs, args: `${leftMin}m` }
+  if (armed !== 0 && (!s.active || leftMin <= 0)) return { armed: 0, args: keep === 'on' ? 'off' : null }
+  return null
+}
+
 async function refresh($: $T): Promise<Snapshot> {
   const root = (await $.session.cwd()).replace(/\\/g, '/'), ab = `${await home($)}/.agent-bridge`, now = await $.clock.now()
   const st = (await readJson<State>($, `${root}/.sprint-state.json`)) ?? {}
@@ -89,6 +114,7 @@ async function refresh($: $T): Promise<Snapshot> {
   }
   usageCache = await $.session.usage().catch(() => null)
   agentsCache = await $.agent.list().catch(() => [])
+  await keepwarm($, s).catch(() => null)
   await update($, snap, () => s)
   return s
 }
@@ -304,6 +330,17 @@ export const register: Register = on => {
           ...u.rateLimits.slice(0, 2).map(r => (
             <Text key={r.kind}><Text dimColor>{cut(r.kind, 7).padEnd(8)}</Text>{bar(r.percentUsed / 100, pctColor(r.percentUsed / 100))} {Math.round(r.percentUsed)}%</Text>
           )),
+          ...(keepCache ? [(() => {
+            const k = keepCache, hm = (ms: number) => `${Math.floor(ms / 3600000)}h${String(Math.floor(ms / 60000) % 60).padStart(2, '0')}m`
+            const spent = k.idlePingUsd != null ? ` · $${k.idlePingUsd.toFixed(2)} this break` : ''
+            return (
+              <Text key="kw"><Text dimColor>{'warm'.padEnd(8)}</Text>{k.pingSkipped
+                ? <Text color={C.red}>budget hit · pings paused{spent}</Text>
+                : k.keepwarm === 'on' ? <Text color={C.green}>on · {hm(k.leftMs)} left{spent}</Text>
+                : k.keepwarm === 'stopped' ? <Text color={C.yellow}>stopped · {cut(k.stopped ?? '', Math.max(8, inner - 20))}</Text>
+                : <Text color={C.overlay}>off{k.cold ? ' · cache cold' : ''}</Text>}{k.autoWarm ? <Text color={C.yellow}> · auto-arm on</Text> : null}</Text>
+            )
+          })()] : []),
         ])}
 
         {agents.length > 0 && card('agents', live.length ? C.sky : C.blue, [

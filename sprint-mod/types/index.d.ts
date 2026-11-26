@@ -22,6 +22,7 @@ declare module 'claude-code' {
       frame: number
       note: string
       compact: boolean
+      keepArmed: number
       effort: string[]
     }
   }
