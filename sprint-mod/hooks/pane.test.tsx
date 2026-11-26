@@ -106,7 +106,7 @@ test('effort routing leaves agents alone outside a sprint', async ($, on) => {
 })
 
 
-import { briefOf, critiqueTitle, isUrgent, keepAction, parseJobs } from './register'
+import { briefOf, critiqueTitle, hasOwnWords, isUrgent, keepAction, parseJobs } from './register'
 
 test('keepAction: arms once per sprint, turns off only its own window', () => {
   const T0 = NOW - 60 * 60000, live = { active: true, budgetMin: 300, startedAtMs: T0, readAtMs: NOW }
@@ -255,4 +255,17 @@ test('Agents tab: live subagent action, a delegated job, and btw answers', async
   await ui.press({ key: 'btw-a1' })
   expect(await ui.find({ type: 'Text', text: /on track/ })).toBeTruthy()
   await ui.unmount()
+})
+
+
+test('a note with your own question under it goes to Claude; a bare note is held', async ($, on) => {
+  expect(hasOwnWords(NOTE)).toBe(false)
+  const asked = NOTE + '\n\nhow do you plan to tackle that'
+  expect(hasOwnWords(asked)).toBe(true)
+  engine(on)
+  const sent: string[] = []
+  on('prompt.submit', (_: unknown, e: any) => { sent.push(e.text); return { text: e.text } })
+  await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
+  await $.prompt.submit({ text: asked })
+  expect(sent).toEqual([asked])
 })

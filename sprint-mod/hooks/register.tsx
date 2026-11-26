@@ -22,6 +22,8 @@ const critiques = atom({ plugin: 'sprint-mod', key: 'critiques' } as const, [] a
 const hold = atom({ plugin: 'sprint-mod', key: 'hold' } as const, 'sprint' as HoldMode)
 const NOTE_RE = /^\s*Here is a note offered by a side agent/i
 // A warning about something about to happen skips the hold: it reaches Claude now and is still listed.
+// Words you typed under a forwarded note (any line outside its "> " quote): your question must reach Claude now.
+export const hasOwnWords = (text: string) => text.split('\n').slice(1).some(l => l.trim() !== '' && !l.trimStart().startsWith('>'))
 export const isUrgent = (text: string) => /\b(about to|is going to|will (delete|overwrite|push|install|drop|remove|deploy)|irreversible|data loss|destructive|secrets?|credentials?|leak|security|stop|right now|immediately|before you)\b/i.test(text)
 // The note's bold title line, else its first line, as the card shows it.
 export function critiqueTitle(text: string): string {
@@ -340,7 +342,7 @@ export const register: Register = on => {
     const text = e.text.slice(0, 4000)
     await saveCritiques($, l => (l.some(c => c.text === text) ? l : [...l, { id: `c${now}`, at: now, title: critiqueTitle(text), text, status: 'open' as const }].slice(-30)))
     const mode = await read($, hold), st = await read($, snap)
-    if (!isUrgent(text) && (mode === 'always' || (mode === 'sprint' && st?.active))) {
+    if (!isUrgent(text) && !hasOwnWords(text) && (mode === 'always' || (mode === 'sprint' && st?.active))) {
       return { drop: 'Queued for ponytail review, not sent to Claude. p in the sprint sidebar or /sprint-critiques apply reviews now; /sprint-critiques hold off sends notes straight through.' }
     }
     return next(e)
