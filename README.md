@@ -2,6 +2,21 @@
   <img src="assets/hero-banner.svg" alt="Sprint System" width="100%" />
 </p>
 
+<p align="center">
+  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600&size=15&duration=2600&pause=1000&color=38BDF8&center=true&vCenter=true&width=680&lines=Sprint+System+v3:+6+gated+phases+in+5+hours;Say+%22start+a+sprint%22+and+the+hooks+keep+the+order;Phase+skill+first%2C+exit+gate+last;Delegated+work+runs+in+isolated+worktrees;Claude+keeps+the+core+logic+and+reviews+every+diff" alt="Sprint System v3: 6 gated phases in 5 hours" />
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/PIPELINE-6_PHASES-38BDF8?style=for-the-badge" alt="6 phases" />
+  <img src="https://img.shields.io/badge/BUDGET-5_HOURS-F59E0B?style=for-the-badge" alt="5 hours" />
+  <img src="https://img.shields.io/badge/CLAUDE_CODE-HOOKS_%2B_MOD-10B981?style=for-the-badge" alt="Claude Code hooks and mod" />
+  <img src="https://img.shields.io/badge/LICENSE-MIT-94A3B8?style=for-the-badge" alt="MIT" />
+</p>
+
+<p align="center">
+  <img src="assets/wimpy-running-agent.svg" alt="The 5-hour sprint: the running agent" width="100%" />
+</p>
+
 # Sprint System v3
 
 A 6-phase, 5-hour build pipeline for Claude Code. You say **"start a sprint"**, and hooks hold Claude to the phase order. Each phase loads its skill first and ends at an exit gate that checks real output. Mechanical work goes to cheaper executors in isolated git worktrees. Claude keeps the domain logic and reviews every diff.
@@ -46,6 +61,10 @@ flowchart TD
 Amber is a hook that blocks the action, green is Claude, grey is a delegated executor.
 
 ## The six phases
+
+<p align="center">
+  <img src="assets/phase-pipeline.svg" alt="The six phases with their budgets and gates" width="100%" />
+</p>
 
 Budgets come from `sprint.config.json` (300 min total).
 

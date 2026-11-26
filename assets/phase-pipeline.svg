@@ -114,8 +114,8 @@
     <circle cx="0" cy="0" r="12" fill="url(#pipe-hatch)"/>
     <circle cx="0" cy="0" r="5" fill="#18181B"/>
     <text x="0" y="-28" text-anchor="middle" class="phase-text">01. DISCOVER</text>
-    <text x="0" y="32" text-anchor="middle" class="phase-time">~60m / SPEC &amp; MOAT</text>
-    <text x="0" y="44" text-anchor="middle" class="hand-note">&gt;= 15 questions</text>
+    <text x="0" y="32" text-anchor="middle" class="phase-time">~30m / SPEC &amp; FIXTURE</text>
+    <text x="0" y="44" text-anchor="middle" class="hand-note">golden fixture</text>
   </g>
 
   <!-- PHASE 02: BACKEND -->
@@ -125,7 +125,7 @@
     <circle cx="0" cy="0" r="12" fill="url(#pipe-hatch)"/>
     <circle cx="0" cy="0" r="5" fill="#18181B"/>
     <text x="0" y="-28" text-anchor="middle" class="phase-text">02. BACKEND</text>
-    <text x="0" y="32" text-anchor="middle" class="phase-time">~60m / FASTAPI &amp; AI</text>
+    <text x="0" y="32" text-anchor="middle" class="phase-time">~60m / CORE API</text>
     <text x="0" y="44" text-anchor="middle" class="hand-note">pytest exit 0</text>
   </g>
 
@@ -136,8 +136,8 @@
     <circle cx="0" cy="0" r="12" fill="url(#pipe-hatch)"/>
     <circle cx="0" cy="0" r="5" fill="#18181B"/>
     <text x="0" y="-28" text-anchor="middle" class="phase-text">03. FRONTEND</text>
-    <text x="0" y="32" text-anchor="middle" class="phase-time">~60m / LIVE SWARM</text>
-    <text x="0" y="44" text-anchor="middle" class="hand-note">0 console errs</text>
+    <text x="0" y="32" text-anchor="middle" class="phase-time">~75m / UI SLICES</text>
+    <text x="0" y="44" text-anchor="middle" class="hand-note">0 axe violations</text>
   </g>
 
   <!-- PHASE 04: POLISH -->
@@ -147,8 +147,8 @@
     <circle cx="0" cy="0" r="12" fill="url(#pipe-hatch)"/>
     <circle cx="0" cy="0" r="5" fill="#18181B"/>
     <text x="0" y="-28" text-anchor="middle" class="phase-text">04. POLISH</text>
-    <text x="0" y="32" text-anchor="middle" class="phase-time">~45m / ANTI-SLOP</text>
-    <text x="0" y="44" text-anchor="middle" class="hand-note">12 motion laws</text>
+    <text x="0" y="32" text-anchor="middle" class="phase-time">~45m / IMPECCABLE</text>
+    <text x="0" y="44" text-anchor="middle" class="hand-note">anti-slop pass</text>
   </g>
 
   <!-- PHASE 05: AUDIT -->
@@ -159,7 +159,7 @@
     <circle cx="0" cy="0" r="5" fill="#18181B"/>
     <text x="0" y="-28" text-anchor="middle" class="phase-text">05. AUDIT</text>
     <text x="0" y="32" text-anchor="middle" class="phase-time">~45m / HARDENING</text>
-    <text x="0" y="44" text-anchor="middle" class="hand-note">gravitas proof</text>
+    <text x="0" y="44" text-anchor="middle" class="hand-note">review + verify</text>
   </g>
 
   <!-- PHASE 06: LAUNCH -->
@@ -169,7 +169,7 @@
     <circle cx="0" cy="0" r="12" fill="url(#pipe-hatch)"/>
     <circle cx="0" cy="0" r="5" fill="#18181B"/>
     <text x="0" y="-28" text-anchor="middle" class="phase-text">06. LAUNCH</text>
-    <text x="0" y="32" text-anchor="middle" class="phase-time">~30m / DEMO VIDEO</text>
-    <text x="0" y="44" text-anchor="middle" class="hand-note">remotion 60s</text>
+    <text x="0" y="32" text-anchor="middle" class="phase-time">~45m / LIVE URL</text>
+    <text x="0" y="44" text-anchor="middle" class="hand-note">HTTP 200 + video</text>
   </g>
 </svg>
