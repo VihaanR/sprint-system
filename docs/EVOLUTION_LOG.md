@@ -66,3 +66,19 @@
 - Friction clusters: none
 - agy tiers: no runs
 
+# [RECURSIVE EVOLUTION CYCLE: 2026-11-26 11:03:38Z]
+- Scanned Market Signals: 72
+- Telemetry events: 16
+- Friction clusters: exhausted: 4, fail: 2, quota: 2, stall: 1, startup-stall: 1
+- agy tiers: hydrogen 0/1, gemini-flash 0/1, Gemini 4 Hydrogen (High) 0/3, Gemini 3.8 Flash (Medium) 0/1
+- Delta: skills/sprint-orchestrator/SKILL.md: executor quota trips seen 2x: prefer freellmapi/auto; batch slices into one dispatch.
+- Delta: skills/sprint-orchestrator/SKILL.md: chain exhausted 4x: implement directly after one failed chain; no re-dispatch.
+
+# [RECURSIVE EVOLUTION CYCLE: 2026-11-26 11:03:57Z]
+- Scanned Market Signals: 72
+- Telemetry events: 16
+- Friction clusters: exhausted: 4, fail: 2, quota: 2, stall: 1, startup-stall: 1
+- agy tiers: hydrogen 0/1, gemini-flash 0/1, Gemini 4 Hydrogen (High) 0/3, Gemini 3.8 Flash (Medium) 0/1
+- Delta: skills/sprint-orchestrator/SKILL.md: executor quota trips seen 2x: prefer freellmapi/auto; batch slices into one dispatch.
+- Delta: skills/sprint-orchestrator/SKILL.md: chain exhausted 4x: implement directly after one failed chain; no re-dispatch.
+
