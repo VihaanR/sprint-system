@@ -300,11 +300,11 @@
       <path d="M 2 -2 C 2 -12, 16 -18, 36 -18 L 318 -18 C 338 -18, 348 -8, 348 10 L 348 72 C 348 90, 336 98, 318 98 L 36 98" class="ink-light"/>
 
       <text x="20" y="8" class="comic-title" font-size="14" fill="#18181B" letter-spacing="0.2">"5 HOURS TO SHIP A WINNING HACK?"</text>
-      <text x="20" y="32" class="comic-title" font-size="13" fill="#18181B" letter-spacing="0.2">JUST HIT /phase-discover &amp; KEEP SPRINTING!</text>
+      <text x="20" y="32" class="comic-title" font-size="13" fill="#18181B" letter-spacing="0.2">SAY "START A SPRINT" &amp; KEEP SPRINTING!</text>
       <!-- Sketched Underline -->
       <path d="M 20 38 Q 150 42, 310 38" stroke="#18181B" stroke-width="1.8" fill="none"/>
       <text x="20" y="60" class="mono-code" font-size="8.5" fill="#52525B">[NO OVERTHINKING • RUTHLESS YAGNI • SHIP IT]</text>
-      <text x="20" y="78" class="mono-code" font-size="8" fill="#18181B">&gt; 21 PLUGINS | 10 MCPS | 34 SKILLS ACTIVE</text>
+      <text x="20" y="78" class="mono-code" font-size="8" fill="#18181B">&gt; 6 PHASES | HOOK-GATED | 22 SKILLS IN REPO</text>
     </g>
   </g>
 
@@ -324,15 +324,15 @@
     </g>
   </g>
 
-  <!-- Index Card 2: >= 15 QS -->
+  <!-- Index Card 2: FIXTURE -->
   <g transform="translate(485, 190)">
     <g class="floating-tag-2">
       <rect x="0" y="0" width="90" height="62" rx="2" fill="#FFFFFF" stroke="#18181B" stroke-width="2.2" filter="url(#card-shadow)"/>
       <rect x="0" y="0" width="90" height="12" fill="none" stroke="#18181B" stroke-width="1.5"/>
       <rect x="26" y="-5" width="38" height="9" fill="#FFFFFF" stroke="#71717A" stroke-width="1.2" stroke-dasharray="3 2"/>
-      <text x="12" y="23" class="comic-title" font-size="11" fill="#18181B">&gt;= 15 QS</text>
-      <text x="8" y="38" class="mono-code" font-size="7" fill="#18181B">- DEEP DIVE</text>
-      <text x="8" y="50" class="mono-code" font-size="7" fill="#18181B">- NO GUESSING</text>
+      <text x="12" y="23" class="comic-title" font-size="11" fill="#18181B">FIXTURE</text>
+      <text x="8" y="38" class="mono-code" font-size="7" fill="#18181B">- GOLDEN OUTPUT</text>
+      <text x="8" y="50" class="mono-code" font-size="7" fill="#18181B">- DOMAIN REVIEW</text>
     </g>
   </g>
 
@@ -344,7 +344,7 @@
       <rect x="30" y="-5" width="40" height="9" fill="#FFFFFF" stroke="#71717A" stroke-width="1.2" stroke-dasharray="3 2"/>
       <text x="10" y="24" class="comic-title" font-size="10.5" fill="#18181B">GRAVITAS</text>
       <text x="8" y="38" class="mono-code" font-size="7" fill="#18181B">[x] EXIT CODE 0</text>
-      <text x="8" y="50" class="mono-code" font-size="7" fill="#18181B">[x] DOM VERIFIED</text>
+      <text x="8" y="50" class="mono-code" font-size="7" fill="#18181B">[x] 0 AXE ISSUES</text>
       <text x="8" y="62" class="mono-code" font-size="7" fill="#18181B">[x] 0 FLUFF</text>
     </g>
   </g>
@@ -384,12 +384,12 @@
     <!-- Mini Hackathon Milestone Checklist Card (All 6 Phases) -->
     <g transform="translate(10, 168)">
       <rect x="0" y="0" width="180" height="88" rx="4" fill="#FFFFFF" stroke="#18181B" stroke-width="2.2" filter="url(#card-shadow)"/>
-      <text x="12" y="16" class="mono-code" font-size="7.5" fill="#18181B">[v] 01. SPEC &amp; MOAT</text>
-      <text x="12" y="29" class="mono-code" font-size="7.5" fill="#18181B">[v] 02. FASTAPI + GEMINI</text>
-      <text x="12" y="42" class="mono-code" font-size="7.5" fill="#18181B">[v] 03. LIVE SWARM UI</text>
+      <text x="12" y="16" class="mono-code" font-size="7.5" fill="#18181B">[v] 01. SPEC &amp; FIXTURE</text>
+      <text x="12" y="29" class="mono-code" font-size="7.5" fill="#18181B">[v] 02. CORE API + PYTEST</text>
+      <text x="12" y="42" class="mono-code" font-size="7.5" fill="#18181B">[v] 03. UI + HUMAN WALK</text>
       <text x="12" y="55" class="mono-code" font-size="7.5" fill="#18181B">[~] 04. POLISH &amp; MOTION</text>
       <text x="12" y="68" class="mono-code" font-size="7.5" fill="#52525B">[ ] 05. GRAVITAS AUDIT</text>
-      <text x="12" y="80" class="mono-code" font-size="7.5" fill="#52525B">[ ] 06. 60s LAUNCH PACK</text>
+      <text x="12" y="80" class="mono-code" font-size="7.5" fill="#52525B">[ ] 06. LIVE URL + 20s VIDEO</text>
     </g>
   </g>
 
