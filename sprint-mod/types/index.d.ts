@@ -1,3 +1,4 @@
+export type Critique = { id: string; at: number; title: string; text: string; status: 'open' | 'sent' }
 export type ExecRow = { key: string; state: 'ok' | 'tripped' | 'new'; reason: string; untilMs: number; sinceMs: number; runs: string[] }
 export type Hop = { ts: string; to: string; model: string; outcome: string; durS: number | null }
 export type Gate = { changed: number; lastEditMs: number; verifiedMs: number; evidence: string }
@@ -23,6 +24,7 @@ declare module 'claude-code' {
       note: string
       compact: boolean
       keepArmed: number
+      critiques: Critique[]
       effort: string[]
     }
   }

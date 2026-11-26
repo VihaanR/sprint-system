@@ -1,7 +1,7 @@
 import { atom, read, update } from 'claude-code'
 import type { Register } from 'claude-code'
 
-import type { ExecRow, Gate, Hop, Snapshot } from '../types'
+import type { Critique, ExecRow, Gate, Hop, Snapshot } from '../types'
 
 // Sprint v3 mod: an animated sidebar pane, a live status-line row and /sprint, /sprint-status.
 // It reads and drives the sprint; the gates themselves live in scripts/hooks/sprint-gate.js (global hooks).
@@ -16,6 +16,26 @@ const frame = atom({ plugin: 'sprint-mod', key: 'frame' } as const, 0)
 const note = atom({ plugin: 'sprint-mod', key: 'note' } as const, '')
 const compact = atom({ plugin: 'sprint-mod', key: 'compact' } as const, false)
 // The sprint (its startedAt) whose keepwarm window this mod armed; 0 when it armed none.
+// Side-agent critiques caught mid-sprint, waiting for a ponytail-review pass.
+const critiques = atom({ plugin: 'sprint-mod', key: 'critiques' } as const, [] as Critique[])
+const NOTE_RE = /^\s*Here is a note offered by a side agent/i
+// The note's bold title line, else its first line, as the card shows it.
+export function critiqueTitle(text: string): string {
+  const bold = /\*\*([^*]{4,120})\*\*/.exec(text)
+  const first = text.split('\n').map(l => l.replace(/^[>\s]+/, '').trim()).find(l => l && !NOTE_RE.test(l)) ?? ''
+  return (bold ? bold[1] : first).slice(0, 120)
+}
+export function ponytailPrompt(list: Critique[]): string {
+  return [
+    `Review these ${list.length} side-agent critiques with the ponytail-review skill, against the current code.`,
+    'For each one: find the concrete case in the code (file:line, the input that goes wrong) or reject it with the reason. No case, no fix.',
+    'Fix only the confirmed ones, with the smallest change; add a focused test where the fix is risky. Then run /verify.',
+    'End with a table: critique, confirmed or rejected, why, fix.',
+    '',
+    ...list.map((c, i) => `${i + 1}. ${c.title}\n${c.text.slice(0, 1500)}`),
+  ].join('\n')
+}
+
 const keepArmed = atom({ plugin: 'sprint-mod', key: 'keepArmed' } as const, 0)
 
 // Catppuccin Mocha, the palette prismantis defaults to, so the two mods match.
@@ -96,6 +116,16 @@ export function keepAction(s: Pick<Snapshot, 'active' | 'budgetMin' | 'startedAt
   return null
 }
 
+async function applyCritiques($: $T): Promise<string> {
+  const open = (await read($, critiques)).filter(c => c.status === 'open')
+  if (!open.length) return 'No open critiques.'
+  await update($, critiques, l => l.map(c => (c.status === 'open' ? { ...c, status: 'sent' as const } : c)))
+  // Submitted on a timer: a prompt from inside a command.run hook would wait on the turn that hook holds.
+  const text = ponytailPrompt(open)
+  $.clock.after(50, () => $.prompt.submit({ text }))
+  return `Sent ${open.length} critique${open.length > 1 ? 's' : ''} to ponytail-review.`
+}
+
 async function refresh($: $T): Promise<Snapshot> {
   const root = (await $.session.cwd()).replace(/\\/g, '/'), ab = `${await home($)}/.agent-bridge`, now = await $.clock.now()
   const st = (await readJson<State>($, `${root}/.sprint-state.json`)) ?? {}
@@ -119,6 +149,7 @@ async function refresh($: $T): Promise<Snapshot> {
   return s
 }
 
+const hhmm = (ms: number) => { const d = new Date(ms); return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}` }
 const mins = (ms: number) => Math.max(0, Math.round(ms / 60000))
 const tone = (o: string) => (o === 'ok' || o === 'advanced' ? 'success' : /quota|stall|breach|exhausted|fail|auth|blocked/.test(o) ? 'error' : 'warning')
 
@@ -143,6 +174,24 @@ function effortFor(type: string, phase: number): Effort | undefined {
 const routedEffort = atom({ plugin: 'sprint-mod', key: 'effort' } as const, [] as string[])
 
 export const register: Register = on => {
+  // Catch side-agent notes as they arrive; the prompt itself goes on unchanged.
+  on('prompt.submit', async ($, e, next) => {
+    const isNote = e.origin?.kind === 'observer' || NOTE_RE.test(e.text)
+    if (isNote && e.text.trim()) {
+      const now = await $.clock.now()
+      const text = e.text.slice(0, 4000)
+      await update($, critiques, l => (l.some(c => c.text === text) ? l : [...l, { id: `c${now}`, at: now, title: critiqueTitle(text), text, status: 'open' as const }].slice(-30)))
+    }
+    return next(e)
+  })
+
+  on('command.run', { command: 'sprint-critiques' }, async ($, e) => {
+    const open = (await read($, critiques)).filter(c => c.status === 'open')
+    if (e.args.trim() === 'apply') return { text: await applyCritiques($) }
+    if (e.args.trim() === 'clear') { await update($, critiques, () => []); return { text: 'Critiques cleared.' } }
+    return { text: open.length ? open.map((c, i) => `${i + 1}. ${c.title}`).join('\n') + '\n\n/sprint-critiques apply  sends them through ponytail-review' : 'No open critiques.' }
+  })
+
   on('tool.call', { tool: 'Agent' }, async ($, e, next) => {
     if (e.effort || e.subagent_type === 'fork') return next(e)
     const st = await read($, snap)
@@ -190,6 +239,7 @@ export const register: Register = on => {
 
   on('session.start', async ($, e, next) => {
     await $.command.register({ name: 'sprint', description: 'Open the sprint sidebar (phases, handovers, executors)' })
+    await $.command.register({ name: 'sprint-critiques', description: 'Side-agent critiques: list, apply (ponytail-review pass) or clear' })
     await $.command.register({ name: 'sprint-status', description: 'Sprint status as text (no model call)' })
     const s = await refresh($)
     // Frame clock: spinner + countdowns tick every 120 ms; data re-reads every 5 s.
@@ -253,6 +303,7 @@ export const register: Register = on => {
     const f = await read($, frame), msg = await read($, note), now = s.readAtMs
     const root = (await $.session.cwd()).split(String.fromCharCode(92)).join('/')
     const u = usageCache
+    const crit = await read($, critiques)
     const W = Math.max(20, e.props.bodyColumns)
     const small = (await read($, compact)) || W < 30
     const agents = [...agentsCache].sort((x, y) => y.startTime - x.startTime)
@@ -316,11 +367,21 @@ export const register: Register = on => {
 
         {(() => {
           const g = s.gate, stale = g.changed > 0 && g.verifiedMs < g.lastEditMs
-          const clock = (ms: number) => new Date(ms).toLocaleTimeString().slice(0, 5)
+          const clock = (ms: number) => hhmm(ms)
           return card('gate', stale ? C.red : C.green, [
             title('DONE GATE', stale ? C.red : C.green, g.changed ? `${g.changed} changed` : 'clean'),
             <Text key="g1">{stale ? chip('NOT VERIFIED', C.red) : chip(g.changed ? 'VERIFIED' : 'CLEAN', C.green)} <Text color={C.overlay}>{stale ? `edit ${clock(g.lastEditMs)}${g.verifiedMs ? ` · verify ${clock(g.verifiedMs)}` : ' · never'}` : g.verifiedMs ? `verify ${clock(g.verifiedMs)}` : ''}</Text></Text>,
             ...(stale ? [<Text key="g2" color={C.overlay}>run /verify before claiming done</Text>] : []),
+          ])
+        })()}
+
+        {(() => {
+          const open = crit.filter(c => c.status === 'open'), sent = crit.length - open.length
+          if (!crit.length) return null
+          return card('crit', open.length ? C.yellow : C.overlay, [
+            title('CRITIQUES', open.length ? C.yellow : C.overlay, `${open.length} open${sent ? ` · ${sent} sent` : ''}`),
+            ...open.slice(-4).map(c => <Text key={c.id}><Text color={C.yellow}>▸ </Text>{cut(c.title, inner - 2)}</Text>),
+            ...(open.length ? [<Button key="apply" label="Review with ponytail" hotkey="p" onPress={async () => { const out = await applyCritiques($); await update($, note, () => out) }} />] : []),
           ])
         })()}
 
@@ -378,7 +439,7 @@ export const register: Register = on => {
           title('HANDOVERS', C.overlay, s.trees ? `${s.trees} worktree live` : undefined),
           ...(s.hops.length === 0 ? [<Text key="none" dimColor>none yet</Text>] : s.hops.slice(0, 5).map((hop, i) => (
             <Box key={`${hop.ts}-${i}`} justifyContent="space-between">
-              <Text><Text dimColor>{new Date(hop.ts).toLocaleTimeString().slice(0, 5)} </Text><Text color={hop.to.startsWith('antigravity') ? C.mauve : C.sky}>{cut(short(hop.to + (hop.model ? `:${hop.model}` : '')), inner - 18)}</Text></Text>
+              <Text><Text dimColor>{hhmm(hop.ts)} </Text><Text color={hop.to.startsWith('antigravity') ? C.mauve : C.sky}>{cut(short(hop.to + (hop.model ? `:${hop.model}` : '')), inner - 18)}</Text></Text>
               <Text color={tone(hop.outcome) === 'success' ? C.green : tone(hop.outcome) === 'error' ? C.red : C.yellow}>{hop.outcome}{hop.durS != null ? ` ${hop.durS}s` : ''}</Text>
             </Box>
           ))),
@@ -393,7 +454,7 @@ export const register: Register = on => {
               onPress={async () => { const out = await run($, ['node', `${SPRINT_REPO}/scripts/hooks/sprint-gate.js`, 'advance'], root); await update($, note, () => out); await refresh($) }} />
           )}
         </Box>
-        <Text dimColor>c compact · r refresh · h hud{s.active ? ' · a advance' : ''}{msg ? ` · ${cut(msg, Math.max(8, inner - 30))}` : ''}</Text>
+        <Text dimColor>c compact · r refresh · h hud · p ponytail{s.active ? ' · a advance' : ''}{msg ? ` · ${cut(msg, Math.max(8, inner - 30))}` : ''}</Text>
       </Box>
     )
   })

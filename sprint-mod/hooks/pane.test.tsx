@@ -1,4 +1,4 @@
-import { expect, test } from 'claude-code/testing'
+import { expect, mock, test } from 'claude-code/testing'
 
 const PANE = {
   plugin: 'sprint-mod', component: 'Pane', requestId: 'sprint',
@@ -16,14 +16,14 @@ const FILES: Record<string, string> = {
 }
 const AGENT = { id: 'a1', description: 'Research sidebar UI', type: 'general-purpose', status: 'running', kind: 'local_agent', taskStatus: 'running', label: 'research', startTime: NOW, cwd: '/repo', tokenCount: 12000, tokenSamples: [], contextWindowSize: 200000 }
 
-function engine(on: any, agents: unknown[] = [], evidence: unknown[] = [], files: Record<string, string> = FILES) {
+function engine(on: any, agents: unknown[] = [], evidence: unknown[] = [], files: Record<string, string> = FILES, withClock = true) {
   on('command.register', () => ({ value: { command: 'x' } }))
   on('ui.open', () => ({ value: { isPlaced: true } }))
   on('session.start', (_: unknown, e: any) => ({ cwd: e.cwd }))
   on('session.cwd', () => ({ value: '/repo' }))
   on('env.get', () => ({ value: '/home' }))
-  on('clock.now', () => ({ value: NOW }))
-  on('clock.every', () => ({ value: { id: 't' } }))
+  if (withClock) on('clock.now', () => ({ value: NOW }))
+  if (withClock) on('clock.every', () => ({ value: { id: 't' } }))
   on('fs.read', (_: unknown, e: any) => { const p = e.path.replace(/^[A-Z]:/, '').split(String.fromCharCode(92)).join('/'); return p in files ? { value: files[p] } : { deny: 'ENOENT' } })
   on('process.run', (_: unknown, e: any) => ({ value: { exitCode: 0, stdout: (e.argv ?? e.command ?? []).includes?.('status') ? ' M src/app.ts' + String.fromCharCode(10) : '', stderr: '' } }))
   on('fs.stat', () => ({ value: { kind: 'file', size: 1, mtimeMs: NOW - 60000, isLink: false } }))
@@ -42,6 +42,7 @@ test('expanded pane draws phase, executors, handovers, subagents', async ($, on)
   expect(await ui.find({ type: 'Text', text: /Research sidebar UI/ })).toBeTruthy()
   expect(await ui.find({ type: 'Text', text: /h hud/ })).toBeTruthy()
   expect(await ui.find({ type: 'Text', text: /DONE GATE/ })).toBeTruthy()
+  expect(await ui.find({ type: 'Text', text: /edit \d\d:\d\d ·/ })).toBeTruthy()
   await ui.unmount()
 })
 
@@ -105,7 +106,7 @@ test('effort routing leaves agents alone outside a sprint', async ($, on) => {
 })
 
 
-import { keepAction } from './register'
+import { critiqueTitle, keepAction } from './register'
 
 test('keepAction: arms once per sprint, turns off only its own window', () => {
   const T0 = NOW - 60 * 60000, live = { active: true, budgetMin: 300, startedAtMs: T0, readAtMs: NOW }
@@ -116,4 +117,33 @@ test('keepAction: arms once per sprint, turns off only its own window', () => {
   expect(keepAction({ ...live, active: false }, T0, 'on')).toEqual({ armed: 0, args: 'off' })
   expect(keepAction({ ...live, readAtMs: T0 + 301 * 60000 }, T0, 'on')).toEqual({ armed: 0, args: 'off' })
   expect(keepAction({ ...live, active: false }, 0, 'on')).toBeNull()
+})
+
+
+const NOTE = 'Here is a note offered by a side agent:\n\n> Heads up · cache-tax spends usage.\n>\n> **cache-tax spends usage during your breaks**\n> - The catch: it pings while you are away.'
+
+test('critiqueTitle takes the bold line of a side-agent note', () => {
+  expect(critiqueTitle(NOTE)).toBe('cache-tax spends usage during your breaks')
+  expect(critiqueTitle('Here is a note offered by a side agent:\n\n> Plain first line')).toBe('Plain first line')
+})
+
+test('a side-agent note becomes a critique and apply sends one ponytail-review prompt', async ($, on) => {
+  engine(on, [], [], FILES, false)
+  const clock = mock.clock(on, { now: NOW })
+  const sent: string[] = []
+  on('prompt.submit', (_: unknown, e: any) => { sent.push(e.text); return { text: e.text } })
+  await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
+  await $.prompt.submit({ text: NOTE })
+  await $.prompt.submit({ text: 'a normal prompt' })
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  expect(await ui.find({ type: 'Text', text: /1 open/ })).toBeTruthy()
+  expect(await ui.find({ type: 'Text', text: /cache-tax spends usage/ })).toBeTruthy()
+  await ui.unmount()
+  const r: any = await $.command.run({ command: 'sprint-critiques', args: 'apply' })
+  expect(r.text).toContain('Sent 1 critique')
+  await clock.advance(100)
+  const review = sent.find(t => t.includes('ponytail-review'))
+  expect(review).toContain('1. cache-tax spends usage during your breaks')
+  const again: any = await $.command.run({ command: 'sprint-critiques', args: 'apply' })
+  expect(again.text).toBe('No open critiques.')
 })
