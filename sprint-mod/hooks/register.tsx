@@ -52,7 +52,7 @@ async function readHops($: $T, file: string): Promise<Hop[]> {
 
 // Done gate (idea from codenotary/agentmon-live): uncommitted edits need a /verify evidence file newer than the last edit.
 async function doneGate($: $T, root: string, now: number): Promise<Gate> {
-  const st = await $.process.run(['git', 'status', '--porcelain'], { cwd: root }).catch(() => null)
+  const st = await $.process.run(['git', 'status', '--porcelain', '-uall'], { cwd: root }).catch(() => null)
   const files = (st?.stdout ?? '').split(String.fromCharCode(10)).filter(Boolean).map(l => l.slice(3).replace(/"/g, '').split(' -> ').pop() as string)
   let lastEditMs = 0
   for (const f of files.slice(0, 25)) {
@@ -66,6 +66,10 @@ async function doneGate($: $T, root: string, now: number): Promise<Gate> {
   }
   return { changed: files.length, lastEditMs, verifiedMs, evidence }
 }
+
+// Read every 5 s by refresh(), not on each 120 ms spinner frame.
+let usageCache: Awaited<ReturnType<$T['session']['usage']>> | null = null
+let agentsCache: Awaited<ReturnType<$T['agent']['list']>> = []
 
 async function refresh($: $T): Promise<Snapshot> {
   const root = (await $.session.cwd()).replace(/\\/g, '/'), ab = `${await home($)}/.agent-bridge`, now = await $.clock.now()
@@ -83,6 +87,8 @@ async function refresh($: $T): Promise<Snapshot> {
     readAtMs: now,
     gate: await doneGate($, root, now),
   }
+  usageCache = await $.session.usage().catch(() => null)
+  agentsCache = await $.agent.list().catch(() => [])
   await update($, snap, () => s)
   return s
 }
@@ -114,6 +120,7 @@ export const register: Register = on => {
   on('tool.call', { tool: 'Agent' }, async ($, e, next) => {
     if (e.effort || e.subagent_type === 'fork') return next(e)
     const st = await read($, snap)
+    if (!st?.active) return next(e) // only route effort during a sprint
     const level = effortFor(e.subagent_type ?? 'general-purpose', st?.active ? st.phase : 0)
     if (!level) return next(e)
     await update($, routedEffort, l => [...l, `${e.subagent_type ?? 'general-purpose'}→${level}`].slice(-20))
@@ -219,10 +226,10 @@ export const register: Register = on => {
     if (!s) return <Text dimColor>Reading sprint state…</Text>
     const f = await read($, frame), msg = await read($, note), now = s.readAtMs
     const root = (await $.session.cwd()).split(String.fromCharCode(92)).join('/')
-    const u = await $.session.usage().catch(() => null)
+    const u = usageCache
     const W = Math.max(20, e.props.bodyColumns)
     const small = (await read($, compact)) || W < 30
-    const agents = (await $.agent.list().catch(() => [])).sort((x, y) => y.startTime - x.startTime)
+    const agents = [...agentsCache].sort((x, y) => y.startTime - x.startTime)
     const live = agents.filter(a => /running|pending|waiting/.test(a.status))
     const elapsedMin = (now - s.startedAtMs) / 60000
     const short = (k: string) => k.replace('opencode:free:', '').replace('antigravity:', '').replace('freellmapi/', '')

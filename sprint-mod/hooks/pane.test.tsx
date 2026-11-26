@@ -16,7 +16,7 @@ const FILES: Record<string, string> = {
 }
 const AGENT = { id: 'a1', description: 'Research sidebar UI', type: 'general-purpose', status: 'running', kind: 'local_agent', taskStatus: 'running', label: 'research', startTime: NOW, cwd: '/repo', tokenCount: 12000, tokenSamples: [], contextWindowSize: 200000 }
 
-function engine(on: any, agents: unknown[] = []) {
+function engine(on: any, agents: unknown[] = [], evidence: unknown[] = [], files: Record<string, string> = FILES) {
   on('command.register', () => ({ value: { command: 'x' } }))
   on('ui.open', () => ({ value: { isPlaced: true } }))
   on('session.start', (_: unknown, e: any) => ({ cwd: e.cwd }))
@@ -24,10 +24,10 @@ function engine(on: any, agents: unknown[] = []) {
   on('env.get', () => ({ value: '/home' }))
   on('clock.now', () => ({ value: NOW }))
   on('clock.every', () => ({ value: { id: 't' } }))
-  on('fs.read', (_: unknown, e: any) => { const p = e.path.replace(/^[A-Z]:/, '').split(String.fromCharCode(92)).join('/'); return p in FILES ? { value: FILES[p] } : { deny: 'ENOENT' } })
+  on('fs.read', (_: unknown, e: any) => { const p = e.path.replace(/^[A-Z]:/, '').split(String.fromCharCode(92)).join('/'); return p in files ? { value: files[p] } : { deny: 'ENOENT' } })
   on('process.run', (_: unknown, e: any) => ({ value: { exitCode: 0, stdout: (e.argv ?? e.command ?? []).includes?.('status') ? ' M src/app.ts' + String.fromCharCode(10) : '', stderr: '' } }))
   on('fs.stat', () => ({ value: { kind: 'file', size: 1, mtimeMs: NOW - 60000, isLink: false } }))
-  on('fs.list', () => ({ value: [] }))
+  on('fs.list', () => ({ value: evidence }))
   on('agent.list', () => ({ value: agents }))
   on('session.usage', () => ({ value: { startedAt: NOW, context: { tokens: 50000, window: 200000 }, rateLimits: [], cost: { usd: 1.5 } } }))
 }
@@ -75,4 +75,31 @@ test('a router call draws as one card line', async ($, on) => {
   expect(await ui.find({ type: 'Text', text: /route/ })).toBeTruthy()
   expect(await ui.find({ type: 'Text', text: /freellmapi\/auto ok/ })).toBeTruthy()
   await ui.unmount()
+})
+
+
+test('done gate: an edit after the last /verify shows NOT VERIFIED', async ($, on) => {
+  engine(on)
+  await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  expect(await ui.find({ type: 'Text', text: /NOT VERIFIED/ })).toBeTruthy()
+  await ui.unmount()
+})
+
+test('done gate: evidence newer than the edit shows VERIFIED', async ($, on) => {
+  engine(on, [], [{ name: 'repo-20261126-1000.md', kind: 'file', size: 1, mtimeMs: NOW, isLink: false }])
+  await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  expect(await ui.find({ type: 'Text', text: /NOT VERIFIED/ })).toBeFalsy()
+  expect(await ui.find({ type: 'Text', text: / VERIFIED / })).toBeTruthy()
+  await ui.unmount()
+})
+
+test('effort routing leaves agents alone outside a sprint', async ($, on) => {
+  engine(on, [], [], { ...FILES, '/repo/.sprint-state.json': JSON.stringify({ active: false }) })
+  const seen: (string | undefined)[] = []
+  on('tool.call', (_: unknown, e: any) => { seen.push(e.effort); return { result: {} } })
+  await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
+  await $.tool.call({ tool: 'Agent', subagent_type: 'Explore', description: 'd', prompt: 'p' } as any)
+  expect(seen).toEqual([undefined])
 })
