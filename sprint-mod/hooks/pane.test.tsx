@@ -15,7 +15,6 @@ const FILES: Record<string, string> = {
   '/home/.claude/verify-evidence/repo-20261126-1000.md': 'result: pass\n# verify: repo',
   '/home/.agent-bridge/telemetry.jsonl': JSON.stringify({ ts: '2026-11-26T09:45:00Z', to: 'antigravity', model: 'hydrogen', outcome: 'ok', durS: 40 }) + '\n',
 }
-const QUOTA = JSON.stringify({ models: [{ label: 'Gemini 4 Hydrogen (High)', remaining: 0.72, resetTime: '2026-11-26T15:30:00Z' }, { label: 'Gemini 3.8 Flash (Medium)', remaining: 0.9, resetTime: null }], credits: null })
 const USAGE = JSON.stringify({ agy: [{ model: 'Gemini 4 Hydrogen (High)', gens: 10, in: 221461, out: 5456 }], agyRuns: { c1: { gens: 2, in: 61124, out: 1287 } }, deepseek: { steps: 2, in: 0, out: 0 } })
 const AGENT = { id: 'a1', description: 'Research sidebar UI', type: 'general-purpose', status: 'running', kind: 'local_agent', taskStatus: 'running', label: 'research', startTime: NOW, cwd: '/repo', tokenCount: 12000, tokenSamples: [], contextWindowSize: 200000 }
 
@@ -31,7 +30,6 @@ function engine(on: any, agents: unknown[] = [], evidence: unknown[] = [], files
   on('process.run', (_: unknown, e: any) => {
     const argv: string[] = e.argv ?? e.command ?? []
     if (argv.some(x => String(x).endsWith('ab-usage.js'))) return { value: { exitCode: 0, stdout: USAGE, stderr: '' } }
-    if (argv.some(x => String(x).endsWith('agy-quota.js'))) return { value: { exitCode: 0, stdout: QUOTA, stderr: '' } }
     return { value: { exitCode: 0, stdout: argv.includes('status') ? ' M src/app.ts' + String.fromCharCode(10) : '', stderr: '' } }
   })
   on('fs.stat', () => ({ value: { kind: 'file', size: 1, mtimeMs: NOW - 60000, isLink: false } }))
@@ -113,7 +111,7 @@ test('effort routing leaves agents alone outside a sprint', async ($, on) => {
 })
 
 
-import { briefOf, critiqueTitle, hasOwnWords, isUrgent, keepAction, parseJobs } from './register'
+import { briefOf, critiqueTitle, hasOwnWords, isUrgent, keepAction, parseBudget, parseJobs } from './register'
 
 test('keepAction: arms once per sprint, turns off only its own window', () => {
   const T0 = NOW - 60 * 60000, live = { active: true, budgetMin: 300, startedAtMs: T0, readAtMs: NOW }
@@ -282,13 +280,24 @@ test('usage: agy pooled total beside its title, tokens per delegated agy job', a
   const tele = JSON.stringify({ ts: '2026-11-26T09:58:00Z', taskId: 't1', to: 'antigravity', model: 'Gemini 4 Hydrogen (High)', outcome: 'ok', durS: 58 })
   const started = JSON.stringify({ ts: '2026-11-26T09:57:00Z', taskId: 't1', to: 'antigravity', model: 'Gemini 4 Hydrogen (High)', outcome: 'started', task: 'smoke', log: '/home/x.log' })
   engine(on, [], [], { ...FILES, '/home/.agent-bridge/telemetry.jsonl': started + '\n' + tele + '\n', '/home/x.log': '▶ antigravity ← task T1\n', '/home/.agent-bridge/tasks/T1/telemetry.json': '{"source":{"conversationId":"c1"}}' })
+  mock.store(on)
   await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
+  await $.command.run({ command: 'sprint-budget', args: '1m' })
   await $.command.run({ command: 'sprint' })
   const main = await $.ui.mount({ ...PANE, surface: 'terminal' })
-  expect(await main.find({ type: 'Text', text: /72% left/ })).toBeTruthy()
+  expect(await main.find({ type: 'Text', text: /77% left/ })).toBeTruthy()
+  expect(await main.find({ type: 'Text', text: /227k of 1\.0M/ })).toBeTruthy()
   expect(await main.find({ type: 'Text', text: /today 221k in · 5k out/ })).toBeTruthy()
   await main.unmount()
   const agents = await $.ui.mount({ ...PANE, requestId: 'sprint-agents', surface: 'terminal' })
   expect(await agents.find({ type: 'Text', text: /58s · 61k\/1k/ })).toBeTruthy()
   await agents.unmount()
+})
+
+
+test('parseBudget reads 2m, 500k and plain numbers', () => {
+  expect(parseBudget('2m')).toBe(2000000)
+  expect(parseBudget('500k')).toBe(500000)
+  expect(parseBudget('1.5M')).toBe(1500000)
+  expect(parseBudget('abc')).toBeNull()
 })
