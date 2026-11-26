@@ -1,26 +1,28 @@
 import { atom, read, update } from 'claude-code'
 import type { Register } from 'claude-code'
 
-import type { Critique, ExecRow, Gate, HoldMode, Hop, Snapshot } from '../types'
+import type { Critique, ExecRow, Gate, HoldMode, Snapshot } from '../types'
 
 // Sprint v3 mod: an animated sidebar pane, a live status-line row and /sprint, /sprint-status.
 // It reads and drives the sprint; the gates themselves live in scripts/hooks/sprint-gate.js (global hooks).
 
 const PANE = 'sprint'
+const AGENTS = 'sprint-agents'
 const NAMES = ['discover', 'backend', 'frontend', 'polish', 'audit', 'launch']
 const SPIN = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
 const SPRINT_REPO = 'V:/Projects/sprint'
 
-const snap = atom({ plugin: 'sprint-mod', key: 'snap' } as const, null, { shape: 'snap-3' })
+const snap = atom({ plugin: 'sprint-mod', key: 'snap' } as const, null, { shape: 'snap-4' })
 const frame = atom({ plugin: 'sprint-mod', key: 'frame' } as const, 0)
 const note = atom({ plugin: 'sprint-mod', key: 'note' } as const, '')
 const compact = atom({ plugin: 'sprint-mod', key: 'compact' } as const, false)
-// The sprint (its startedAt) whose keepwarm window this mod armed; 0 when it armed none.
 // Side-agent critiques caught mid-sprint, waiting for a ponytail-review pass.
 const critiques = atom({ plugin: 'sprint-mod', key: 'critiques' } as const, [] as Critique[])
 // sprint: a note sent to the chat during a sprint is queued, not answered. always: queued any time. off: sent on.
 const hold = atom({ plugin: 'sprint-mod', key: 'hold' } as const, 'sprint' as HoldMode)
 const NOTE_RE = /^\s*Here is a note offered by a side agent/i
+// A warning about something about to happen skips the hold: it reaches Claude now and is still listed.
+export const isUrgent = (text: string) => /\b(about to|is going to|will (delete|overwrite|push|install|drop|remove|deploy)|irreversible|data loss|destructive|secrets?|credentials?|leak|security|stop|right now|immediately|before you)\b/i.test(text)
 // The note's bold title line, else its first line, as the card shows it.
 export function critiqueTitle(text: string): string {
   const bold = /\*\*([^*]{4,120})\*\*/.exec(text)
@@ -38,6 +40,7 @@ export function ponytailPrompt(list: Critique[]): string {
   ].join('\n')
 }
 
+// The sprint (its startedAt) whose keepwarm window this mod armed; 0 when it armed none.
 const keepArmed = atom({ plugin: 'sprint-mod', key: 'keepArmed' } as const, 0)
 
 // Catppuccin Mocha, the palette prismantis defaults to, so the two mods match.
@@ -63,15 +66,6 @@ function execRows(h: Health, now: number): ExecRow[] {
     const tripped = e.state === 'tripped' && untilMs > now
     return { key, state: tripped ? 'tripped' : runs.length ? 'ok' : 'new', reason: e.reason ?? '', untilMs, sinceMs: last, runs: runs.map(r => r.outcome) }
   })
-}
-
-async function readHops($: $T, file: string): Promise<Hop[]> {
-  try {
-    const lines = (await $.fs.read(file)).trim().split('\n').slice(-8).reverse()
-    return lines.flatMap(l => {
-      try { const j = JSON.parse(l); return [{ ts: j.ts, to: String(j.to ?? ''), model: String(j.model ?? ''), outcome: String(j.outcome ?? ''), durS: j.durS ?? null }] } catch { return [] }
-    })
-  } catch { return [] }
 }
 
 // Done gate (idea from codenotary/agentmon-live): uncommitted edits need a /verify evidence file newer than the last edit.
@@ -141,6 +135,115 @@ async function applyCritiques($: $T): Promise<string> {
   return `Sent ${open.length} critique${open.length > 1 ? 's' : ''} to ponytail-review.`
 }
 
+// ---- Delegation view: router jobs, what each subagent is doing, worktrees, model usage, /btw answers ----
+type Job = { id: string; to: string; model: string; task: string; log: string; tree: string | null; state: string; startMs: number; durS: number | null; progress?: string; summary?: string }
+type TreeRow = { path: string; branch: string; prunable: boolean; changed: number }
+type UsageDoc = { agy: { model: string; gens: number; in: number; out: number }[]; deepseek: { steps: number; in: number; out: number } | null }
+let jobs: Job[] = []
+let treeRows: TreeRow[] = []
+let modelUsage: UsageDoc | null = null
+const activity = new Map<string, { at: number; tool: string; brief: string }[]>()
+const btwAnswers = new Map<string, string>()
+
+// One line for a tool call: the command, the file, the pattern.
+export function briefOf(i: Record<string, unknown>): string {
+  const s = (k: string) => (typeof i[k] === 'string' ? (i[k] as string) : '')
+  const t = String(i.tool)
+  if (t === 'Bash') return s('command').split('\n')[0]
+  if (['Read', 'Edit', 'Write', 'NotebookEdit'].includes(t)) return (s('file_path') || s('notebook_path')).split(/[\\/]/).pop() ?? ''
+  if (t === 'Grep' || t === 'Glob') return s('pattern')
+  if (t === 'WebFetch') return s('url').replace(/^https?:\/\//, '').split('/')[0]
+  if (t === 'WebSearch') return s('query')
+  if (t === 'Agent') return s('subagent_type') || s('description')
+  return ''
+}
+
+// Router jobs from telemetry: a start record (task, log, worktree), then the outcome once it ends.
+export function parseJobs(lines: string[], now: number): Job[] {
+  const byId = new Map<string, Job>()
+  for (const l of lines) {
+    let t: { ts?: string; taskId?: string; to?: string; model?: string; outcome?: string; durS?: number | null; task?: string; log?: string; worktree?: string | null }
+    try { t = JSON.parse(l) } catch { continue }
+    if (!t.taskId || !t.to || t.to === 'router' || !t.ts) continue
+    const id = `${t.taskId}|${t.to}|${t.model ?? ''}`, prev = byId.get(id)
+    const base: Job = prev ?? { id, to: t.to, model: t.model ?? '', task: t.task ?? '', log: t.log ?? '', tree: t.worktree ?? null, state: 'running', startMs: Date.parse(t.ts), durS: null }
+    byId.set(id, t.outcome === 'started' ? base : { ...base, state: t.outcome ?? '?', durS: t.durS ?? null })
+  }
+  // A start with no end after 30 minutes is a router that died mid-run.
+  return [...byId.values()].map(j => (j.state === 'running' && now - j.startMs > 30 * 60000 ? { ...j, state: 'lost' } : j)).sort((a, b) => b.startMs - a.startMs).slice(0, 5)
+}
+
+// `git worktree list --porcelain`, without the main checkout.
+export function parseTrees(porcelain: string): Omit<TreeRow, 'changed'>[] {
+  return porcelain.split(/\n\n/).slice(1).map(b => ({
+    path: /^worktree (.+)$/m.exec(b)?.[1]?.trim() ?? '',
+    branch: /^branch refs\/heads\/(.+)$/m.exec(b)?.[1]?.trim() ?? '(detached)',
+    prunable: /^prunable/m.test(b),
+  })).filter(t => t.path)
+}
+
+async function refreshDelegation($: $T, ab: string, now: number, porcelain: string): Promise<void> {
+  const list = parseJobs((await $.fs.read(`${ab}/telemetry.jsonl`).catch(() => '')).trim().split('\n').slice(-80), now)
+  for (const j of list) {
+    if (j.state !== 'running' || j.to !== 'antigravity' || !j.log) continue
+    // agy runs through agent-bridge, whose status file carries progress and a one-line summary.
+    const tid = /← task (\S+)/.exec((await $.fs.read(j.log).catch(() => '')).slice(0, 800))?.[1]
+    const st = tid ? await $.fs.read(`${ab}/tasks/${tid}/status.md`).catch(() => '') : ''
+    j.progress = /^progress:\s*(.*)$/m.exec(st)?.[1]?.trim()
+    j.summary = /^summary:\s*(.*)$/m.exec(st)?.[1]?.trim()
+  }
+  jobs = list
+  treeRows = await Promise.all(parseTrees(porcelain).slice(0, 6).map(async t => {
+    const r = t.prunable ? null : await $.process.run(['git', 'status', '--porcelain'], { cwd: t.path }).catch(() => null)
+    return { ...t, changed: (r?.stdout ?? '').split('\n').filter(Boolean).length }
+  }))
+}
+
+// agy and DeepSeek v4.1 Flash usage today, from ~/.claude/bin/ab-usage.js (about a second: polled every minute).
+async function refreshUsage($: $T): Promise<void> {
+  const r = await $.process.run(['node', `${await home($)}/.claude/bin/ab-usage.js`]).catch(() => null)
+  try { if (r && r.exitCode === 0) modelUsage = JSON.parse(r.stdout) as UsageDoc } catch { /* keep the last good reading */ }
+}
+
+// /btw for one agent: a cheap side question about it, answered from what it did. The agent is never touched.
+const BTW_ASK = 'In at most two short lines: what is it doing right now, and does it look on track, stuck or looping?'
+async function btwAgent($: $T, a: { id: string; type: string; description: string; label: string }): Promise<void> {
+  const acts = (activity.get(a.id) ?? []).map(x => `- ${hhmm(x.at)} ${x.tool} ${x.brief}`.trimEnd()).join('\n') || '- no tool calls seen yet'
+  btwAnswers.set(a.id, '… asking haiku')
+  const r = await $.model.complete({ model: 'haiku', maxTokens: 160, prompt: `A coding subagent (${a.type}) is working on: ${a.description || a.label}\nIts tool calls so far, oldest first:\n${acts}\n\n${BTW_ASK}` }).catch(() => null)
+  btwAnswers.set(a.id, r && r.isAnswered ? r.text.trim() : 'no answer')
+}
+async function btwJob($: $T, j: Job): Promise<void> {
+  const log = (j.log ? await $.fs.read(j.log).catch(() => '') : '').replace(/\x1b\[[0-9;]*m/g, '')
+  btwAnswers.set(j.id, '… asking haiku')
+  const state = `${j.state}${j.progress ? `, ${j.progress}% done` : ''}${j.summary ? `, "${j.summary}"` : ''}`
+  const r = await $.model.complete({ model: 'haiku', maxTokens: 160, prompt: `A delegated coding job runs on ${j.to}${j.model ? ` (${j.model})` : ''}.\nIts task: ${j.task || 'unknown'}\nState: ${state}\nThe end of its log:\n${log.split('\n').slice(-40).join('\n').slice(-4000) || '(empty)'}\n\n${BTW_ASK}` }).catch(() => null)
+  btwAnswers.set(j.id, r && r.isAnswered ? r.text.trim() : 'no answer')
+}
+
+// The card kit both panes draw with.
+type UI = ReturnType<$T['ui']['resolve']>
+function kit(ui: UI, inner: number) {
+  const { Box, Text } = ui
+  const room = Math.max(6, Math.min(20, inner - 16))
+  return {
+    short: (k: string) => k.replace('opencode:free:', '').replace('antigravity:', '').replace('freellmapi/', ''),
+    cut: (t: string, n: number) => (t.length > n ? t.slice(0, Math.max(1, n - 1)) + '…' : t),
+    tok: (n: number) => (n >= 1e6 ? `${(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `${Math.round(n / 1e3)}k` : String(n)),
+    bar: (part: number, color: string) => {
+      const p = Math.max(0, Math.min(1, part)), n = Math.round(p * room)
+      return <Text><Text dimColor>▕</Text><Text color={color}>{'█'.repeat(n)}</Text><Text dimColor>{'░'.repeat(room - n)}▏</Text></Text>
+    },
+    chip: (label: string, color: string) => <Text backgroundColor={color} color={C.crust} bold>{` ${label} `}</Text>,
+    title: (label: string, color: string, right?: string) => (
+      <Box key="title" justifyContent="space-between"><Text color={color} bold>● {label}</Text>{right ? <Text dimColor>{right}</Text> : null}</Box>
+    ),
+    card: (key: string, color: string, kids: unknown[]) => (
+      <Box key={key} flexDirection="column" borderStyle="round" borderColor={color} paddingX={1}>{kids}</Box>
+    ),
+  }
+}
+
 async function refresh($: $T): Promise<Snapshot> {
   const root = (await $.session.cwd()).replace(/\\/g, '/'), ab = `${await home($)}/.agent-bridge`, now = await $.clock.now()
   const st = (await readJson<State>($, `${root}/.sprint-state.json`)) ?? {}
@@ -152,13 +255,13 @@ async function refresh($: $T): Promise<Snapshot> {
     phaseBudgets: [1, 2, 3, 4, 5, 6].map(n => cfg.phases?.[n]?.budgetMin ?? 0),
     skillsLoaded: st.skillsLoaded ?? [],
     execs: execRows((await readJson<Health>($, `${ab}/health.json`)) ?? {}, now),
-    hops: await readHops($, `${ab}/telemetry.jsonl`),
     trees: (trees?.stdout ?? '').split(/\n\n/).filter(b => /refs\/heads\/route\//.test(b) && !/prunable/.test(b)).length,
     readAtMs: now,
     gate: await doneGate($, root, now),
   }
   usageCache = await $.session.usage().catch(() => null)
   agentsCache = await $.agent.list().catch(() => [])
+  await refreshDelegation($, ab, now, trees?.stdout ?? '').catch(() => null)
   await keepwarm($, s).catch(() => null)
   // Held critiques get their ponytail pass at each phase boundary and when the sprint ends.
   if (lastPhase > 0 && (!s.active || s.phase > lastPhase)) await applyCritiques($).catch(() => null)
@@ -198,6 +301,15 @@ function effortFor(type: string, phase: number): Effort | undefined {
 const routedEffort = atom({ plugin: 'sprint-mod', key: 'effort' } as const, [] as string[])
 
 export const register: Register = on => {
+  // What each subagent is doing, live: its tool calls as they pass. Read-only; every call goes on unchanged.
+  on('tool.call', async ($, e, next) => {
+    if (e.agentId) {
+      const list = activity.get(e.agentId) ?? []
+      activity.set(e.agentId, [...list, { at: await $.clock.now(), tool: e.tool, brief: briefOf(e as unknown as Record<string, unknown>) }].slice(-15))
+    }
+    return next(e)
+  })
+
   // Catch side-agent notes sent to the chat. While held the note is queued and dropped, so Claude does not act on it
   // now and again in the ponytail pass; otherwise it goes on to Claude unchanged.
   on('prompt.submit', async ($, e, next) => {
@@ -207,7 +319,7 @@ export const register: Register = on => {
     const text = e.text.slice(0, 4000)
     await saveCritiques($, l => (l.some(c => c.text === text) ? l : [...l, { id: `c${now}`, at: now, title: critiqueTitle(text), text, status: 'open' as const }].slice(-30)))
     const mode = await read($, hold), st = await read($, snap)
-    if (mode === 'always' || (mode === 'sprint' && st?.active)) {
+    if (!isUrgent(text) && (mode === 'always' || (mode === 'sprint' && st?.active))) {
       return { drop: 'Queued for ponytail review, not sent to Claude. p in the sprint sidebar or /sprint-critiques apply reviews now; /sprint-critiques hold off sends notes straight through.' }
     }
     return next(e)
@@ -240,7 +352,7 @@ export const register: Register = on => {
     if (at < 0 || !txt.includes('"attempts"')) return null
     try { return JSON.parse(txt.slice(at, end + 1)) as { outcome?: string; class?: string; attempts?: { executor: string; outcome?: string; skipped?: string; log?: string }[] } } catch { return null }
   }
-  const isRoute = (input: unknown) => /ab-route\.js/.test(String((input as { command?: unknown })?.command ?? '')) && !/--(status|reset)/.test(String((input as { command?: unknown })?.command ?? ''))
+  const isRoute = (input: unknown) => /ab-route\.js/.test(String((input as { command?: unknown })?.command ?? '')) && !/--(status|reset)\b/.test(String((input as { command?: unknown })?.command ?? ''))
   on('ui.render', { component: 'ToolUse' }, async ($, e, next) => {
     if (e.props.tool !== 'Bash' || !isRoute(e.props.input) || e.props.isExpanded) return next(e)
     const { Text } = $.ui.resolve(e)
@@ -272,6 +384,7 @@ export const register: Register = on => {
     await $.command.register({ name: 'sprint', description: 'Open the sprint sidebar (phases, handovers, executors)' })
     await $.command.register({ name: 'sprint-critiques', description: 'Side-agent critiques: list, apply (ponytail-review pass) or clear' })
     await $.command.register({ name: 'sprint-status', description: 'Sprint status as text (no model call)' })
+    await $.command.register({ name: 'sprint-agents', description: 'Open the Agents tab: subagents, delegated jobs, worktrees, btw' })
     const saved = await $.store.get(await critKey($)).catch(() => null)
     if (Array.isArray(saved) && !(await read($, critiques)).length) await update($, critiques, () => saved as Critique[])
     const s = await refresh($)
@@ -281,16 +394,28 @@ export const register: Register = on => {
       ticks++
       await update($, frame, f => (f + 1) % SPIN.length)
       if (ticks % 40 === 0) await refresh($)
+      if (ticks % 500 === 0) void refreshUsage($)
     })
+    void refreshUsage($)
     const root = (await $.session.cwd()).replace(/\\/g, '/')
-    if (s.active || root === SPRINT_REPO) void $.ui.open({ id: PANE, title: 'Sprint', columns: 42 })
+    if (s.active || root === SPRINT_REPO) {
+      void $.ui.open({ id: AGENTS, title: 'Agents', columns: 42 })
+      void $.ui.open({ id: PANE, title: 'Sprint', columns: 42 })
+    }
     return next(e)
   })
 
   on('command.run', { command: 'sprint' }, async $ => {
     await refresh($)
+    await refreshUsage($)
     await $.ui.open({ id: PANE, title: 'Sprint', focus: true, columns: 42 })
     return { text: 'Sprint sidebar opened.' }
+  })
+
+  on('command.run', { command: 'sprint-agents' }, async $ => {
+    await refresh($)
+    await $.ui.open({ id: AGENTS, title: 'Agents', focus: true, columns: 42 })
+    return { text: 'Agents tab opened: btw on any row asks haiku what that agent is doing, without interrupting it.' }
   })
 
   on('command.run', { command: 'sprint-status' }, async $ => {
@@ -343,26 +468,25 @@ export const register: Register = on => {
     const agents = [...agentsCache].sort((x, y) => y.startTime - x.startTime)
     const live = agents.filter(a => /running|pending|waiting/.test(a.status))
     const elapsedMin = (now - s.startedAtMs) / 60000
-    const short = (k: string) => k.replace('opencode:free:', '').replace('antigravity:', '').replace('freellmapi/', '')
-    const cut = (t: string, n: number) => (t.length > n ? t.slice(0, Math.max(1, n - 1)) + '…' : t)
+    const inner = W - 4
+    const { short, cut, tok, bar, chip, title, card } = kit($.ui.resolve(e), inner)
     const groups: [string, string, ExecRow[]][] = [
       ['ANTIGRAVITY', C.mauve, s.execs.filter(x => x.key.startsWith('antigravity'))],
       ['OPENCODE', C.sky, s.execs.filter(x => x.key.startsWith('opencode'))],
     ]
-    const inner = W - 4
-    const room = Math.max(6, Math.min(20, inner - 16))
-    const bar = (part: number, color: string) => {
-      const p = Math.max(0, Math.min(1, part)), n = Math.round(p * room)
-      return <Text><Text dimColor>▕</Text><Text color={color}>{'█'.repeat(n)}</Text><Text dimColor>{'░'.repeat(room - n)}▏</Text></Text>
-    }
     const pctColor = (p: number) => (p > 0.85 ? C.red : p > 0.6 ? C.yellow : C.green)
-    const chip = (label: string, color: string) => <Text backgroundColor={color} color={C.crust} bold>{` ${label} `}</Text>
-    const title = (label: string, color: string, right?: string) => (
-      <Box key="title" justifyContent="space-between"><Text color={color} bold>● {label}</Text>{right ? <Text dimColor>{right}</Text> : null}</Box>
+    const runningJobs = jobs.filter(j => j.state === 'running').length
+    // Today's tokens per model: agy from its own run databases, DeepSeek from `opencode stats`; auto is not trackable.
+    const useRow = (key: string, name: string, n: number, i: number, o: number) => (
+      <Text key={key}><Text color={C.overlay}>▸ </Text>{cut(name, 18).padEnd(18)} <Text dimColor>{n}× {tok(i)}/{tok(o)}</Text></Text>
     )
-    const card = (key: string, color: string, kids: unknown[]) => (
-      <Box key={key} flexDirection="column" borderStyle="round" borderColor={color} paddingX={1}>{kids}</Box>
-    )
+    const usageRows = (g: string) => (g === 'ANTIGRAVITY'
+      ? (modelUsage?.agy.length ? [<Text key="u-h" dimColor>today · runs× tokens in/out</Text>, ...modelUsage.agy.map(m => useRow(`u-${m.model}`, m.model.replace(/^Gemini /, ''), m.gens, m.in, m.out))] : [])
+      : [
+          <Text key="u-h" dimColor>today · runs× tokens in/out</Text>,
+          ...(modelUsage?.deepseek ? [useRow('u-ds', 'deepseek-v4.1-flash', modelUsage.deepseek.steps, modelUsage.deepseek.in, modelUsage.deepseek.out)] : []),
+          <Text key="u-auto" color={C.overlay}>  auto via freellmapi: not tracked</Text>,
+        ])
     const phaseName = s.active ? NAMES[s.phase - 1] : ''
     const skillOk = s.skillsLoaded.some(x => x.endsWith(`phase-${phaseName}`))
 
@@ -390,6 +514,7 @@ export const register: Register = on => {
           {u && <Text><Text dimColor>ctx </Text>{bar(ctx, pctColor(ctx))} {Math.round(ctx * 100)}%</Text>}
           {groups.map(([g, c, rows]) => <Text key={g}><Text color={c}>● </Text>{g.toLowerCase()} <Text color={rows.some(x => x.state === 'tripped') ? C.red : C.green}>{rows.filter(x => x.state !== 'tripped').length}/{rows.length}</Text></Text>)}
           <Text><Text color={['clean', 'pass'].includes(gateState(s.gate)) ? C.green : C.red}>● </Text>gate {({ clean: 'clean', pass: 'ok', stale: 'not verified', fail: 'checks failed', none: 'no result' })[gateState(s.gate)]}</Text>
+          <Text><Text color={runningJobs ? C.mauve : C.overlay}>● </Text>jobs {runningJobs} running</Text>
           <Text><Text color={C.blue}>● </Text>agents <Text color={live.length ? C.sky : C.overlay}>{live.length} running</Text></Text>
         </Box>
       )
@@ -442,19 +567,9 @@ export const register: Register = on => {
           })()] : []),
         ])}
 
-        {agents.length > 0 && card('agents', live.length ? C.sky : C.blue, [
-          title('SUBAGENTS', live.length ? C.sky : C.blue, `${live.length} running`),
-          ...agents.slice(0, 4).map(a => {
-            const isLive = /running|pending|waiting/.test(a.status), bad = /failed|killed/.test(a.status)
-            const frac = a.contextWindowSize ? a.tokenCount / a.contextWindowSize : 0
-            return (
-              <Box key={a.id} flexDirection="column">
-                <Text>{chip(isLive ? 'LIVE' : bad ? 'FAIL' : 'DONE', isLive ? C.sky : bad ? C.red : C.green)} <Text bold>{cut(a.name || a.type, inner - 8)}</Text></Text>
-                <Text dimColor>{cut(a.description || a.label, inner)}</Text>
-                <Text>{bar(frac, isLive ? C.sky : C.blue)} <Text dimColor>{Math.round(a.tokenCount / 1000)}k{a.effort ? ` · ${a.effort}` : ''}{a.model ? ` · ${cut(a.model, 10)}` : ''}</Text></Text>
-              </Box>
-            )
-          }),
+        {card('agents', live.length || runningJobs ? C.sky : C.overlay, [
+          title('AGENTS', live.length || runningJobs ? C.sky : C.overlay, `${live.length} live · ${runningJobs} jobs`),
+          <Button key="open-agents" label="Open Agents tab" hotkey="g" onPress={async () => { await $.ui.open({ id: AGENTS, title: 'Agents', focus: true, columns: 42 }) }} />,
         ])}
 
         {groups.map(([g, c, rows]) => card(g, rows.some(x => x.state === 'tripped') ? C.red : c, [
@@ -471,28 +586,107 @@ export const register: Register = on => {
               </Box>
             )
           }),
+          ...usageRows(g),
         ]))}
-
-        {card('hops', C.overlay, [
-          title('HANDOVERS', C.overlay, s.trees ? `${s.trees} worktree live` : undefined),
-          ...(s.hops.length === 0 ? [<Text key="none" dimColor>none yet</Text>] : s.hops.slice(0, 5).map((hop, i) => (
-            <Box key={`${hop.ts}-${i}`} justifyContent="space-between">
-              <Text><Text dimColor>{hhmm(hop.ts)} </Text><Text color={hop.to.startsWith('antigravity') ? C.mauve : C.sky}>{cut(short(hop.to + (hop.model ? `:${hop.model}` : '')), inner - 18)}</Text></Text>
-              <Text color={tone(hop.outcome) === 'success' ? C.green : tone(hop.outcome) === 'error' ? C.red : C.yellow}>{hop.outcome}{hop.durS != null ? ` ${hop.durS}s` : ''}</Text>
-            </Box>
-          ))),
-        ])}
 
         <Box gap={1}>
           <Button key="hud" label="HUD" hotkey="h"
             onPress={async () => { const out = await run($, ['node', `${await home($)}/.claude/bin/ab-route.js`, '--status'], root); const h0 = await home($); await update($, note, () => (out.startsWith('ok') ? `status.html updated · ${h0}/.agent-bridge/status.html` : out)) }} />
-          <Button key="refresh" label="Refresh" hotkey="r" onPress={async () => { await refresh($); await update($, note, () => 'refreshed') }} />
+          <Button key="refresh" label="Refresh" hotkey="r" onPress={async () => { await refresh($); await refreshUsage($); await update($, note, () => 'refreshed') }} />
           {s.active && (
             <Button key="advance" label="Advance" hotkey="a"
               onPress={async () => { const out = await run($, ['node', `${SPRINT_REPO}/scripts/hooks/sprint-gate.js`, 'advance'], root); await update($, note, () => out); await refresh($) }} />
           )}
         </Box>
-        <Text dimColor>c compact · r refresh · h hud · p ponytail{s.active ? ' · a advance' : ''}{msg ? ` · ${cut(msg, Math.max(8, inner - 30))}` : ''}</Text>
+        <Text dimColor>c compact · g agents · r refresh · h hud · p ponytail{s.active ? ' · a advance' : ''}{msg ? ` · ${cut(msg, Math.max(8, inner - 30))}` : ''}</Text>
+      </Box>
+    )
+  })
+
+  on('ui.render', { component: 'Pane', requestId: AGENTS }, async ($, e) => {
+    const ui = $.ui.resolve(e), { Box, Text, Button } = ui
+    const f = await read($, frame), msg = await read($, note), now = await $.clock.now()
+    const inner = Math.max(20, e.props.bodyColumns) - 4
+    const { short, cut, bar, chip, title, card } = kit(ui, inner)
+    const ago = (ms: number) => { const m = Math.max(0, Math.round((now - ms) / 60000)); return m < 1 ? 'now' : `${m}m ago` }
+    const isLive = (st: string) => /running|pending|waiting/.test(st)
+    const agents = [...agentsCache].sort((x, y) => y.startTime - x.startTime).slice(0, 4)
+    const live = agentsCache.filter(a => isLive(a.status)).length, running = jobs.filter(j => j.state === 'running').length
+    const answer = (id: string) => {
+      const t = btwAnswers.get(id)
+      return t ? <Text key={`a-${id}`} color={C.yellow}>{t.startsWith('…') ? `${SPIN[f]} ` : '» '}{cut(t.replace(/\s+/g, ' '), inner * 2)}</Text> : null
+    }
+    const btw = (id: string, ask: () => Promise<void>) => (
+      <Button key={`btw-${id}`} label="btw" onPress={async () => { await ask(); await update($, note, () => `btw answered at ${hhmm(now)}`) }} />
+    )
+
+    return (
+      <Box flexDirection="column" gap={1}>
+        <Text><Text bold>AGENTS</Text><Text dimColor> · btw asks haiku about one agent, never interrupting it</Text></Text>
+
+        {card('subagents', live ? C.sky : C.blue, [
+          title('SUBAGENTS', live ? C.sky : C.blue, `${live} running`),
+          ...(agents.length ? agents.map(a => {
+            const active = isLive(a.status), bad = /failed|killed/.test(a.status)
+            const last = (activity.get(a.id) ?? []).at(-1)
+            return (
+              <Box key={a.id} flexDirection="column">
+                <Box justifyContent="space-between">
+                  <Text>{chip(active ? 'LIVE' : bad ? 'FAIL' : 'DONE', active ? C.sky : bad ? C.red : C.green)} <Text bold>{cut(a.name || a.type, inner - 14)}</Text></Text>
+                  {btw(a.id, () => btwAgent($, a))}
+                </Box>
+                <Text dimColor>{cut(a.description || a.label, inner)}</Text>
+                {last ? <Text><Text color={C.peach}>▸ </Text>{cut(`${last.tool} ${last.brief}`.trim(), inner - 10)} <Text dimColor>{ago(last.at)}</Text></Text> : null}
+                <Text>{bar(a.contextWindowSize ? a.tokenCount / a.contextWindowSize : 0, active ? C.sky : C.blue)} <Text dimColor>{Math.round(a.tokenCount / 1000)}k{a.effort ? ` · ${a.effort}` : ''}</Text></Text>
+                {answer(a.id)}
+              </Box>
+            )
+          }) : [<Text key="none" dimColor>none yet this session</Text>]),
+        ])}
+
+        {card('jobs', running ? C.mauve : C.overlay, [
+          title('DELEGATED', running ? C.mauve : C.overlay, `${running} running`),
+          ...(jobs.length ? jobs.map(j => {
+            const isRun = j.state === 'running', ok = j.state === 'ok' || j.state === 'no-change'
+            const who = j.to === 'antigravity' ? `agy:${j.model.replace(/^Gemini /, '')}` : short(j.to)
+            const meta = [isRun ? `started ${ago(j.startMs)}` : j.durS != null ? `${j.durS}s` : '', j.progress ? `${j.progress}%` : '', j.summary ?? '', j.tree ? `tree ${j.tree.split(/[\\/]/).pop()}` : ''].filter(Boolean).join(' · ')
+            return (
+              <Box key={j.id} flexDirection="column">
+                <Box justifyContent="space-between">
+                  <Text>{chip(isRun ? 'RUN' : j.state.toUpperCase(), isRun ? C.mauve : ok ? C.green : C.red)} <Text color={j.to === 'antigravity' ? C.mauve : C.sky}>{cut(who, inner - 18)}</Text></Text>
+                  {btw(j.id, () => btwJob($, j))}
+                </Box>
+                <Text dimColor>{cut(j.task || '(task not recorded: started before this version)', inner)}</Text>
+                {meta ? <Text color={C.overlay}>{cut(meta, inner)}</Text> : null}
+                {answer(j.id)}
+              </Box>
+            )
+          }) : [<Text key="none" dimColor>no router jobs yet</Text>]),
+        ])}
+
+        {card('trees', treeRows.some(t => t.prunable) ? C.red : C.green, [
+          title('WORKTREES', treeRows.some(t => t.prunable) ? C.red : C.green, `${treeRows.length} besides main`),
+          ...(treeRows.length ? treeRows.map(t => {
+            const name = t.path.split(/[\\/]/).pop() ?? t.path
+            const job = jobs.find(j => j.tree && j.tree.split(/[\\/]/).pop() === name)
+            // REVIEW: a finished job left changes there, waiting for review and a merge by hand.
+            const st = t.prunable ? 'STALE' : job?.state === 'running' ? 'LIVE' : t.changed ? 'REVIEW' : 'IDLE'
+            const owner = job ? ` · ${job.to === 'antigravity' ? 'agy' : short(job.to)}` : t.path.includes('.claude') ? ' · claude agent' : ''
+            return (
+              <Box key={t.path} flexDirection="column">
+                <Text>{chip(st, { STALE: C.red, LIVE: C.mauve, REVIEW: C.yellow, IDLE: C.overlay }[st])} {cut(name, inner - 10)}</Text>
+                <Text color={C.overlay}>{cut(`${t.branch} · ${t.changed} changed${owner}`, inner)}</Text>
+              </Box>
+            )
+          }) : [<Text key="none" dimColor>only the main checkout</Text>]),
+          ...(treeRows.some(t => t.prunable) ? [<Button key="prune" label="git worktree prune"
+            onPress={async () => { const out = await run($, ['git', 'worktree', 'prune'], (await $.session.cwd()).split(String.fromCharCode(92)).join('/')); await update($, note, () => out); await refresh($) }} />] : []),
+        ])}
+
+        <Box gap={1}>
+          <Button key="refresh" label="Refresh" hotkey="r" onPress={async () => { await refresh($); await update($, note, () => 'refreshed') }} />
+        </Box>
+        <Text dimColor>r refresh · btw per row{msg ? ` · ${cut(msg, Math.max(8, inner - 24))}` : ''}</Text>
       </Box>
     )
   })

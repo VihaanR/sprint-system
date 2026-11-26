@@ -39,8 +39,7 @@ test('expanded pane draws phase, executors, handovers, subagents', async ($, on)
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
   expect((await ui.find({ type: 'Text', text: /P3\/6 FRONTEND/ }))?.text).toContain('FRONTEND')
   expect(await ui.find({ type: 'Text', text: /ANTIGRAVITY/ })).toBeTruthy()
-  expect(await ui.find({ type: 'Text', text: /HANDOVERS/ })).toBeTruthy()
-  expect(await ui.find({ type: 'Text', text: /Research sidebar UI/ })).toBeTruthy()
+  expect(await ui.find({ type: 'Text', text: /1 live/ })).toBeTruthy()
   expect(await ui.find({ type: 'Text', text: /h hud/ })).toBeTruthy()
   expect(await ui.find({ type: 'Text', text: /DONE GATE/ })).toBeTruthy()
   expect(await ui.find({ type: 'Text', text: /edit \d\d:\d\d ·/ })).toBeTruthy()
@@ -107,7 +106,7 @@ test('effort routing leaves agents alone outside a sprint', async ($, on) => {
 })
 
 
-import { critiqueTitle, keepAction } from './register'
+import { briefOf, critiqueTitle, isUrgent, keepAction, parseJobs } from './register'
 
 test('keepAction: arms once per sprint, turns off only its own window', () => {
   const T0 = NOW - 60 * 60000, live = { active: true, budgetMin: 300, startedAtMs: T0, readAtMs: NOW }
@@ -205,5 +204,55 @@ test('done gate: a newer record with no result line stays red', async ($, on) =>
   await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
   expect(await ui.find({ type: 'Text', text: /NO RESULT/ })).toBeTruthy()
+  await ui.unmount()
+})
+
+
+test('urgent side-agent notes skip the hold, other notes wait', () => {
+  expect(isUrgent('Heads up · The main agent is about to install cache-tax')).toBe(true)
+  expect(isUrgent('This will delete the worktree')).toBe(true)
+  expect(isUrgent('A green done gate does not mean tests passed')).toBe(false)
+})
+
+test('an urgent note reaches Claude during a sprint and is still listed', async ($, on) => {
+  engine(on)
+  const sent: string[] = []
+  on('prompt.submit', (_: unknown, e: any) => { sent.push(e.text); return { text: e.text } })
+  await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
+  const urgent = 'Here is a note offered by a side agent:\n\n> **The main agent is about to push to main**'
+  await $.prompt.submit({ text: urgent })
+  expect(sent).toEqual([urgent])
+  const r: any = await $.command.run({ command: 'sprint-critiques' })
+  expect(r.text).toContain('about to push to main')
+})
+
+test('briefOf and parseJobs', () => {
+  expect(briefOf({ tool: 'Bash', command: 'npm test\nmore' })).toBe('npm test')
+  expect(briefOf({ tool: 'Read', file_path: 'C:/repo/src/app.ts' })).toBe('app.ts')
+  const T = '2026-11-26T09:00:00Z', now = Date.parse(T) + 60000
+  const lines = [
+    JSON.stringify({ ts: T, taskId: 't1', to: 'antigravity', model: 'Gemini 4 Hydrogen (High)', outcome: 'started', task: 'add tests', log: 'x.log' }),
+    JSON.stringify({ ts: T, taskId: 't2', to: 'opencode:free:freellmapi/auto', model: 'freellmapi/auto', outcome: 'started', task: 'map repo' }),
+    JSON.stringify({ ts: T, taskId: 't2', to: 'opencode:free:freellmapi/auto', model: 'freellmapi/auto', outcome: 'ok', durS: 27 }),
+  ]
+  const jobs = parseJobs(lines, now)
+  expect(jobs.find(j => j.task === 'add tests')?.state).toBe('running')
+  expect(jobs.find(j => j.task === 'map repo')).toMatchObject({ state: 'ok', durS: 27 })
+  expect(parseJobs(lines, Date.parse(T) + 31 * 60000).find(j => j.task === 'add tests')?.state).toBe('lost')
+})
+
+test('Agents tab: live subagent action, a delegated job, and btw answers', async ($, on) => {
+  const tele = JSON.stringify({ ts: '2026-11-26T09:58:00Z', taskId: 't1', to: 'antigravity', model: 'Gemini 4 Hydrogen (High)', outcome: 'started', task: 'add pagination tests', log: '/home/x.log' })
+  engine(on, [AGENT], [], { ...FILES, '/home/.agent-bridge/telemetry.jsonl': tele + '\n', '/home/x.log': 'running vitest' })
+  on('tool.call', () => ({ result: {} }))
+  on('model.complete', () => ({ value: { isAnswered: true, text: 'Running the test suite; on track.', usage: { input_tokens: 1, output_tokens: 1 } } }))
+  await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
+  await $.tool.call({ tool: 'Bash', command: 'npm test', agentId: 'a1' } as any)
+  const ui = await $.ui.mount({ ...PANE, requestId: 'sprint-agents', surface: 'terminal' })
+  expect(await ui.find({ type: 'Text', text: /Research sidebar UI/ })).toBeTruthy()
+  expect(await ui.find({ type: 'Text', text: /Bash npm test/ })).toBeTruthy()
+  expect(await ui.find({ type: 'Text', text: /add pagination tests/ })).toBeTruthy()
+  await ui.press({ key: 'btw-a1' })
+  expect(await ui.find({ type: 'Text', text: /on track/ })).toBeTruthy()
   await ui.unmount()
 })

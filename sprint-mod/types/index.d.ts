@@ -1,7 +1,6 @@
 export type HoldMode = 'sprint' | 'always' | 'off'
 export type Critique = { id: string; at: number; title: string; text: string; status: 'open' | 'sent' }
 export type ExecRow = { key: string; state: 'ok' | 'tripped' | 'new'; reason: string; untilMs: number; sinceMs: number; runs: string[] }
-export type Hop = { ts: string; to: string; model: string; outcome: string; durS: number | null }
 export type Gate = { changed: number; lastEditMs: number; verifiedMs: number; evidence: string; verdict: 'pass' | 'fail' | 'none' }
 export type Snapshot = {
   active: boolean
@@ -11,7 +10,6 @@ export type Snapshot = {
   phaseBudgets: number[]
   skillsLoaded: string[]
   execs: ExecRow[]
-  hops: Hop[]
   trees: number
   readAtMs: number
   gate: Gate
