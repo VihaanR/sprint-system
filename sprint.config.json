@@ -19,7 +19,12 @@
     "maxChainWallMs": 600000,
     "requireStatusPreflight": true
   },
+  "orchestrator": { "model": "claude-opus-5-5", "effort": "high" },
   "gates": {
+    "phaseFloorLeadMin": 5,
+    "maxFloorStopBlocks": 10,
+    "discoverMinUserQuestions": 15,
+    "discoverMinChallengeRounds": 5,
     "backendMaxCoreLoc": 450,
     "maxCyclomaticComplexity": 6,
     "stripeEnabled": false,

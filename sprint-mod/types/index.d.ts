@@ -8,6 +8,8 @@ export type Snapshot = {
   startedAtMs: number
   budgetMin: number
   phaseBudgets: number[]
+  phaseStartedAtMs: number
+  floorMin: number
   skillsLoaded: string[]
   execs: ExecRow[]
   trees: number

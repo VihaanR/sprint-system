@@ -22,6 +22,7 @@ const checks = [
   ['mod validate', 'claude', ['plugin', 'validate', 'sprint-mod']],
   ...(py.length ? [['python compile', process.platform === 'win32' ? 'python' : 'python3', ['-m', 'py_compile', ...py]]] : []),
   ...files('scripts/hooks', '.js').map(f => [`node --check ${f}`, process.execPath, ['--check', f]]),
+  ...files('scripts/hooks', '.test.js').map(f => [`node --test ${f}`, process.execPath, ['--test', f]]),
 ]
 const results = checks.map(([name, cmd, args]) => ({ name, ...run(cmd, args) }))
 const pass = results.every(r => r.code === 0)

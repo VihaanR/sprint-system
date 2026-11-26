@@ -7,7 +7,19 @@ description: Phase-gate dispatcher for the 5-hour hackathon sprint. Use when the
 
 State: `.sprint-state.json`. Config: `sprint.config.json` (budgets, router tiers, gates). Hooks enforce the gates.
 
-Every reply in a sprint starts with: `Phase N/6 (<name>) | ~X min left`
+Every reply in a sprint starts with: `Phase N/6 (<name>) | X min in | floor F, budget B`
+
+## Runs on Opus 5.5, high effort
+The sprint only starts on `claude-opus-5-5` at `high` effort (`sprint.config.json` `orchestrator`); the start hook
+blocks otherwise and pins both in `.claude/settings.local.json`. You are the orchestrator: think before acting,
+validate before claiming, and keep core logic yourself.
+
+## Phase window: floor = budget − 5 min, ceiling = budget
+- A phase may not end before its floor. `advance` refuses, and stopping early is blocked with the next validation
+  round (up to `maxFloorStopBlocks` rounds per phase). Finishing early means validating more, not idling:
+  run the tests, re-check golden outputs, attack an assumption, re-read the spec against the build.
+- Only the user can lift a floor, by typing `skip floor`. Never suggest it to save time.
+- At the budget the hook says `[OVER BUDGET]`: post the scorecard and ask for go at once.
 
 ## Phase loop
 1. The FIRST tool call of each phase is `Skill(phase-<name>)`: discover, backend, frontend, polish, audit, launch.
@@ -18,13 +30,14 @@ Every reply in a sprint starts with: `Phase N/6 (<name>) | ~X min left`
 4. Core domain/scientific logic stays with Claude. Playbooks: `.claude/agents/{discover,builder,auditor,launcher}.md`.
 5. On one failed chain, implement directly. No blind `--reset`.
 6. Phase end: post the scorecard, wait for the user to type `go`, then run `node scripts/hooks/sprint-gate.js advance`
-   (runs the exit gate: P2 pytest + LOC, P3 walkthrough + axe 0, P6 live URL + video + README claims).
+   (runs the exit gate: every phase its floor, P1 15+ user questions + 5 challenge rounds, P2 pytest + LOC,
+   P3 walkthrough + axe 0, P6 live URL + video + README claims).
 
 ## Executive Scorecard (5 lines, end of each phase)
 ```
 [DONE]   <artifacts shipped, with paths>
 [VERIFY] <command> -> <exit code / count>
 [RISK]   <top open risk or none>
-[TIME]   <used> / <budget> min this phase
+[TIME]   <used> / <budget> min this phase (floor <F>)
 [NEXT]   Phase N+1 (<name>): <first action>. Type go.
 ```
