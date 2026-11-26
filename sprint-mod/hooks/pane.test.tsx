@@ -12,6 +12,7 @@ const FILES: Record<string, string> = {
     'antigravity:Gemini 4 Hydrogen (High)': { state: 'ok', runs: [{ ts: '2026-11-26T09:30:00Z', outcome: 'ok' }] },
     'opencode:free:freellmapi/auto': { state: 'tripped', until: '2026-11-26T10:30:00Z', reason: 'quota', runs: [{ ts: '2026-11-26T09:40:00Z', outcome: 'quota' }] },
   } }),
+  '/home/.claude/verify-evidence/repo-20261126-1000.md': 'result: pass\n# verify: repo',
   '/home/.agent-bridge/telemetry.jsonl': JSON.stringify({ ts: '2026-11-26T09:45:00Z', to: 'antigravity', model: 'hydrogen', outcome: 'ok', durS: 40 }) + '\n',
 }
 const AGENT = { id: 'a1', description: 'Research sidebar UI', type: 'general-purpose', status: 'running', kind: 'local_agent', taskStatus: 'running', label: 'research', startTime: NOW, cwd: '/repo', tokenCount: 12000, tokenSamples: [], contextWindowSize: 200000 }
@@ -133,8 +134,10 @@ test('a side-agent note becomes a critique and apply sends one ponytail-review p
   const sent: string[] = []
   on('prompt.submit', (_: unknown, e: any) => { sent.push(e.text); return { text: e.text } })
   await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
-  await $.prompt.submit({ text: NOTE })
+  const held: any = await $.prompt.submit({ text: NOTE })
+  expect(held.drop).toContain('Queued for ponytail review')
   await $.prompt.submit({ text: 'a normal prompt' })
+  expect(sent).toEqual(['a normal prompt'])
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
   expect(await ui.find({ type: 'Text', text: /1 open/ })).toBeTruthy()
   expect(await ui.find({ type: 'Text', text: /cache-tax spends usage/ })).toBeTruthy()
@@ -146,4 +149,61 @@ test('a side-agent note becomes a critique and apply sends one ponytail-review p
   expect(review).toContain('1. cache-tax spends usage during your breaks')
   const again: any = await $.command.run({ command: 'sprint-critiques', args: 'apply' })
   expect(again.text).toBe('No open critiques.')
+})
+
+
+test('hold off: a side-agent note is still queued but also goes on to Claude', async ($, on) => {
+  engine(on)
+  const sent: string[] = []
+  on('prompt.submit', (_: unknown, e: any) => { sent.push(e.text); return { text: e.text } })
+  await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
+  await $.command.run({ command: 'sprint-critiques', args: 'hold off' })
+  await $.prompt.submit({ text: NOTE })
+  expect(sent).toEqual([NOTE])
+  const r: any = await $.command.run({ command: 'sprint-critiques' })
+  expect(r.text).toContain('1. cache-tax spends usage during your breaks')
+  expect(r.text).toContain('Hold: off')
+})
+
+test('a phase advance sends held critiques through ponytail-review', async ($, on) => {
+  const files: Record<string, string> = { ...FILES }
+  engine(on, [], [], files, false)
+  const clock = mock.clock(on, { now: NOW })
+  const sent: string[] = []
+  on('prompt.submit', (_: unknown, e: any) => { sent.push(e.text); return { text: e.text } })
+  await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
+  await $.prompt.submit({ text: NOTE })
+  files['/repo/.sprint-state.json'] = JSON.stringify({ active: true, phase: 4, startedAt: '2026-11-26T09:00:00Z', skillsLoaded: [] })
+  await $.command.run({ command: 'sprint' })
+  await clock.advance(100)
+  expect(sent.filter(t => t.includes('ponytail-review'))).toHaveLength(1)
+})
+
+test('the critique queue is restored from the store after a restart', async ($, on) => {
+  engine(on)
+  mock.store(on, { 'critiques:/repo': [{ id: 'c1', at: NOW, title: 'Saved before restart', text: 'x', status: 'open' }] })
+  await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  expect(await ui.find({ type: 'Text', text: /Saved before restart/ })).toBeTruthy()
+  await ui.unmount()
+})
+
+
+const EVIDENCE = [{ name: 'repo-20261126-1000.md', kind: 'file', size: 1, mtimeMs: NOW, isLink: false }]
+
+test('done gate: a newer record that says result: fail stays red', async ($, on) => {
+  engine(on, [], EVIDENCE, { ...FILES, '/home/.claude/verify-evidence/repo-20261126-1000.md': 'result: fail\n3 failed' })
+  await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  expect(await ui.find({ type: 'Text', text: /CHECKS FAILED/ })).toBeTruthy()
+  expect(await ui.find({ type: 'Text', text: / VERIFIED / })).toBeFalsy()
+  await ui.unmount()
+})
+
+test('done gate: a newer record with no result line stays red', async ($, on) => {
+  engine(on, [], EVIDENCE, { ...FILES, '/home/.claude/verify-evidence/repo-20261126-1000.md': '# verify: typed summary, tests looked fine' })
+  await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  expect(await ui.find({ type: 'Text', text: /NO RESULT/ })).toBeTruthy()
+  await ui.unmount()
 })
