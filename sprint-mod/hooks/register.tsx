@@ -145,6 +145,10 @@ let jobs: Job[] = []
 let treeRows: TreeRow[] = []
 let modelUsage: UsageDoc | null = null
 let usageError = ''
+// agy quota left, from ~/.claude/bin/agy-quota.js (its own one-time Google sign-in; agy's pool is shared by its models).
+type Quota = { models: { label: string; remaining: number | null; resetTime: string | null }[]; credits: { available: number; monthly: number } | null }
+let agyQuota: Quota | null = null
+let quotaError = ''
 const activity = new Map<string, { at: number; tool: string; brief: string }[]>()
 const btwAnswers = new Map<string, string>()
 
@@ -206,13 +210,25 @@ async function refreshDelegation($: $T, ab: string, now: number, porcelain: stri
 }
 
 // agy and DeepSeek v4.1 Flash usage today, from ~/.claude/bin/ab-usage.js (about a second: polled every minute).
+async function refreshQuota($: $T): Promise<void> {
+  const r = await $.process.run(['node', `${await home($)}/.claude/bin/agy-quota.js`]).catch((err: unknown) => ({ exitCode: 1, stdout: JSON.stringify({ error: String(err) }), stderr: '' }))
+  try {
+    const d = JSON.parse(r.stdout) as Quota & { error?: string }
+    if (d.error) throw new Error(d.error)
+    agyQuota = d
+    quotaError = ''
+  } catch (err) { quotaError = String(err instanceof Error ? err.message : err).slice(0, 120) }
+}
+
 async function refreshUsage($: $T): Promise<void> {
+  const quotaRead = refreshQuota($) // in parallel with the usage read
   const r = await $.process.run(['node', `${await home($)}/.claude/bin/ab-usage.js`]).catch((err: unknown) => ({ exitCode: 1, stdout: '', stderr: String(err) }))
   try {
     if (r.exitCode !== 0) throw new Error(r.stderr.trim().split('\n').pop() || `exit ${r.exitCode}`)
     modelUsage = JSON.parse(r.stdout) as UsageDoc
     usageError = ''
   } catch (err) { usageError = String(err instanceof Error ? err.message : err).slice(0, 120) }
+  await quotaRead
 }
 
 // /btw for one agent: a cheap side question about it, answered from what it did. The agent is never touched.
@@ -510,6 +526,7 @@ export const register: Register = on => {
     ]
     const pctColor = (p: number) => (p > 0.85 ? C.red : p > 0.6 ? C.yellow : C.green)
     const runningJobs = jobs.filter(j => j.state === 'running').length
+    const pool = (agyQuota?.models ?? []).filter(m => m.remaining != null).sort((a, b) => (a.remaining ?? 1) - (b.remaining ?? 1))[0] as { remaining: number; resetTime: string | null } | undefined
     // Today's tokens per model: agy from its own run databases, DeepSeek from `opencode stats`; auto is not trackable.
     const useRow = (key: string, name: string, n: number, i: number, o: number) => (
       <Text key={key}><Text color={C.sub}>▸ </Text>{cut(name, 18).padEnd(18)} <Text color={C.sub}>{n}× {tok(i)}/{tok(o)}</Text></Text>
@@ -607,7 +624,10 @@ export const register: Register = on => {
 
         {groups.map(([g, c, rows]) => card(g, rows.some(x => x.state === 'tripped') ? C.red : c, [
           title(g, c, [rows.length ? `${rows.filter(x => x.state !== 'tripped').length}/${rows.length} ready` : 'unused',
-            g === 'ANTIGRAVITY' && modelUsage?.agy.length ? `pool ${tok(modelUsage.agy.reduce((n, m) => n + m.in, 0))}/${tok(modelUsage.agy.reduce((n, m) => n + m.out, 0))}` : ''].filter(Boolean).join(' · ')),
+            g === 'ANTIGRAVITY' && pool ? `${Math.round(pool.remaining * 100)}% left` : ''].filter(Boolean).join(' · ')),
+          ...(g === 'ANTIGRAVITY' && pool ? [<Text key="q-bar">{bar(pool.remaining, pool.remaining < 0.15 ? C.red : pool.remaining < 0.4 ? C.yellow : C.green)} <Text color={C.sub}>{pool.resetTime ? `resets ${hhmm(Date.parse(pool.resetTime))}` : ''}</Text></Text>] : []),
+          ...(g === 'ANTIGRAVITY' && !pool && quotaError ? [<Text key="q-err" color={C.yellow}>{cut(quotaError.startsWith('not signed in') ? 'quota: sign in once, run agy-quota.js login' : `quota: ${quotaError}`, inner)}</Text>] : []),
+          ...(g === 'ANTIGRAVITY' && modelUsage?.agy.length ? [<Text key="q-spent" color={C.sub}>{`today ${tok(modelUsage.agy.reduce((n, m) => n + m.in, 0))} in · ${tok(modelUsage.agy.reduce((n, m) => n + m.out, 0))} out`}</Text>] : []),
           ...(usageError ? [<Text key="u-err" color={C.yellow}>{cut(`usage: ${usageError}`, inner)}</Text>] : []),
           ...rows.map(x => {
             const tripped = x.state === 'tripped'
