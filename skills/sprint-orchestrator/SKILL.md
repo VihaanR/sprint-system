@@ -41,3 +41,7 @@ validate before claiming, and keep core logic yourself.
 [TIME]   <used> / <budget> min this phase (floor <F>)
 [NEXT]   Phase N+1 (<name>): <first action>. Type go.
 ```
+
+## Learned guardrails (auto, evolve_skills.py)
+- executor quota trips seen 2x: prefer freellmapi/auto; batch slices into one dispatch.
+- chain exhausted 4x: implement directly after one failed chain; no re-dispatch.
