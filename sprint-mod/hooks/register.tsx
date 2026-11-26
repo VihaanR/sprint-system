@@ -298,6 +298,9 @@ async function refresh($: $T): Promise<Snapshot> {
   if (lastPhase > 0 && (!s.active || s.phase > lastPhase)) await applyCritiques($).catch(() => null)
   lastPhase = s.active ? s.phase : 0
   await update($, snap, () => s)
+  // The status line's sprint segment reads this, so each fact is worked out once, here.
+  const open = (await read($, critiques)).filter(c => c.status === 'open').length
+  await $.fs.write(`${ab}/sprint-status.json`, JSON.stringify({ at: new Date(now).toISOString(), active: s.active, phase: s.phase, name: s.active ? NAMES[s.phase - 1] : '', leftMin: mins(s.budgetMin * 60000 - (now - s.startedAtMs)), gate: gateState(s.gate), critiques: open })).catch(() => null)
   return s
 }
 
@@ -465,29 +468,6 @@ export const register: Register = on => {
     }
   })
 
-  // Status line: keep the user's own status line, add one live sprint row under it.
-  on('ui.render', { component: 'StatusLine' }, async ($, e, next) => {
-    const s = await read($, snap)
-    const base = await next(e)
-    if (!s || e.props.maxRows < 1) return base
-    const { Box, Text } = $.ui.resolve(e)
-    const f = await read($, frame), now = s.readAtMs
-    const tripped = s.execs.filter(x => x.state === 'tripped').length
-    const left = mins(s.budgetMin * 60000 - (now - s.startedAtMs))
-    return (
-      <Box flexDirection="column">
-        {base}
-        <Box>
-          <Text color={s.active ? 'claude' : 'subtle'}>{s.active ? SPIN[f] : '○'} </Text>
-          <Text weight="bold">{s.active ? `Sprint P${s.phase}/6 ${NAMES[s.phase - 1]}` : 'Sprint idle'}</Text>
-          {s.active && <Text color={left < 30 ? 'error' : 'subtle'}> · {left}m left</Text>}
-          <Text color={tripped ? 'warning' : 'success'}> · {tripped ? `${tripped} tripped` : 'router ok'}</Text>
-          {s.trees > 0 && <Text color="warning"> · {s.trees} worktree live</Text>}
-        </Box>
-      </Box>
-    )
-  })
-
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Text, Button } = $.ui.resolve(e)
     const s = await read($, snap)
@@ -508,7 +488,6 @@ export const register: Register = on => {
       ['ANTIGRAVITY', C.mauve, s.execs.filter(x => x.key.startsWith('antigravity'))],
       ['OPENCODE', C.sky, s.execs.filter(x => x.key.startsWith('opencode'))],
     ]
-    const pctColor = (p: number) => (p > 0.85 ? C.red : p > 0.6 ? C.yellow : C.green)
     const runningJobs = jobs.filter(j => j.state === 'running').length
     // agy's real quota from its own /usage: two pools (Gemini; Claude and GPT), each with a 5-hour and a weekly window.
     const quota = modelUsage?.agyQuota ?? []
@@ -550,11 +529,9 @@ export const register: Register = on => {
     )
 
     if (small) {
-      const ctx = u ? (u.context.tokens ?? 0) / u.context.window : 0
       return (
         <Box flexDirection="column" gap={1}>
           {header}
-          {u && <Text><Text color={C.sub}>ctx </Text>{bar(ctx, pctColor(ctx))} {Math.round(ctx * 100)}%</Text>}
           {groups.map(([g, c, rows]) => <Text key={g}><Text color={c}>● </Text>{g.toLowerCase()} <Text color={rows.some(x => x.state === 'tripped') ? C.red : C.green}>{rows.filter(x => x.state !== 'tripped').length}/{rows.length}</Text></Text>)}
           <Text><Text color={['clean', 'pass'].includes(gateState(s.gate)) ? C.green : C.red}>● </Text>gate {({ clean: 'clean', pass: 'ok', stale: 'not verified', fail: 'checks failed', none: 'no result' })[gateState(s.gate)]}</Text>
           <Text><Text color={runningJobs ? C.mauve : C.sub}>● </Text>jobs {runningJobs} running</Text>
@@ -593,10 +570,6 @@ export const register: Register = on => {
 
         {u && card('usage', C.text, [
           title('USAGE', C.text, u.cost ? `$${u.cost.usd.toFixed(2)}` : undefined),
-          <Text key="ctx"><Text color={C.sub}>{'context'.padEnd(8)}</Text>{bar((u.context.tokens ?? 0) / u.context.window, pctColor((u.context.tokens ?? 0) / u.context.window))} {Math.round((u.context.tokens ?? 0) / 1000)}k</Text>,
-          ...u.rateLimits.slice(0, 2).map(r => (
-            <Text key={r.kind}><Text color={C.sub}>{cut(r.kind, 7).padEnd(8)}</Text>{bar(r.percentUsed / 100, pctColor(r.percentUsed / 100))} {Math.round(r.percentUsed)}%</Text>
-          )),
           ...(keepCache ? [(() => {
             const k = keepCache, hm = (ms: number) => `${Math.floor(ms / 3600000)}h${String(Math.floor(ms / 60000) % 60).padStart(2, '0')}m`
             const spent = k.idlePingUsd != null ? ` · $${k.idlePingUsd.toFixed(2)} this break` : ''
