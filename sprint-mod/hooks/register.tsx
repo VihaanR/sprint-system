@@ -671,17 +671,18 @@ export const register: Register = on => {
 
         {card('jobs', running ? C.mauve : C.sub, [
           title('DELEGATED', running ? C.mauve : C.sub, `${running} running`),
-          ...(jobs.length ? jobs.map(j => {
+          ...(jobs.length ? [...jobs.filter(j => j.state === 'running'), ...jobs.filter(j => j.state !== 'running').slice(0, 3)].map(j => {
             const isRun = j.state === 'running', ok = j.state === 'ok' || j.state === 'no-change'
             const who = j.to === 'antigravity' ? `agy:${j.model.replace(/^Gemini /, '')}` : short(j.to)
-            const meta = [isRun ? `started ${ago(j.startMs)}` : j.durS != null ? `${j.durS}s` : '', j.progress ? `${j.progress}%` : '', j.summary ?? '', j.tree ? `tree ${j.tree.split(/[\\/]/).pop()}` : ''].filter(Boolean).join(' · ')
+            const time = isRun ? ago(j.startMs) : j.durS != null ? `${j.durS}s` : ''
+            const meta = [j.progress ? `${j.progress}%` : '', j.summary ?? '', j.tree ? `tree ${j.tree.split(/[\\/]/).pop()}` : ''].filter(Boolean).join(' · ')
             return (
               <Box key={j.id} flexDirection="column">
                 <Box justifyContent="space-between">
-                  <Text>{chip(isRun ? 'RUN' : j.state.toUpperCase(), isRun ? C.mauve : ok ? C.green : C.red)} <Text color={j.to === 'antigravity' ? C.mauve : C.sky}>{cut(who, inner - 18)}</Text></Text>
+                  <Text>{chip(isRun ? 'RUN' : j.state.toUpperCase(), isRun ? C.mauve : ok ? C.green : C.red)} <Text color={j.to === 'antigravity' ? C.mauve : C.sky}>{cut(who, inner - 26)}</Text>{time ? <Text color={C.sub}> · {time}</Text> : null}</Text>
                   {btw(j.id, () => btwJob($, j))}
                 </Box>
-                <Text color={C.sub}>{cut(j.task || '(task not recorded: started before this version)', inner)}</Text>
+                {j.task ? <Text color={C.sub}>{cut(j.task, inner)}</Text> : null}
                 {meta ? <Text color={C.sub}>{cut(meta, inner)}</Text> : null}
                 {answer(j.id)}
               </Box>
