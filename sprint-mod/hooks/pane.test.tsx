@@ -15,6 +15,7 @@ const FILES: Record<string, string> = {
   '/home/.claude/verify-evidence/repo-20261126-1000.md': 'result: pass\n# verify: repo',
   '/home/.agent-bridge/telemetry.jsonl': JSON.stringify({ ts: '2026-11-26T09:45:00Z', to: 'antigravity', model: 'hydrogen', outcome: 'ok', durS: 40 }) + '\n',
 }
+const USAGE = JSON.stringify({ agy: [{ model: 'Gemini 4 Hydrogen (High)', gens: 10, in: 221461, out: 5456 }], agyRuns: { c1: { gens: 2, in: 61124, out: 1287 } }, deepseek: { steps: 2, in: 0, out: 0 } })
 const AGENT = { id: 'a1', description: 'Research sidebar UI', type: 'general-purpose', status: 'running', kind: 'local_agent', taskStatus: 'running', label: 'research', startTime: NOW, cwd: '/repo', tokenCount: 12000, tokenSamples: [], contextWindowSize: 200000 }
 
 function engine(on: any, agents: unknown[] = [], evidence: unknown[] = [], files: Record<string, string> = FILES, withClock = true) {
@@ -26,7 +27,11 @@ function engine(on: any, agents: unknown[] = [], evidence: unknown[] = [], files
   if (withClock) on('clock.now', () => ({ value: NOW }))
   if (withClock) on('clock.every', () => ({ value: { id: 't' } }))
   on('fs.read', (_: unknown, e: any) => { const p = e.path.replace(/^[A-Z]:/, '').split(String.fromCharCode(92)).join('/'); return p in files ? { value: files[p] } : { deny: 'ENOENT' } })
-  on('process.run', (_: unknown, e: any) => ({ value: { exitCode: 0, stdout: (e.argv ?? e.command ?? []).includes?.('status') ? ' M src/app.ts' + String.fromCharCode(10) : '', stderr: '' } }))
+  on('process.run', (_: unknown, e: any) => {
+    const argv: string[] = e.argv ?? e.command ?? []
+    if (argv.some(x => String(x).endsWith('ab-usage.js'))) return { value: { exitCode: 0, stdout: USAGE, stderr: '' } }
+    return { value: { exitCode: 0, stdout: argv.includes('status') ? ' M src/app.ts' + String.fromCharCode(10) : '', stderr: '' } }
+  })
   on('fs.stat', () => ({ value: { kind: 'file', size: 1, mtimeMs: NOW - 60000, isLink: false } }))
   on('fs.list', () => ({ value: evidence }))
   on('agent.list', () => ({ value: agents }))
@@ -268,4 +273,19 @@ test('a note with your own question under it goes to Claude; a bare note is held
   await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
   await $.prompt.submit({ text: asked })
   expect(sent).toEqual([asked])
+})
+
+
+test('usage: agy pooled total beside its title, tokens per delegated agy job', async ($, on) => {
+  const tele = JSON.stringify({ ts: '2026-11-26T09:58:00Z', taskId: 't1', to: 'antigravity', model: 'Gemini 4 Hydrogen (High)', outcome: 'ok', durS: 58 })
+  const started = JSON.stringify({ ts: '2026-11-26T09:57:00Z', taskId: 't1', to: 'antigravity', model: 'Gemini 4 Hydrogen (High)', outcome: 'started', task: 'smoke', log: '/home/x.log' })
+  engine(on, [], [], { ...FILES, '/home/.agent-bridge/telemetry.jsonl': started + '\n' + tele + '\n', '/home/x.log': '▶ antigravity ← task T1\n', '/home/.agent-bridge/tasks/T1/telemetry.json': '{"source":{"conversationId":"c1"}}' })
+  await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
+  await $.command.run({ command: 'sprint' })
+  const main = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  expect(await main.find({ type: 'Text', text: /pool 221k\/5k/ })).toBeTruthy()
+  await main.unmount()
+  const agents = await $.ui.mount({ ...PANE, requestId: 'sprint-agents', surface: 'terminal' })
+  expect(await agents.find({ type: 'Text', text: /58s · 61k\/1k/ })).toBeTruthy()
+  await agents.unmount()
 })

@@ -138,12 +138,13 @@ async function applyCritiques($: $T): Promise<string> {
 }
 
 // ---- Delegation view: router jobs, what each subagent is doing, worktrees, model usage, /btw answers ----
-type Job = { id: string; to: string; model: string; task: string; log: string; tree: string | null; state: string; startMs: number; durS: number | null; progress?: string; summary?: string }
+type Job = { id: string; to: string; model: string; task: string; log: string; tree: string | null; state: string; startMs: number; durS: number | null; progress?: string; summary?: string; conv?: string }
 type TreeRow = { path: string; branch: string; prunable: boolean; changed: number }
-type UsageDoc = { agy: { model: string; gens: number; in: number; out: number }[]; deepseek: { steps: number; in: number; out: number } | null }
+type UsageDoc = { agy: { model: string; gens: number; in: number; out: number }[]; agyRuns?: Record<string, { gens: number; in: number; out: number }>; deepseek: { steps: number; in: number; out: number } | null }
 let jobs: Job[] = []
 let treeRows: TreeRow[] = []
 let modelUsage: UsageDoc | null = null
+let usageError = ''
 const activity = new Map<string, { at: number; tool: string; brief: string }[]>()
 const btwAnswers = new Map<string, string>()
 
@@ -187,10 +188,13 @@ export function parseTrees(porcelain: string): Omit<TreeRow, 'changed'>[] {
 async function refreshDelegation($: $T, ab: string, now: number, porcelain: string): Promise<void> {
   const list = parseJobs((await $.fs.read(`${ab}/telemetry.jsonl`).catch(() => '')).trim().split('\n').slice(-80), now)
   for (const j of list) {
-    if (j.state !== 'running' || j.to !== 'antigravity' || !j.log) continue
-    // agy runs through agent-bridge, whose status file carries progress and a one-line summary.
+    if (j.to !== 'antigravity' || !j.log) continue
+    // agy runs through agent-bridge: its task folder names the agy conversation, and its status file the progress.
     const tid = /← task (\S+)/.exec((await $.fs.read(j.log).catch(() => '')).slice(0, 800))?.[1]
-    const st = tid ? await $.fs.read(`${ab}/tasks/${tid}/status.md`).catch(() => '') : ''
+    if (!tid) continue
+    j.conv = /"conversationId"\s*:\s*"([^"]+)"/.exec(await $.fs.read(`${ab}/tasks/${tid}/telemetry.json`).catch(() => ''))?.[1]
+    if (j.state !== 'running') continue
+    const st = await $.fs.read(`${ab}/tasks/${tid}/status.md`).catch(() => '')
     j.progress = /^progress:\s*(.*)$/m.exec(st)?.[1]?.trim()
     j.summary = /^summary:\s*(.*)$/m.exec(st)?.[1]?.trim()
   }
@@ -203,8 +207,12 @@ async function refreshDelegation($: $T, ab: string, now: number, porcelain: stri
 
 // agy and DeepSeek v4.1 Flash usage today, from ~/.claude/bin/ab-usage.js (about a second: polled every minute).
 async function refreshUsage($: $T): Promise<void> {
-  const r = await $.process.run(['node', `${await home($)}/.claude/bin/ab-usage.js`]).catch(() => null)
-  try { if (r && r.exitCode === 0) modelUsage = JSON.parse(r.stdout) as UsageDoc } catch { /* keep the last good reading */ }
+  const r = await $.process.run(['node', `${await home($)}/.claude/bin/ab-usage.js`]).catch((err: unknown) => ({ exitCode: 1, stdout: '', stderr: String(err) }))
+  try {
+    if (r.exitCode !== 0) throw new Error(r.stderr.trim().split('\n').pop() || `exit ${r.exitCode}`)
+    modelUsage = JSON.parse(r.stdout) as UsageDoc
+    usageError = ''
+  } catch (err) { usageError = String(err instanceof Error ? err.message : err).slice(0, 120) }
 }
 
 // /btw for one agent: a cheap side question about it, answered from what it did. The agent is never touched.
@@ -413,11 +421,14 @@ export const register: Register = on => {
     const s = await refresh($)
     // Frame clock: spinner + countdowns tick every 120 ms; data re-reads every 5 s.
     let ticks = 0
-    $.clock.every(120, async () => {
+    // One tick a second. The spinner frame (which redraws the panes) moves only while something runs, so an idle
+    // sidebar stays still instead of repainting 8 times a second.
+    $.clock.every(1000, async () => {
       ticks++
-      await update($, frame, f => (f + 1) % SPIN.length)
-      if (ticks % 40 === 0) await refresh($)
-      if (ticks % 500 === 0) void refreshUsage($)
+      const moving = (await read($, snap))?.active || jobs.some(j => j.state === 'running') || agentsCache.some(a => /running|pending|waiting/.test(a.status)) || [...btwAnswers.values()].some(t => t.startsWith('…'))
+      if (moving) await update($, frame, f => (f + 1) % SPIN.length)
+      if (ticks % 5 === 0) await refresh($)
+      if (ticks % 60 === 0) void refreshUsage($)
     })
     void refreshUsage($)
     const root = (await $.session.cwd()).replace(/\\/g, '/')
@@ -595,7 +606,9 @@ export const register: Register = on => {
         ])}
 
         {groups.map(([g, c, rows]) => card(g, rows.some(x => x.state === 'tripped') ? C.red : c, [
-          title(g, c, rows.length ? `${rows.filter(x => x.state !== 'tripped').length}/${rows.length} ready` : 'unused'),
+          title(g, c, [rows.length ? `${rows.filter(x => x.state !== 'tripped').length}/${rows.length} ready` : 'unused',
+            g === 'ANTIGRAVITY' && modelUsage?.agy.length ? `pool ${tok(modelUsage.agy.reduce((n, m) => n + m.in, 0))}/${tok(modelUsage.agy.reduce((n, m) => n + m.out, 0))}` : ''].filter(Boolean).join(' · ')),
+          ...(usageError ? [<Text key="u-err" color={C.yellow}>{cut(`usage: ${usageError}`, inner)}</Text>] : []),
           ...rows.map(x => {
             const tripped = x.state === 'tripped'
             return (
@@ -629,7 +642,7 @@ export const register: Register = on => {
     const ui = $.ui.resolve(e), { Box, Text, Button } = ui
     const f = await read($, frame), msg = await read($, note), now = await $.clock.now()
     const inner = Math.max(20, e.props.bodyColumns) - 4
-    const { short, cut, bar, chip, title, card, keys } = kit(ui, inner)
+    const { short, cut, tok, bar, chip, title, card, keys } = kit(ui, inner)
     const ago = (ms: number) => { const m = Math.max(0, Math.round((now - ms) / 60000)); return m < 1 ? 'now' : `${m}m ago` }
     const isLive = (st: string) => /running|pending|waiting/.test(st)
     const agents = [...agentsCache].sort((x, y) => y.startTime - x.startTime).slice(0, 4)
@@ -674,7 +687,8 @@ export const register: Register = on => {
           ...(jobs.length ? [...jobs.filter(j => j.state === 'running'), ...jobs.filter(j => j.state !== 'running').slice(0, 3)].map(j => {
             const isRun = j.state === 'running', ok = j.state === 'ok' || j.state === 'no-change'
             const who = j.to === 'antigravity' ? `agy:${j.model.replace(/^Gemini /, '')}` : short(j.to)
-            const time = isRun ? ago(j.startMs) : j.durS != null ? `${j.durS}s` : ''
+            const used = j.conv ? modelUsage?.agyRuns?.[j.conv] : undefined
+            const time = [isRun ? ago(j.startMs) : j.durS != null ? `${j.durS}s` : '', used ? `${tok(used.in)}/${tok(used.out)}` : ''].filter(Boolean).join(' · ')
             const meta = [j.progress ? `${j.progress}%` : '', j.summary ?? '', j.tree ? `tree ${j.tree.split(/[\\/]/).pop()}` : ''].filter(Boolean).join(' · ')
             return (
               <Box key={j.id} flexDirection="column">
