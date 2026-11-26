@@ -44,7 +44,7 @@ export function ponytailPrompt(list: Critique[]): string {
 const keepArmed = atom({ plugin: 'sprint-mod', key: 'keepArmed' } as const, 0)
 
 // Catppuccin Mocha, the palette prismantis defaults to, so the two mods match.
-const C = { mauve: '#cba6f7', blue: '#89b4fa', sky: '#89dceb', green: '#a6e3a1', yellow: '#f9e2af', peach: '#fab387', red: '#f38ba8', text: '#cdd6f4', overlay: '#6c7086', crust: '#11111b' }
+const C = { mauve: '#cba6f7', blue: '#89b4fa', sky: '#89dceb', green: '#a6e3a1', yellow: '#f9e2af', peach: '#fab387', red: '#f38ba8', text: '#cdd6f4', overlay: '#6c7086', sub: '#a6adc8', track: '#45475a', crust: '#11111b' }
 
 type $T = Parameters<Parameters<Register>[0]>[2] extends (...a: infer A) => unknown ? A[0] : never
 type Health = { executors?: Record<string, { state?: string; until?: string | null; reason?: string; runs?: { ts: string; outcome: string }[] }> }
@@ -232,15 +232,36 @@ function kit(ui: UI, inner: number) {
     tok: (n: number) => (n >= 1e6 ? `${(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `${Math.round(n / 1e3)}k` : String(n)),
     bar: (part: number, color: string) => {
       const p = Math.max(0, Math.min(1, part)), n = Math.round(p * room)
-      return <Text><Text dimColor>▕</Text><Text color={color}>{'█'.repeat(n)}</Text><Text dimColor>{'░'.repeat(room - n)}▏</Text></Text>
+      return <Text><Text color={C.track}>▕</Text><Text color={color}>{'█'.repeat(n)}</Text><Text color={C.track}>{'░'.repeat(room - n)}▏</Text></Text>
     },
     chip: (label: string, color: string) => <Text backgroundColor={color} color={C.crust} bold>{` ${label} `}</Text>,
     title: (label: string, color: string, right?: string) => (
-      <Box key="title" justifyContent="space-between"><Text color={color} bold>● {label}</Text>{right ? <Text dimColor>{right}</Text> : null}</Box>
+      <Box key="title" flexDirection="column">
+        <Box justifyContent="space-between"><Text color={color} bold>● {label}</Text>{right ? <Text color={C.sub}>{right}</Text> : null}</Box>
+        <Text color={C.track}>{'─'.repeat(inner)}</Text>
+      </Box>
     ),
-    card: (key: string, color: string, kids: unknown[]) => (
-      <Box key={key} flexDirection="column" borderStyle="round" borderColor={color} paddingX={1}>{kids}</Box>
-    ),
+    card: (key: string, color: string, kids: unknown[]) => (color === C.red || color === C.yellow
+      ? <Box key={key} flexDirection="column" borderStyle="round" borderColor={color} paddingX={1}>{kids}</Box>
+      : <Box key={key} flexDirection="column">{kids}</Box>),
+    // Footer hints: the key in the accent colour, its action in plain secondary text.
+    keys: (pairs: [string, string][], tail?: string) => {
+      const rows: [string, string][][] = [[]]
+      let width = 0
+      for (const pr of pairs) {
+        const w = pr[0].length + pr[1].length + 4
+        if (width + w > inner && rows[rows.length - 1].length) { rows.push([]); width = 0 }
+        rows[rows.length - 1].push(pr); width += w
+      }
+      return (
+        <Box key="keys" flexDirection="column">
+          {rows.map((row, r) => (
+            <Text key={String(r)}>{row.map(([k, label], i) => <Text key={k}>{i ? <Text color={C.track}> · </Text> : null}<Text color={C.peach} bold>{k}</Text><Text color={C.sub}> {label}</Text></Text>)}</Text>
+          ))}
+          {tail ? <Text color={C.sub}>{tail}</Text> : null}
+        </Box>
+      )
+    },
   }
 }
 
@@ -357,15 +378,15 @@ export const register: Register = on => {
     if (e.props.tool !== 'Bash' || !isRoute(e.props.input) || e.props.isExpanded) return next(e)
     const { Text } = $.ui.resolve(e)
     const cls = (/--class\s+(\w+)/.exec(String((e.props.input as { command: string }).command)) ?? [])[1] ?? '?'
-    if (e.props.isRunning) return <Text><Text color={C.peach}>⇄ route</Text> <Text bold>{cls}</Text> <Text color={C.overlay}>running…</Text></Text>
+    if (e.props.isRunning) return <Text><Text color={C.peach}>⇄ route</Text> <Text bold>{cls}</Text> <Text color={C.sub}>running…</Text></Text>
     const r = routeOf(e.props.output)
     if (!r) return next(e)
     const ok = (r.attempts ?? []).find(a => a.outcome === 'ok')
     return (
       <Text>
-        <Text color={C.peach}>⇄ route</Text> <Text bold>{cls}</Text> <Text color={C.overlay}>→</Text>{' '}
+        <Text color={C.peach}>⇄ route</Text> <Text bold>{cls}</Text> <Text color={C.sub}>→</Text>{' '}
         {(r.attempts ?? []).map((a, i) => (
-          <Text key={String(i)} color={a.outcome === 'ok' ? C.green : a.skipped ? C.overlay : C.red}>{a.executor.replace('opencode:free:', '').replace('antigravity:', 'agy:')} {a.outcome ?? 'skip'}{i < (r.attempts ?? []).length - 1 ? ' · ' : ''}</Text>
+          <Text key={String(i)} color={a.outcome === 'ok' ? C.green : a.skipped ? C.sub : C.red}>{a.executor.replace('opencode:free:', '').replace('antigravity:', 'agy:')} {a.outcome ?? 'skip'}{i < (r.attempts ?? []).length - 1 ? ' · ' : ''}</Text>
         ))}
         {!ok && <Text color={C.red}> · do it with Claude</Text>}
       </Text>
@@ -377,7 +398,7 @@ export const register: Register = on => {
     if (!r) return next(e)
     const { Text } = $.ui.resolve(e)
     const log = (r.attempts ?? []).map(a => a.log).filter(Boolean).pop()
-    return <Text color={C.overlay}>  {log ? `log ${log}` : 'no log'} · ctrl+o for full output</Text>
+    return <Text color={C.sub}>  {log ? `log ${log}` : 'no log'} · ctrl+o for full output</Text>
   })
 
   on('session.start', async ($, e, next) => {
@@ -457,7 +478,7 @@ export const register: Register = on => {
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Text, Button } = $.ui.resolve(e)
     const s = await read($, snap)
-    if (!s) return <Text dimColor>Reading sprint state…</Text>
+    if (!s) return <Text color={C.sub}>Reading sprint state…</Text>
     const f = await read($, frame), msg = await read($, note), now = s.readAtMs
     const root = (await $.session.cwd()).split(String.fromCharCode(92)).join('/')
     const u = usageCache
@@ -469,7 +490,7 @@ export const register: Register = on => {
     const live = agents.filter(a => /running|pending|waiting/.test(a.status))
     const elapsedMin = (now - s.startedAtMs) / 60000
     const inner = W - 4
-    const { short, cut, tok, bar, chip, title, card } = kit($.ui.resolve(e), inner)
+    const { short, cut, tok, bar, chip, title, card, keys } = kit($.ui.resolve(e), inner)
     const groups: [string, string, ExecRow[]][] = [
       ['ANTIGRAVITY', C.mauve, s.execs.filter(x => x.key.startsWith('antigravity'))],
       ['OPENCODE', C.sky, s.execs.filter(x => x.key.startsWith('opencode'))],
@@ -478,14 +499,13 @@ export const register: Register = on => {
     const runningJobs = jobs.filter(j => j.state === 'running').length
     // Today's tokens per model: agy from its own run databases, DeepSeek from `opencode stats`; auto is not trackable.
     const useRow = (key: string, name: string, n: number, i: number, o: number) => (
-      <Text key={key}><Text color={C.overlay}>▸ </Text>{cut(name, 18).padEnd(18)} <Text dimColor>{n}× {tok(i)}/{tok(o)}</Text></Text>
+      <Text key={key}><Text color={C.sub}>▸ </Text>{cut(name, 18).padEnd(18)} <Text color={C.sub}>{n}× {tok(i)}/{tok(o)}</Text></Text>
     )
     const usageRows = (g: string) => (g === 'ANTIGRAVITY'
-      ? (modelUsage?.agy.length ? [<Text key="u-h" dimColor>today · runs× tokens in/out</Text>, ...modelUsage.agy.map(m => useRow(`u-${m.model}`, m.model.replace(/^Gemini /, ''), m.gens, m.in, m.out))] : [])
+      ? (modelUsage?.agy.length ? [<Text key="u-h" color={C.sub}>today · runs× tokens in/out</Text>, ...modelUsage.agy.map(m => useRow(`u-${m.model}`, m.model.replace(/^Gemini /, ''), m.gens, m.in, m.out))] : [])
       : [
-          <Text key="u-h" dimColor>today · runs× tokens in/out</Text>,
-          ...(modelUsage?.deepseek ? [useRow('u-ds', 'deepseek-v4.1-flash', modelUsage.deepseek.steps, modelUsage.deepseek.in, modelUsage.deepseek.out)] : []),
-          <Text key="u-auto" color={C.overlay}>  auto via freellmapi: not tracked</Text>,
+          ...(modelUsage?.deepseek ? [<Text key="u-h" color={C.sub}>today · runs× tokens in/out</Text>, useRow('u-ds', 'deepseek-v4.1-flash', modelUsage.deepseek.steps, modelUsage.deepseek.in, modelUsage.deepseek.out)] : []),
+          <Text key="u-auto" color={C.sub}>  auto via freellmapi: not tracked</Text>,
         ])
     const phaseName = s.active ? NAMES[s.phase - 1] : ''
     const skillOk = s.skillsLoaded.some(x => x.endsWith(`phase-${phaseName}`))
@@ -493,16 +513,16 @@ export const register: Register = on => {
     const header = (
       <Box flexDirection="column">
         <Box justifyContent="space-between">
-          <Text><Text bold>SPRINT</Text><Text dimColor> · </Text><Text color={C.peach} bold>{s.active ? `P${s.phase}/6 ${phaseName.toUpperCase()}` : 'IDLE'}</Text></Text>
+          <Text><Text bold>SPRINT</Text><Text color={C.sub}> · </Text><Text color={C.peach} bold>{s.active ? `P${s.phase}/6 ${phaseName.toUpperCase()}` : 'IDLE'}</Text></Text>
           <Button key="compact" label={small ? '⤢' : '⤡'} hotkey="c" onPress={async () => { await update($, compact, v => !v) }} />
         </Box>
         {s.active && (
           <Text>
-            {NAMES.map((n, i) => <Text key={n} color={i + 1 < s.phase ? C.green : i + 1 === s.phase ? C.peach : C.overlay}>{i + 1 < s.phase ? '━━' : i + 1 === s.phase ? `${SPIN[f]}━` : '──'}</Text>)}
-            <Text dimColor> {Math.round(elapsedMin)}/{s.budgetMin}m</Text>
+            {NAMES.map((n, i) => <Text key={n} color={i + 1 < s.phase ? C.green : i + 1 === s.phase ? C.peach : C.sub}>{i + 1 < s.phase ? '━━' : i + 1 === s.phase ? `${SPIN[f]}━` : '──'}</Text>)}
+            <Text color={C.sub}> {Math.round(elapsedMin)}/{s.budgetMin}m</Text>
           </Text>
         )}
-        <Text dimColor>{cut(root.split('/').pop() || root, inner)}{s.active && !skillOk ? ' · load phase skill' : ''}</Text>
+        <Text color={C.sub}>{cut(root.split('/').pop() || root, inner)}{s.active && !skillOk ? ' · load phase skill' : ''}</Text>
       </Box>
     )
 
@@ -511,11 +531,11 @@ export const register: Register = on => {
       return (
         <Box flexDirection="column" gap={1}>
           {header}
-          {u && <Text><Text dimColor>ctx </Text>{bar(ctx, pctColor(ctx))} {Math.round(ctx * 100)}%</Text>}
+          {u && <Text><Text color={C.sub}>ctx </Text>{bar(ctx, pctColor(ctx))} {Math.round(ctx * 100)}%</Text>}
           {groups.map(([g, c, rows]) => <Text key={g}><Text color={c}>● </Text>{g.toLowerCase()} <Text color={rows.some(x => x.state === 'tripped') ? C.red : C.green}>{rows.filter(x => x.state !== 'tripped').length}/{rows.length}</Text></Text>)}
           <Text><Text color={['clean', 'pass'].includes(gateState(s.gate)) ? C.green : C.red}>● </Text>gate {({ clean: 'clean', pass: 'ok', stale: 'not verified', fail: 'checks failed', none: 'no result' })[gateState(s.gate)]}</Text>
-          <Text><Text color={runningJobs ? C.mauve : C.overlay}>● </Text>jobs {runningJobs} running</Text>
-          <Text><Text color={C.blue}>● </Text>agents <Text color={live.length ? C.sky : C.overlay}>{live.length} running</Text></Text>
+          <Text><Text color={runningJobs ? C.mauve : C.sub}>● </Text>jobs {runningJobs} running</Text>
+          <Text><Text color={C.blue}>● </Text>agents <Text color={live.length ? C.sky : C.sub}>{live.length} running</Text></Text>
         </Box>
       )
     }
@@ -532,43 +552,43 @@ export const register: Register = on => {
           const hint = { stale: 'run /verify before claiming done', fail: 'newest /verify record says result: fail', none: 'record has no result: line · rerun /verify', clean: '', pass: '' }[st]
           return card('gate', ok ? C.green : C.red, [
             title('DONE GATE', ok ? C.green : C.red, g.changed ? `${g.changed} changed` : 'clean'),
-            <Text key="g1">{chip(label, ok ? C.green : C.red)} <Text color={C.overlay}>{detail}</Text></Text>,
-            ...(hint ? [<Text key="g2" color={C.overlay}>{cut(hint, inner)}</Text>] : []),
+            <Text key="g1">{chip(label, ok ? C.green : C.red)} <Text color={C.sub}>{detail}</Text></Text>,
+            ...(hint ? [<Text key="g2" color={C.sub}>{cut(hint, inner)}</Text>] : []),
           ])
         })()}
 
         {(() => {
           const open = crit.filter(c => c.status === 'open'), sent = crit.length - open.length
           if (!crit.length) return null
-          return card('crit', open.length ? C.yellow : C.overlay, [
-            title('CRITIQUES', open.length ? C.yellow : C.overlay, `${open.length} open${sent ? ` · ${sent} sent` : ''}`),
+          return card('crit', open.length ? C.yellow : C.sub, [
+            title('CRITIQUES', open.length ? C.yellow : C.sub, `${open.length} open${sent ? ` · ${sent} sent` : ''}`),
             ...open.slice(-4).map(c => <Text key={c.id}><Text color={C.yellow}>▸ </Text>{cut(c.title, inner - 2)}</Text>),
-            ...(held ? [<Text key="held" color={C.overlay}>{cut('held: sent notes queue here · reviewed at phase end', inner)}</Text>] : []),
+            ...(held ? [<Text key="held" color={C.sub}>{cut('held: sent notes queue here · reviewed at phase end', inner)}</Text>] : []),
             ...(open.length ? [<Button key="apply" label="Review with ponytail" hotkey="p" onPress={async () => { const out = await applyCritiques($); await update($, note, () => out) }} />] : []),
           ])
         })()}
 
         {u && card('usage', C.text, [
           title('USAGE', C.text, u.cost ? `$${u.cost.usd.toFixed(2)}` : undefined),
-          <Text key="ctx"><Text dimColor>{'context'.padEnd(8)}</Text>{bar((u.context.tokens ?? 0) / u.context.window, pctColor((u.context.tokens ?? 0) / u.context.window))} {Math.round((u.context.tokens ?? 0) / 1000)}k</Text>,
+          <Text key="ctx"><Text color={C.sub}>{'context'.padEnd(8)}</Text>{bar((u.context.tokens ?? 0) / u.context.window, pctColor((u.context.tokens ?? 0) / u.context.window))} {Math.round((u.context.tokens ?? 0) / 1000)}k</Text>,
           ...u.rateLimits.slice(0, 2).map(r => (
-            <Text key={r.kind}><Text dimColor>{cut(r.kind, 7).padEnd(8)}</Text>{bar(r.percentUsed / 100, pctColor(r.percentUsed / 100))} {Math.round(r.percentUsed)}%</Text>
+            <Text key={r.kind}><Text color={C.sub}>{cut(r.kind, 7).padEnd(8)}</Text>{bar(r.percentUsed / 100, pctColor(r.percentUsed / 100))} {Math.round(r.percentUsed)}%</Text>
           )),
           ...(keepCache ? [(() => {
             const k = keepCache, hm = (ms: number) => `${Math.floor(ms / 3600000)}h${String(Math.floor(ms / 60000) % 60).padStart(2, '0')}m`
             const spent = k.idlePingUsd != null ? ` · $${k.idlePingUsd.toFixed(2)} this break` : ''
             return (
-              <Text key="kw"><Text dimColor>{'warm'.padEnd(8)}</Text>{k.pingSkipped
+              <Text key="kw"><Text color={C.sub}>{'warm'.padEnd(8)}</Text>{k.pingSkipped
                 ? <Text color={C.red}>budget hit · pings paused{spent}</Text>
                 : k.keepwarm === 'on' ? <Text color={C.green}>on · {hm(k.leftMs)} left{spent}</Text>
                 : k.keepwarm === 'stopped' ? <Text color={C.yellow}>stopped · {cut(k.stopped ?? '', Math.max(8, inner - 20))}</Text>
-                : <Text color={C.overlay}>off{k.cold ? ' · cache cold' : ''}</Text>}{k.autoWarm ? <Text color={C.yellow}> · auto-arm on</Text> : null}</Text>
+                : <Text color={C.sub}>off{k.cold ? ' · cache cold' : ''}</Text>}{k.autoWarm ? <Text color={C.yellow}> · auto-arm on</Text> : null}</Text>
             )
           })()] : []),
         ])}
 
-        {card('agents', live.length || runningJobs ? C.sky : C.overlay, [
-          title('AGENTS', live.length || runningJobs ? C.sky : C.overlay, `${live.length} live · ${runningJobs} jobs`),
+        {card('agents', live.length || runningJobs ? C.sky : C.sub, [
+          title('AGENTS', live.length || runningJobs ? C.sky : C.sub, `${live.length} live · ${runningJobs} job${runningJobs === 1 ? '' : 's'}`),
           <Button key="open-agents" label="Open Agents tab" hotkey="g" onPress={async () => { await $.ui.open({ id: AGENTS, title: 'Agents', focus: true, columns: 42 }) }} />,
         ])}
 
@@ -578,11 +598,11 @@ export const register: Register = on => {
             const tripped = x.state === 'tripped'
             return (
               <Box key={x.key} justifyContent="space-between">
-                <Text><Text color={tripped ? C.red : x.state === 'ok' ? C.green : C.overlay}>{tripped ? '✕' : '●'} </Text>{cut(short(x.key), inner - 12)}</Text>
+                <Text><Text color={tripped ? C.red : x.state === 'ok' ? C.green : C.sub}>{tripped ? '✕' : '●'} </Text>{cut(short(x.key), inner - 12)}</Text>
                 {tripped
                   ? <Button key={`reset-${x.key}`} label={`${x.reason} ${mins(x.untilMs - now)}m ↺`}
                       onPress={async () => { const out = await run($, ['node', `${await home($)}/.claude/bin/ab-route.js`, '--reset', x.key], root); await update($, note, () => out); await refresh($) }} />
-                  : <Text>{x.runs.length ? x.runs.map((r, i) => <Text key={String(i)} color={r === 'ok' ? C.green : C.red}>▮</Text>) : <Text dimColor>idle</Text>}</Text>}
+                  : <Text>{x.runs.length ? x.runs.map((r, i) => <Text key={String(i)} color={r === 'ok' ? C.green : C.red}>▮</Text>) : <Text color={C.sub}>idle</Text>}</Text>}
               </Box>
             )
           }),
@@ -598,7 +618,7 @@ export const register: Register = on => {
               onPress={async () => { const out = await run($, ['node', `${SPRINT_REPO}/scripts/hooks/sprint-gate.js`, 'advance'], root); await update($, note, () => out); await refresh($) }} />
           )}
         </Box>
-        <Text dimColor>c compact · g agents · r refresh · h hud · p ponytail{s.active ? ' · a advance' : ''}{msg ? ` · ${cut(msg, Math.max(8, inner - 30))}` : ''}</Text>
+        {keys([['c', 'compact'], ['g', 'agents'], ['r', 'refresh'], ['h', 'hud'], ['p', 'ponytail'], ...(s.active ? [['a', 'advance'] as [string, string]] : [])], msg ? cut(msg, Math.max(8, inner - 30)) : undefined)}
       </Box>
     )
   })
@@ -607,7 +627,7 @@ export const register: Register = on => {
     const ui = $.ui.resolve(e), { Box, Text, Button } = ui
     const f = await read($, frame), msg = await read($, note), now = await $.clock.now()
     const inner = Math.max(20, e.props.bodyColumns) - 4
-    const { short, cut, bar, chip, title, card } = kit(ui, inner)
+    const { short, cut, bar, chip, title, card, keys } = kit(ui, inner)
     const ago = (ms: number) => { const m = Math.max(0, Math.round((now - ms) / 60000)); return m < 1 ? 'now' : `${m}m ago` }
     const isLive = (st: string) => /running|pending|waiting/.test(st)
     const agents = [...agentsCache].sort((x, y) => y.startTime - x.startTime).slice(0, 4)
@@ -622,7 +642,10 @@ export const register: Register = on => {
 
     return (
       <Box flexDirection="column" gap={1}>
-        <Text><Text bold>AGENTS</Text><Text dimColor> · btw asks haiku about one agent, never interrupting it</Text></Text>
+        <Box flexDirection="column">
+          <Text bold>AGENTS</Text>
+          <Text color={C.sub}>{cut('btw asks haiku; the agent keeps working', inner)}</Text>
+        </Box>
 
         {card('subagents', live ? C.sky : C.blue, [
           title('SUBAGENTS', live ? C.sky : C.blue, `${live} running`),
@@ -635,17 +658,17 @@ export const register: Register = on => {
                   <Text>{chip(active ? 'LIVE' : bad ? 'FAIL' : 'DONE', active ? C.sky : bad ? C.red : C.green)} <Text bold>{cut(a.name || a.type, inner - 14)}</Text></Text>
                   {btw(a.id, () => btwAgent($, a))}
                 </Box>
-                <Text dimColor>{cut(a.description || a.label, inner)}</Text>
-                {last ? <Text><Text color={C.peach}>▸ </Text>{cut(`${last.tool} ${last.brief}`.trim(), inner - 10)} <Text dimColor>{ago(last.at)}</Text></Text> : null}
-                <Text>{bar(a.contextWindowSize ? a.tokenCount / a.contextWindowSize : 0, active ? C.sky : C.blue)} <Text dimColor>{Math.round(a.tokenCount / 1000)}k{a.effort ? ` · ${a.effort}` : ''}</Text></Text>
+                <Text color={C.sub}>{cut(a.description || a.label, inner)}</Text>
+                {last ? <Text><Text color={C.peach}>▸ </Text>{cut(`${last.tool} ${last.brief}`.trim(), inner - 10)} <Text color={C.sub}>{ago(last.at)}</Text></Text> : null}
+                <Text>{bar(a.contextWindowSize ? a.tokenCount / a.contextWindowSize : 0, active ? C.sky : C.blue)} <Text color={C.sub}>{Math.round(a.tokenCount / 1000)}k{a.effort ? ` · ${a.effort}` : ''}</Text></Text>
                 {answer(a.id)}
               </Box>
             )
-          }) : [<Text key="none" dimColor>none yet this session</Text>]),
+          }) : [<Text key="none" color={C.sub}>none yet this session</Text>]),
         ])}
 
-        {card('jobs', running ? C.mauve : C.overlay, [
-          title('DELEGATED', running ? C.mauve : C.overlay, `${running} running`),
+        {card('jobs', running ? C.mauve : C.sub, [
+          title('DELEGATED', running ? C.mauve : C.sub, `${running} running`),
           ...(jobs.length ? jobs.map(j => {
             const isRun = j.state === 'running', ok = j.state === 'ok' || j.state === 'no-change'
             const who = j.to === 'antigravity' ? `agy:${j.model.replace(/^Gemini /, '')}` : short(j.to)
@@ -656,12 +679,12 @@ export const register: Register = on => {
                   <Text>{chip(isRun ? 'RUN' : j.state.toUpperCase(), isRun ? C.mauve : ok ? C.green : C.red)} <Text color={j.to === 'antigravity' ? C.mauve : C.sky}>{cut(who, inner - 18)}</Text></Text>
                   {btw(j.id, () => btwJob($, j))}
                 </Box>
-                <Text dimColor>{cut(j.task || '(task not recorded: started before this version)', inner)}</Text>
-                {meta ? <Text color={C.overlay}>{cut(meta, inner)}</Text> : null}
+                <Text color={C.sub}>{cut(j.task || '(task not recorded: started before this version)', inner)}</Text>
+                {meta ? <Text color={C.sub}>{cut(meta, inner)}</Text> : null}
                 {answer(j.id)}
               </Box>
             )
-          }) : [<Text key="none" dimColor>no router jobs yet</Text>]),
+          }) : [<Text key="none" color={C.sub}>no router jobs yet</Text>]),
         ])}
 
         {card('trees', treeRows.some(t => t.prunable) ? C.red : C.green, [
@@ -674,11 +697,11 @@ export const register: Register = on => {
             const owner = job ? ` · ${job.to === 'antigravity' ? 'agy' : short(job.to)}` : t.path.includes('.claude') ? ' · claude agent' : ''
             return (
               <Box key={t.path} flexDirection="column">
-                <Text>{chip(st, { STALE: C.red, LIVE: C.mauve, REVIEW: C.yellow, IDLE: C.overlay }[st])} {cut(name, inner - 10)}</Text>
-                <Text color={C.overlay}>{cut(`${t.branch} · ${t.changed} changed${owner}`, inner)}</Text>
+                <Text>{chip(st, { STALE: C.red, LIVE: C.mauve, REVIEW: C.yellow, IDLE: C.sub }[st])} {cut(name, inner - 10)}</Text>
+                <Text color={C.sub}>{cut(`${t.branch} · ${t.changed} changed${owner}`, inner)}</Text>
               </Box>
             )
-          }) : [<Text key="none" dimColor>only the main checkout</Text>]),
+          }) : [<Text key="none" color={C.sub}>only the main checkout</Text>]),
           ...(treeRows.some(t => t.prunable) ? [<Button key="prune" label="git worktree prune"
             onPress={async () => { const out = await run($, ['git', 'worktree', 'prune'], (await $.session.cwd()).split(String.fromCharCode(92)).join('/')); await update($, note, () => out); await refresh($) }} />] : []),
         ])}
@@ -686,7 +709,7 @@ export const register: Register = on => {
         <Box gap={1}>
           <Button key="refresh" label="Refresh" hotkey="r" onPress={async () => { await refresh($); await update($, note, () => 'refreshed') }} />
         </Box>
-        <Text dimColor>r refresh · btw per row{msg ? ` · ${cut(msg, Math.max(8, inner - 24))}` : ''}</Text>
+        {keys([['r', 'refresh'], ['btw', 'per row']], msg ? cut(msg, Math.max(8, inner - 24)) : undefined)}
       </Box>
     )
   })
