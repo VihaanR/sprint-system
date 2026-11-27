@@ -25,12 +25,17 @@ validate before claiming, and keep core logic yourself.
 1. The FIRST tool call of each phase is `Skill(phase-<name>)`: discover, backend, frontend, polish, audit, launch.
    The PreToolUse hook blocks code edits until it is loaded.
 2. Phase 1 output (PRODUCT.md, DESIGN.md, golden fixture, frozen schema) gates every later phase.
-3. Claude builds by default. Wall-clock minutes are the scarce resource, not tokens (Sprint 1 lost 12-18 min to
-   executor stalls, two isolation breaches and an exhausted quota pool). Critical-path work, anything without a
-   measurable check, and core domain/scientific logic: Claude in its own worktree.
-4. Model split, to protect the 5-hour usage window: Opus (you) plans, decides and reviews; implementation slices go
-   to the `builder` agent (Sonnet) when they are independent. Check `/usage` at each phase end and put the % in the
-   scorecard's [TIME] line. Above 70% with phases left: move more slices to `builder`, keep Opus for review only.
+3. Claude builds, not the router: wall-clock minutes are the scarce resource (Sprint 1 lost 12-18 min to executor
+   stalls, two isolation breaches and an exhausted quota pool).
+4. Sonnet writes the code, Opus (you) runs the sprint (the user's choice: it protects the 5-hour usage window).
+   - Default for every implementation slice (backend endpoints, UI screens, tests, seed data, deploy config):
+     spawn the `builder` agent (Sonnet, own worktree) with the outcome, the frozen schema and a measurable acceptance
+     check. Independent slices: several `builder` agents in one message, in parallel.
+   - Opus writes code itself only for: core domain/scientific logic (the part judges probe), fixes under ~20 lines,
+     merging builder worktrees, or a slice a builder already failed once.
+   - Opus always: plans, writes briefs, reviews every builder diff and runs the checks before merging.
+   - Check `/usage` at each phase end and put the % in the scorecard's [TIME] line. Above 70% with phases left,
+     Opus stops writing code entirely and only reviews.
 5. Router (`node ~/.claude/bin/ab-route.js --class <bulk|large|agy> --accept "<metric>" --repo . "<outcome>"`) only for
    independent, mechanical, off-critical-path jobs: seed data, bulk tests, docs, repeating a pattern across files.
    Run `--status` first. Not started in 60 s, or one failed chain: implement directly, no `--reset`, no retry.

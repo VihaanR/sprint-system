@@ -111,7 +111,7 @@ test('effort routing leaves agents alone outside a sprint', async ($, on) => {
 })
 
 
-import { briefOf, critiqueTitle, hasOwnWords, isUrgent, keepAction, parseJobs, phaseWindow } from './register'
+import { briefOf, mainPrompt, critiqueTitle, hasOwnWords, isUrgent, keepAction, parseJobs, phaseWindow } from './register'
 
 test('phaseWindow: floor wait, open window, over budget', () => {
   const w = (usedMin: number, floorMin = 25) => phaseWindow({ phase: 1, phaseBudgets: [30, 60, 75, 45, 45, 45], phaseStartedAtMs: NOW - usedMin * 60000, floorMin, readAtMs: NOW })
@@ -314,3 +314,10 @@ test('usage: agy pooled total beside its title, tokens per delegated agy job', a
   await agents.unmount()
 })
 
+
+test('main-session btw prompt names the phase and lists tool calls', () => {
+  const p = mainPrompt('discover', [{ at: Date.parse('2026-11-26T10:00:00Z'), tool: 'Edit', brief: 'SPRINT.md' }])
+  expect(p).toContain('phase: discover')
+  expect(p).toContain('Edit SPRINT.md')
+  expect(p).toContain('plain-English')
+})

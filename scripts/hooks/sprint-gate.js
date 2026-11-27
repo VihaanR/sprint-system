@@ -159,8 +159,10 @@ function exitGate(root, s, cfg) {
   if (w.elapsedMin < w.floorMin) fail.push(`Phase ${s.phase} floor: ${Math.ceil(w.floorMin - w.elapsedMin)} min left (floor ${w.floorMin} of ${w.ceilMin} min). Keep validating before advancing.`);
   if (s.phase === 1) { const m = missingArtifacts(root); if (m.length) fail.push(`Phase 1 artifacts missing: ${m.join(", ")}`); fail.push(...discoverLogFails(root, g)); }
   if (s.phase === 2) {
-    const t = spawnSync("python", ["-m", "pytest", "-q"], { cwd: root, encoding: "utf8", timeout: 300000 });
-    if (t.status !== 0) fail.push(`pytest exit ${t.status}`);
+    // uv projects keep deps in .venv, which the system python cannot see (pytest then exits 2 on import errors).
+    const uv = fs.existsSync(path.join(root, "uv.lock"));
+    const t = spawnSync(uv ? "uv" : "python", uv ? ["run", "pytest", "-q"] : ["-m", "pytest", "-q"], { cwd: root, encoding: "utf8", timeout: 300000, shell: process.platform === "win32" });
+    if (t.status !== 0) fail.push(`pytest exit ${t.status}${t.stdout ? ": " + t.stdout.trim().split("\n").pop() : ""}`);
     const loc = coreLoc(root), max = g.backendMaxCoreLoc || 450; if (loc > max) fail.push(`core backend LOC ${loc} > ${max}`);
   }
   if (s.phase === 3) {
@@ -192,6 +194,21 @@ function routeGuard(cmd) {
 }
 
 // ---- SPRINT-REPORT.md: your words, phase times and friction, for the post-mortem ----
+// Paused clock: a gap with no hook activity longer than idlePauseMin (terminal closed, usage exhausted, session
+// restart) is not sprint time. Shift the sprint and phase start forward by the gap, so every reader of the clock
+// (gate, sidebar, scorecard, report) sees it paused, and record the pause.
+function pauseClock(root, s, cfg) {
+  const now = Date.now(), idle = ((cfg.gates || {}).idlePauseMin ?? 10) * 60000;
+  const last = Date.parse(s.lastActivityAt || "") || now, gap = now - last;
+  if (gap > idle) {
+    const shift = t => (t ? new Date(Date.parse(t) + gap).toISOString() : t);
+    s.startedAt = shift(s.startedAt); s.phaseStartedAt = shift(s.phaseStartedAt);
+    s.pauses = [...(s.pauses || []), { from: new Date(last).toISOString(), to: new Date(now).toISOString(), min: Math.round(gap / 60000) }];
+  }
+  s.lastActivityAt = new Date(now).toISOString();
+  saveState(root, s);
+}
+
 const endPhase = (s, now) => { s.phaseLog = [...(s.phaseLog || []), { phase: s.phase, startedAt: s.phaseStartedAt || s.startedAt, endedAt: now }]; };
 const jsonl = p => { try { return fs.readFileSync(p, "utf8").split("\n").map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean); } catch { return []; } };
 const oneLine = t => String(t).replace(/\s+/g, " ").trim();
@@ -252,7 +269,11 @@ function main() {
     return;
   }
   let inp = {}; try { inp = JSON.parse(fs.readFileSync(0, "utf8") || "{}"); } catch {}
-  const root = process.env.CLAUDE_PROJECT_DIR || inp.cwd || process.cwd(), ev = inp.hook_event_name;
+  // The project root is the folder holding .sprint-state.json, searched upward: a session whose cwd moved into a
+  // subfolder (frontend/) otherwise read no state, recorded no activity, and the idle-pause saw a fake 28-min gap.
+  const start = process.env.CLAUDE_PROJECT_DIR || inp.cwd || process.cwd(), ev = inp.hook_event_name;
+  const findUp = d => { for (let p = path.resolve(d); ; p = path.dirname(p)) { if (fs.existsSync(path.join(p, ".sprint-state.json"))) return p; if (path.dirname(p) === p) return null; } };
+  const root = findUp(start) || start;
   if (ev === "PreToolUse" && (inp.tool_name === "Bash" || inp.tool_name === "PowerShell")) routeGuard(String((inp.tool_input || {}).command || ""));
   const cfg = config(root);
 
@@ -272,6 +293,7 @@ function main() {
   }
   const s = readJson(statePath(root)); if (!s || !s.active) return;
   PHASE = s.phase;
+  pauseClock(root, s, cfg);
   if (ev === "UserPromptSubmit") {
     const p = (inp.prompt || "").trim(), kind = /^wtf\b/i.test(p) ? "wtf" : FRUSTRATED.test(p) ? "auto" : null;
     const newTranscript = inp.transcript_path && !(s.transcripts || []).includes(inp.transcript_path);
