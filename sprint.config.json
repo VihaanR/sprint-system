@@ -10,10 +10,10 @@
     "6": { "name": "launch", "budgetMin": 45 }
   },
   "router": {
-    "autoRoute": true,
+    "autoRoute": false,
     "agyModels": ["Gemini 4 Hydrogen (High)", "Gemini 3.8 Flash (Medium)"],
     "agySessionPrefix": "sprint",
-    "agyStartupStallMs": 180000,
+    "agyStartupStallMs": 60000,
     "agyOneStrikeDrop": true,
     "opencodeFallback": "freellmapi/auto",
     "maxChainWallMs": 600000,

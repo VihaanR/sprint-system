@@ -171,6 +171,19 @@ function exitGate(root, s, cfg) {
   return fail;
 }
 
+// Router guard (was ~/.claude/bin/route-guard.js): always on, sprint or not. Escape hatch: AB_DIRECT=1.
+const DIRECT_EXECUTOR = [
+  /\bagent-bridge(\.js)?["']?\s+run\b/i,
+  /\bagy(\.exe)?["']?\s+(-p\b|--print\b|--mode\b|--dangerously)/i,
+  /\bopencode(\.exe)?["']?\s+run\b(?!\s+--help)/i,
+];
+function routeGuard(cmd) {
+  if (/ab-route\.js/.test(cmd) || /AB_DIRECT=1/.test(cmd) || !DIRECT_EXECUTOR.some(r => r.test(cmd))) return;
+  block("Blocked: use the router, not an executor directly.\n" +
+    "  node ~/.claude/bin/ab-route.js --class <recon|bulk|large|review|research> --repo <dir> \"<outcome + acceptance criteria>\"\n" +
+    "  (status: node ~/.claude/bin/ab-route.js --status). To bypass on purpose, prefix the command with AB_DIRECT=1.");
+}
+
 function main() {
   if (process.argv[2] === "advance") {
     const root = process.cwd(), s = readJson(statePath(root));
@@ -186,6 +199,7 @@ function main() {
   }
   let inp = {}; try { inp = JSON.parse(fs.readFileSync(0, "utf8") || "{}"); } catch {}
   const root = process.env.CLAUDE_PROJECT_DIR || inp.cwd || process.cwd(), ev = inp.hook_event_name;
+  if (ev === "PreToolUse" && (inp.tool_name === "Bash" || inp.tool_name === "PowerShell")) routeGuard(String((inp.tool_input || {}).command || ""));
   const cfg = config(root);
 
   if (ev === "UserPromptSubmit") {

@@ -105,3 +105,14 @@ test("sprint start needs Opus 5.5 high and pins it in settings.local.json", () =
   assert.strictEqual(ok.code, 0); assert.match(ok.out, /window 25-30 min/);
   const s = state(root); assert.strictEqual(s.phase, 1); assert.ok(s.phaseStartedAt);
 });
+
+test("router guard blocks direct executor runs with no sprint active, and allows the router and AB_DIRECT", () => {
+  const root = project();
+  const pre = command => run(root, { input: { hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command } } });
+  const blocked = pre('agy -p "build it"');
+  assert.strictEqual(blocked.code, 2); assert.match(blocked.out, /use the router/);
+  assert.strictEqual(pre("opencode run fix").code, 2);
+  assert.strictEqual(pre('AB_DIRECT=1 agy -p "say ok"').code, 0);
+  assert.strictEqual(pre("node ~/.claude/bin/ab-route.js --status").code, 0);
+  assert.strictEqual(pre("ls").code, 0);
+});
