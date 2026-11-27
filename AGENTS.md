@@ -6,7 +6,7 @@ Applies to any AI assistant working in this repo or running a sprint. Tunables l
 - Six phases, in order: 1 discover, 2 backend, 3 frontend, 4 polish, 5 audit, 6 launch.
 - The first action of each phase is loading its skill (`phase-<name>`). Hooks block code edits until it is loaded.
 - Phase 2+ needs Phase 1 artifacts: `SPRINT.md`, `PRODUCT.md`, `DESIGN.md`, a golden fixture, a frozen schema.
-- Phases advance only after the user types `go`, via `node scripts/hooks/sprint-gate.js advance` (runs the exit gate).
+- Phases advance only after the user types `go`, via `node V:/Projects/sprint/scripts/hooks/sprint-gate.js advance` (runs the exit gate).
 
 ## 2. Worktree rule
 - Delegated writes run in router worktrees (`~/.claude/bin/ab-route.js`, `~/.agent-bridge/worktrees/route-*`).

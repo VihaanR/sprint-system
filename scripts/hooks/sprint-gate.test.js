@@ -22,7 +22,8 @@ function project(state) {
   return root;
 }
 function run(root, { args = [], input, env = {} } = {}) {
-  const e = { ...process.env, USERPROFILE: path.join(root, "home"), HOME: path.join(root, "home"), CLAUDE_PROJECT_DIR: root, ...env };
+  const e = { ...process.env, USERPROFILE: path.join(root, "home"), HOME: path.join(root, "home"), CLAUDE_PROJECT_DIR: root,
+    SPRINT_REPORTS_DIR: path.join(root, "reports"), ...env };
   delete e.CLAUDE_CODE_EFFORT_LEVEL; Object.assign(e, env);
   const r = spawnSync(process.execPath, [GATE, ...args], { cwd: root, env: e, input: input ? JSON.stringify(input) : "", encoding: "utf8" });
   return { code: r.status, out: r.stdout + r.stderr };
@@ -115,4 +116,43 @@ test("router guard blocks direct executor runs with no sprint active, and allows
   assert.strictEqual(pre('AB_DIRECT=1 agy -p "say ok"').code, 0);
   assert.strictEqual(pre("node ~/.claude/bin/ab-route.js --status").code, 0);
   assert.strictEqual(pre("ls").code, 0);
+});
+
+test("wtf prompts are logged as the user's own, frustrated ones as auto, neutral ones not at all", () => {
+  const root = project({ phase: 2, startedAt: ago(20), phaseStartedAt: ago(5) });
+  const say = prompt => run(root, { input: { hook_event_name: "UserPromptSubmit", prompt, transcript_path: path.join(root, "t.jsonl") } });
+  say("wtf the build takes forever"); say("why does the import fail"); say("looks good, continue");
+  const g = state(root).gripes;
+  assert.deepStrictEqual(g.map(x => [x.kind, x.phase, x.text]), [["wtf", 2, "wtf the build takes forever"], ["auto", 2, "why does the import fail"]]);
+  assert.deepStrictEqual(state(root).transcripts, [path.join(root, "t.jsonl")]);
+});
+
+test("end sprint closes the sprint and writes SPRINT-REPORT.md with quotes, interrupts and phase times", () => {
+  const root = project({ phase: 2, startedAt: ago(40), phaseStartedAt: ago(10),
+    phaseLog: [{ phase: 1, startedAt: ago(40), endedAt: ago(10) }],
+    gripes: [{ ts: ago(8), phase: 2, kind: "wtf", text: "wtf agy stalled again" }] });
+  write(root, "t.jsonl", [
+    { type: "user", timestamp: ago(30), message: { content: [{ type: "text", text: "[Request interrupted by user]" }] } },
+    { type: "user", timestamp: ago(5), message: { content: "[Request interrupted by user for tool use]" } },
+  ].map(x => JSON.stringify(x)).join("\n"));
+  const r = run(root, { input: { hook_event_name: "UserPromptSubmit", prompt: "end sprint", transcript_path: path.join(root, "t.jsonl") } });
+  assert.strictEqual(r.code, 0); assert.match(r.out, /Sprint ended at Phase 2\/6/);
+  assert.strictEqual(state(root).active, false);
+  const md = fs.readFileSync(path.join(root, "SPRINT-REPORT.md"), "utf8");
+  assert.match(md, /status: \*\*ended early by you\*\*/);
+  assert.match(md, /\[P2 backend, \d\d:\d\d\] wtf agy stalled again/);
+  assert.match(md, /Interrupts \(Esc\): 2/); assert.match(md, /- P1 discover: 1/); assert.match(md, /- P2 backend: 1/);
+  assert.match(md, /\| P1 discover \| 30 \| 30 \|/);
+  assert.strictEqual(fs.readdirSync(path.join(root, "reports")).length, 1);
+});
+
+test("advance writes the report and counts blocks from this sprint as friction", () => {
+  const root = project({ phase: 4, startedAt: ago(60), phaseStartedAt: ago(60) });
+  write(root, "src/app.tsx", "x");
+  run(root, { input: { hook_event_name: "PreToolUse", tool_name: "Edit", tool_input: { file_path: path.join(root, "src/app.tsx") } } });
+  assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
+  const md = fs.readFileSync(path.join(root, "SPRINT-REPORT.md"), "utf8");
+  assert.match(md, /status: \*\*in progress\*\*/);
+  assert.match(md, /\| P4 polish \| 60 \| 45 \| \*\*over\*\* \|/);
+  assert.match(md, /\| 4 \| block \| \[BLOCKED\] Phase 4\/6 \(polish\): call Skill\(phase-polish\) before editing code\. \| 1 \|/);
 });

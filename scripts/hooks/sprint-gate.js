@@ -3,18 +3,25 @@
 // Sprint v3 hook: one script, dispatched on hook_event_name. Inert unless <project>/.sprint-state.json has active:true
 // (except UserPromptSubmit, which starts a sprint). Exit 2 = block, stderr goes to Claude.
 //   CLI: node sprint-gate.js advance   -> run the current phase's exit gate, then move to the next phase
+// Every advance and "end sprint" (re)writes <project>/SPRINT-REPORT.md and copies it to docs/sprint-reports/.
 const fs = require("fs"), path = require("path"), os = require("os");
 const { spawnSync } = require("child_process");
 
 const TELE = path.join(os.homedir(), ".agent-bridge", "telemetry.jsonl");
+const SPRINT_REPO = path.resolve(__dirname, "..", "..");
+const GATE_CMD = `node ${__filename.replace(/\\/g, "/")} advance`; // absolute: projects don't contain this script
+const REPORTS_DIR = process.env.SPRINT_REPORTS_DIR || path.join(SPRINT_REPO, "docs", "sprint-reports");
 const NAMES = ["discover", "backend", "frontend", "polish", "audit", "launch"];
 const CODE_DIR = /(^|[\\/])(src|app|api|backend|frontend)[\\/]/i;
 const UI_FILE = /\.(tsx|jsx|css|html)$/i;
 const SLOP = [/bg-slate-950/, /from-purple-\d+/, /to-indigo-\d+/, /transition:\s*all[^;]*linear/i];
+// Prompts quoted in the report as "sounded frustrated". Quotes make false positives cheap; "wtf" at the start is explicit.
+const FRUSTRATED = /\b(wtf|ffs|not working|doesn'?t work|still (broken|not|failing)|why (is|does|did|doesn'?t|isn'?t|won'?t)|i can'?t|useless|what the)\b/i;
+let PHASE = 0; // current phase, so blocks land in the right row of the report
 
 const log = ev => { try { fs.mkdirSync(path.dirname(TELE), { recursive: true }); fs.appendFileSync(TELE, JSON.stringify({ ts: new Date().toISOString(), from: "hook", ...ev }) + "\n"); } catch {} };
 const readJson = p => { try { return JSON.parse(fs.readFileSync(p, "utf8")); } catch { return null; } };
-const block = msg => { process.stderr.write(msg + "\n"); process.exit(2); };
+const block = msg => { log({ phase: PHASE, to: "block", outcome: msg.split("\n")[0].slice(0, 160) }); process.stderr.write(msg + "\n"); process.exit(2); };
 const context = (event, text) => { process.stdout.write(JSON.stringify({ hookSpecificOutput: { hookEventName: event, additionalContext: text } })); process.exit(0); };
 
 function config(root) {
@@ -184,17 +191,64 @@ function routeGuard(cmd) {
     "  (status: node ~/.claude/bin/ab-route.js --status). To bypass on purpose, prefix the command with AB_DIRECT=1.");
 }
 
+// ---- SPRINT-REPORT.md: your words, phase times and friction, for the post-mortem ----
+const endPhase = (s, now) => { s.phaseLog = [...(s.phaseLog || []), { phase: s.phase, startedAt: s.phaseStartedAt || s.startedAt, endedAt: now }]; };
+const jsonl = p => { try { return fs.readFileSync(p, "utf8").split("\n").map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean); } catch { return []; } };
+const oneLine = t => String(t).replace(/\s+/g, " ").trim();
+
+function writeReport(root, s, cfg, status) {
+  const since = Date.parse(s.startedAt), at = Date.parse, now = Date.now();
+  const phaseOf = t => ((s.phaseLog || []).find(x => t >= at(x.startedAt) && t < at(x.endedAt)) || { phase: s.phase }).phase;
+  const label = p => `P${p} ${NAMES[p - 1] || "?"}`, hhmm = iso => new Date(iso).toTimeString().slice(0, 5);
+  const gripes = s.gripes || [], mine = gripes.filter(g => g.kind === "wtf"), auto = gripes.filter(g => g.kind === "auto");
+  const interrupts = {};
+  for (const t of s.transcripts || []) for (const e of jsonl(t))
+    if (e.type === "user" && at(e.timestamp) >= since && JSON.stringify(e.message || "").includes("[Request interrupted by user")) {
+      const p = phaseOf(at(e.timestamp)); interrupts[p] = (interrupts[p] || 0) + 1; }
+  const friction = {};
+  for (const e of jsonl(TELE)) {
+    if (!e.ts || at(e.ts) < since || e.to === "phase") continue;
+    const k = `${e.phase ?? "?"}|${e.to}|${e.outcome}`;
+    friction[k] = friction[k] || { phase: e.phase, to: e.to, outcome: e.outcome, n: 0, ex: oneLine((e.flags || [])[0] || e.file || "") };
+    friction[k].n++;
+  }
+  const phases = [...(s.phaseLog || []), ...(s.active ? [{ phase: s.phase, startedAt: s.phaseStartedAt, endedAt: null }] : [])];
+  const quote = g => `- [${label(g.phase)}, ${hhmm(g.ts)}] ${oneLine(g.text)}`;
+  const md = [
+    `# Sprint report: ${path.basename(root)}`, "",
+    `Started ${s.startedAt} · status: **${status}** · reached Phase ${s.phase}/6 (${NAMES[s.phase - 1]})`, "",
+    "## Your words", "",
+    `### wtf (you flagged these): ${mine.length}`, ...(mine.length ? mine.map(quote) : ["- none"]), "",
+    `### Sounded frustrated (auto, may include false positives): ${auto.length}`, ...(auto.length ? auto.map(quote) : ["- none"]), "",
+    `### Interrupts (Esc): ${Object.values(interrupts).reduce((a, b) => a + b, 0)}`,
+    ...Object.entries(interrupts).map(([p, n]) => `- ${label(+p)}: ${n}`), "",
+    "## Time per phase", "", "| Phase | Used (min) | Budget (min) | |", "|---|---|---|---|",
+    ...phases.map(x => { const used = Math.round(((x.endedAt ? at(x.endedAt) : now) - at(x.startedAt)) / 60000), b = ((cfg.phases || {})[x.phase] || {}).budgetMin;
+      return `| ${label(x.phase)} | ${used} | ${b ?? "-"} | ${!x.endedAt ? "running" : b && used > b ? "**over**" : ""} |`; }), "",
+    "## Friction (blocks, failures, router)", "", "| Phase | Source | Event | Count | Example |", "|---|---|---|---|---|",
+    ...Object.values(friction).sort((a, b) => b.n - a.n).map(f => `| ${f.phase ?? "?"} | ${f.to} | ${oneLine(f.outcome)} | ${f.n} | ${f.ex.slice(0, 120)} |`), "",
+    "## For the post-mortem",
+    "Read this with every other file in the sprint repo's docs/sprint-reports/. Rank problems by minutes lost and by how often",
+    "the user flagged them (wtf first), then propose at most 3 fixes, each tied to a quote or a row above.", "",
+  ].join("\n");
+  fs.writeFileSync(path.join(root, "SPRINT-REPORT.md"), md);
+  try { fs.mkdirSync(REPORTS_DIR, { recursive: true });
+    fs.writeFileSync(path.join(REPORTS_DIR, `${s.startedAt.slice(0, 10)}-${path.basename(root)}.md`), md); } catch {}
+}
+
 function main() {
   if (process.argv[2] === "advance") {
-    const root = process.cwd(), s = readJson(statePath(root));
+    const root = process.cwd(), s = readJson(statePath(root)), cfg = config(root);
     if (!s || !s.active) { console.log("no active sprint"); process.exit(1); }
-    const fail = exitGate(root, s, config(root));
+    const fail = exitGate(root, s, cfg);
     if (fail.length) { s.exitRequested = true; saveState(root, s); console.log(`[BLOCKED] Phase ${s.phase} exit gate:\n- ${fail.join("\n- ")}`); process.exit(1); }
-    s.exitRequested = false; s.phaseStartedAt = new Date().toISOString(); s.floorStopBlocks = 0; s.ceilNoticed = false;
-    if (s.phase === 6) { s.active = false; spawnSync("python", [path.join(root, "scripts", "evolve_skills.py")], { cwd: root, stdio: "inherit" }); }
+    const now = new Date().toISOString();
+    endPhase(s, now); s.exitRequested = false; s.phaseStartedAt = now; s.floorStopBlocks = 0; s.ceilNoticed = false;
+    if (s.phase === 6) { s.active = false; spawnSync("python", [path.join(SPRINT_REPO, "scripts", "evolve_skills.py")], { cwd: SPRINT_REPO, stdio: "inherit" }); }
     else s.phase++;
     saveState(root, s); log({ phase: s.phase, to: "phase", outcome: s.active ? "advanced" : "sprint-closed" });
-    console.log(s.active ? `[DONE] Phase ${s.phase}/6 (${NAMES[s.phase - 1]}). Load Skill(phase-${NAMES[s.phase - 1]}) first.` : "[DONE] Sprint closed; evolve_skills.py ran.");
+    writeReport(root, s, cfg, s.active ? "in progress" : "complete");
+    console.log(s.active ? `[DONE] Phase ${s.phase}/6 (${NAMES[s.phase - 1]}). Load Skill(phase-${NAMES[s.phase - 1]}) first. SPRINT-REPORT.md updated.` : "[DONE] Sprint closed; evolve_skills.py ran; SPRINT-REPORT.md written.");
     return;
   }
   let inp = {}; try { inp = JSON.parse(fs.readFileSync(0, "utf8") || "{}"); } catch {}
@@ -209,13 +263,27 @@ function main() {
       if (bad) { log({ phase: 0, to: "orchestrator", outcome: "wrong-model", flags: [bad] });
         block(`[BLOCKED] Sprint needs ${cfg.orchestrator.model} at ${cfg.orchestrator.effort} effort (${bad}). Run /model ${cfg.orchestrator.model} and /effort ${cfg.orchestrator.effort}, then say "start a sprint" again. (.claude/settings.local.json now pins both for new sessions; an /effort changed mid-session is not visible to hooks.)`); }
       const now = new Date().toISOString();
-      const s = { active: true, phase: 1, startedAt: now, phaseStartedAt: now, skillsLoaded: [], userGo: false, autoRoute: (cfg.router || {}).autoRoute !== false };
+      const s = { active: true, phase: 1, startedAt: now, phaseStartedAt: now, skillsLoaded: [], userGo: false, autoRoute: (cfg.router || {}).autoRoute !== false,
+        transcripts: inp.transcript_path ? [inp.transcript_path] : [], gripes: [], phaseLog: [] };
       saveState(root, s); log({ phase: 1, to: "phase", outcome: "sprint-started" });
       const w = phaseWindow(s, cfg);
-      context(ev, `SPRINT ACTIVE (Phase 1/6: Discover, window ${w.floorMin}-${w.ceilMin} min). Your FIRST tool call MUST be Skill(sprint-orchestrator) then Skill(phase-discover). Ask the user at least ${(cfg.gates || {}).discoverMinUserQuestions ?? 15} questions and keep challenging the spec until the floor; advance refuses earlier. Automatic ab-route.js routing is ${s.autoRoute ? "ON" : "OFF"} (sprint.config.json). Advance phases only with \`node scripts/hooks/sprint-gate.js advance\` after the user says go.`);
+      context(ev, `SPRINT ACTIVE (Phase 1/6: Discover, window ${w.floorMin}-${w.ceilMin} min). Your FIRST tool call MUST be Skill(sprint-orchestrator) then Skill(phase-discover). Ask the user at least ${(cfg.gates || {}).discoverMinUserQuestions ?? 15} questions and keep challenging the spec until the floor; advance refuses earlier. Automatic ab-route.js routing is ${s.autoRoute ? "ON" : "OFF"} (sprint.config.json). Advance phases only with \`${GATE_CMD}\` (run from the project root) after the user says go. The user can start any message with "wtf" to log a complaint for SPRINT-REPORT.md, or say "end sprint" to stop early.`);
     }
   }
   const s = readJson(statePath(root)); if (!s || !s.active) return;
+  PHASE = s.phase;
+  if (ev === "UserPromptSubmit") {
+    const p = (inp.prompt || "").trim(), kind = /^wtf\b/i.test(p) ? "wtf" : FRUSTRATED.test(p) ? "auto" : null;
+    const newTranscript = inp.transcript_path && !(s.transcripts || []).includes(inp.transcript_path);
+    if (kind) s.gripes = [...(s.gripes || []), { ts: new Date().toISOString(), phase: s.phase, kind, text: p.slice(0, 500) }];
+    if (newTranscript) s.transcripts = [...(s.transcripts || []), inp.transcript_path];
+    if (/^end sprint\b/i.test(p)) {
+      endPhase(s, new Date().toISOString()); s.active = false; saveState(root, s);
+      log({ phase: s.phase, to: "phase", outcome: "sprint-ended-early" }); writeReport(root, s, cfg, "ended early by you");
+      context(ev, `[DONE] Sprint ended at Phase ${s.phase}/6 by the user. SPRINT-REPORT.md is written in the project and copied to ${REPORTS_DIR}. Tell the user both paths; gates are now off.`);
+    }
+    if (kind || newTranscript) saveState(root, s);
+  }
   // Only the user's own prompt can lift the floor (the phase's checks still run on advance).
   if (ev === "UserPromptSubmit" && /^skip floor\b/i.test((inp.prompt || "").trim())) {
     s.floorSkippedPhase = s.phase; saveState(root, s); log({ phase: s.phase, to: "phase", outcome: "floor-skipped" });

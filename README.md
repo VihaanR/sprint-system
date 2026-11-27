@@ -149,7 +149,7 @@ start a sprint for <problem statement>
 ```bash
 node ~/.claude/bin/ab-route.js --status                                   # once per phase, before any dispatch
 node ~/.claude/bin/ab-route.js --class large --accept "pytest exit 0" "<outcome>"
-node scripts/hooks/sprint-gate.js advance                                 # after you type go
+node V:/Projects/sprint/scripts/hooks/sprint-gate.js advance                                 # after you type go
 ```
 
 ## Configuration

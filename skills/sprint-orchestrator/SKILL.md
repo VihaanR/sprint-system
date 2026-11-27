@@ -35,9 +35,16 @@ validate before claiming, and keep core logic yourself.
    independent, mechanical, off-critical-path jobs: seed data, bulk tests, docs, repeating a pattern across files.
    Run `--status` first. Not started in 60 s, or one failed chain: implement directly, no `--reset`, no retry.
    Never edit the main checkout while a route-* worktree is live.
-6. Phase end: post the scorecard, wait for the user to type `go`, then run `node scripts/hooks/sprint-gate.js advance`
+6. Phase end: post the scorecard, wait for the user to type `go`, then run `node V:/Projects/sprint/scripts/hooks/sprint-gate.js advance`
    (runs the exit gate: every phase its floor, P1 15+ user questions + 5 challenge rounds, P2 pytest + LOC,
    P3 walkthrough + axe 0, P6 live URL + video + README claims).
+
+## Sprint report (automatic)
+- A message starting with `wtf` is the user's complaint: the hook logs it word for word. Fix the cause if it is in
+  scope, but never argue with it or ask them to rephrase. Frustrated-sounding messages and Esc interrupts are logged too.
+- `end sprint` (user only) stops the sprint early. Every `advance` and `end sprint` rewrites `SPRINT-REPORT.md` in the
+  project and copies it to `V:/Projects/sprint/docs/sprint-reports/` (local only, gitignored: it quotes the user).
+- Post-mortem: read every file in `docs/sprint-reports/`, rank by minutes lost and `wtf` count, propose at most 3 fixes.
 
 ## Executive Scorecard (5 lines, end of each phase)
 ```
