@@ -16,8 +16,8 @@ Record everything in `.sprint/discover-log.json`:
 ```
 The exit gate needs at least 15 answered questions and 5 challenge rounds (`sprint.config.json` gates).
 
-- **User questions (every phase):** ask at least 15 questions with `AskUserQuestion` before the phase may end (this is on top of the discover-log checks above)
-  (`gates.minUserQuestionsPerPhase`). A PostToolUse hook counts them into `.sprint-state.json` `questionsByPhase`;
+- **User questions (every phase):** get at least 15 answers via `AskUserQuestion` before the phase may end (on top of the discover-log checks above)
+  (`gates.minUserQuestionsPerPhase`). The PostToolUse `AskUserQuestion` matcher counts answers into `.sprint-state.json` `questionsByPhase`;
   `advance` refuses below 15. Ask about this phase's real decisions (trade-offs, thresholds, edge cases, cuts), 4 per call.
 
 ## Step 1: interrogate the user (15+ questions, about 10 min)
@@ -52,7 +52,7 @@ Good rounds find something. Five rounds that all say "kept" means the attacks we
 
 ## Step 4: pre-flight (router and services)
 Before exiting Discover, verify execution tooling and every external dependency works right now:
-1. Run `node V:/Projects/sprint/scripts/router-smoke.mjs --require antigravity` and record `exitCode` (nonzero needs a user waiver via `AskUserQuestion`).
+1. Run `node V:/Projects/sprint/scripts/router-smoke.mjs --require antigravity` (works from any folder; flags `--router`, `--timeout-min`, `--require`, `--dry`) and record `exitCode` (nonzero needs a user waiver via `AskUserQuestion`).
 2. List every external service, login, and API key the spec needs and test each once (log in, make one real call). For any failure, ask the user (`AskUserQuestion`) whether to fix it now or cut it.
 3. Write `.sprint/preflight.json` (`"services": []` if none needed):
 ```json

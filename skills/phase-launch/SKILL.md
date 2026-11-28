@@ -20,7 +20,7 @@ description: Phase 6 of the 5-Hour Hackathon Sprint. Packages the judge-ready su
    - Railway for FastAPI backends, PostgreSQL/Redis, and Docker services.
    - Netlify for Edge functions and static web deployments.
    - Zero multi-cloud circus. One single concrete deployment target per project.
-3. **Commercial Monetization Gate**:
+3. **Commercial Monetization Gate (only when `gates.stripeEnabled` is true)**:
    - Mechanical execution against `/api/v1/billing/create-checkout-session` returning an active `cs_test_...` Stripe checkout session URL.
 4. **Programmatic Remotion React Video**:
    - Tone is the user's call: ask before building (checklist step 4); default high energy (chaotic or cinematic), never calm polished.
@@ -45,9 +45,9 @@ description: Phase 6 of the 5-Hour Hackathon Sprint. Packages the judge-ready su
 
 ## Execution Checklist
 
-- **User questions (every phase):** ask at least 15 questions with `AskUserQuestion` before the phase may end
-  (`gates.minUserQuestionsPerPhase`). A PostToolUse hook counts them into `.sprint-state.json` `questionsByPhase`;
-  `advance` refuses below 15. Ask about this phase's real decisions (trade-offs, thresholds, edge cases, cuts), 4 per call.
+- **User questions (every phase):** get at least 15 answers via `AskUserQuestion` before the phase may end
+  (`gates.minUserQuestionsPerPhase`). The PostToolUse `AskUserQuestion` matcher counts answers into `.sprint-state.json` `questionsByPhase`;
+  `advance` refuses below 15 and checks `.sprint/user-asks.json` for unconfirmed cuts. Ask about real decisions (trade-offs, thresholds, edge cases, cuts), 4 per call.
 
 1. **Pre-Phase Gate**:
    - Deliver Phase 5 Executive Scorecard (clean 2-pass audit, 0 vulnerabilities, 0 a11y violations).
@@ -89,5 +89,6 @@ description: Phase 6 of the 5-Hour Hackathon Sprint. Packages the judge-ready su
      - **Live Links**: Deployed web app, Swagger API docs, Postman link, demo video.
      - **One-Click Demo Credentials**: Pre-seeded accounts to eliminate login friction.
 7. **Phase Checkpoint & Git Release Tag**:
+   - Write `.sprint/launch-proof.json` (`url`, `httpStatus: 200`, `videoSec`, `readmeClaimsChecked: true`, `stripeSession` when `gates.stripeEnabled` is true).
    - Push release tag (`v1.0.0-hackathon`) via `git-advanced-workflows` and `github-mcp-server`.
-   - Finalize `SPRINT.md`: Mark all 6 phases complete with mechanical proofs. Hackathon submission ready!
+   - Run `node V:/Projects/sprint/scripts/hooks/sprint-gate.js advance` (checks exit gate + `.sprint/user-asks.json`, then runs `scripts/evolve_skills.py`) and finalize `SPRINT.md`.
