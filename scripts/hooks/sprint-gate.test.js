@@ -345,3 +345,30 @@ test("design exit gate: fonts named in CSS custom properties (--font-*) must loa
   write(root, "frontend/src/main.tsx", 'import "@fontsource/inter";\nimport "@fontsource/jetbrains-mono";\n');
   assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
 });
+
+test("Phase 4 floor Stop starts with /impeccable critique and never yields golden hand-check", () => {
+  const root = project({ phase: 4, phaseStartedAt: ago(5) });
+  write(root, "sprint.config.json", { ...CFG, gates: { ...CFG.gates, maxFloorStopBlocks: 10 } });
+  const outs = Array.from({ length: 10 }, () => {
+    const r = run(root, { input: { hook_event_name: "Stop" } });
+    assert.strictEqual(r.code, 2);
+    assert.doesNotMatch(r.out, /golden/i);
+    return r.out;
+  });
+  assert.match(outs[0], /\/impeccable critique.*\.sprint\/screens-p4\//);
+  assert.match(outs[1], /compare the build against DESIGN\.md/);
+});
+
+test("Phase 1 and 2 floor Stops can yield golden hand-check and never yield impeccable critique", () => {
+  for (const phase of [1, 2]) {
+    const root = project({ phase, phaseStartedAt: ago(5) });
+    write(root, "sprint.config.json", { ...CFG, phases: { ...CFG.phases, 2: { budgetMin: 60 } }, gates: { ...CFG.gates, maxFloorStopBlocks: 10 } });
+    const outs = Array.from({ length: 10 }, () => {
+      const r = run(root, { input: { hook_event_name: "Stop" } });
+      assert.strictEqual(r.code, 2);
+      assert.doesNotMatch(r.out, /impeccable critique/i);
+      return r.out;
+    });
+    assert.ok(outs.some(o => /check one golden expected output/.test(o)), `Phase ${phase} should yield golden hand-check`);
+  }
+});

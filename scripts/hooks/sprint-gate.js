@@ -100,12 +100,17 @@ function phaseWindow(s, cfg, now = Date.now()) {
   return { elapsedMin: (now - started) / 60000, floorMin: floor, ceilMin: budget };
 }
 const CHALLENGES = [
-  "attack one spec assumption: what input or user breaks it?",
-  "check one golden expected output against the code or data by hand",
-  "re-test one edge case end to end and record the result",
-  "re-read SPRINT.md against what is built: list every claim that is not yet true",
-  "ask a cold subagent (devil-advocate) to find the weakest decision of this phase",
+  { phases: [3, 4], text: "run /impeccable critique on the running UI, have a builder fix the top finding, re-screenshot into .sprint/screens-p<N>/" },
+  { phases: [3, 4], text: "compare the build against DESIGN.md (fonts, colors, layout, spacing) and have a builder fix one drift" },
+  { phases: [1, 2], text: "check one golden expected output against the code or data by hand" },
+  { phases: [1, 2], text: "attack one spec assumption: what input or user breaks it?" },
+  { phases: [2, 3, 4, 5, 6], text: "re-test one edge case end to end and record the result" },
+  { text: "re-raise one open item from .sprint/user-asks.json with the user (AskUserQuestion); update its status" },
+  { text: "ask the user one question that changes a decision in this phase (AskUserQuestion)" },
+  { text: "re-read SPRINT.md against what is built: list every claim that is not yet true" },
+  { text: "ask a cold subagent (devil-advocate) to find the weakest decision of this phase" },
 ];
+const challengesFor = phase => CHALLENGES.filter(c => !c.phases || c.phases.includes(phase)).map(c => c.text.replace("<N>", phase));
 
 // Discover's interrogation record: user Q&A and self-challenge rounds.
 function discoverLogFails(root, g) {
@@ -489,7 +494,8 @@ function stopGate(root, s, cfg, inp) {
   const w = phaseWindow(s, cfg), max = (cfg.gates || {}).maxFloorStopBlocks ?? 10, n = s.floorStopBlocks || 0;
   if (w.elapsedMin < w.floorMin && n < max) {
     s.floorStopBlocks = n + 1; saveState(root, s);
-    block(`[BLOCKED] Phase ${s.phase}/6 (${NAMES[s.phase - 1]}) floor: ${Math.ceil(w.floorMin - w.elapsedMin)} min left before this phase may end. Next validation round: ${CHALLENGES[n % CHALLENGES.length]}. Record it${s.phase === 1 ? " in .sprint/discover-log.json challengeRounds" : " in SPRINT.md"}, then continue.`);
+    const list = challengesFor(s.phase);
+    block(`[BLOCKED] Phase ${s.phase}/6 (${NAMES[s.phase - 1]}) floor: ${Math.ceil(w.floorMin - w.elapsedMin)} min left before this phase may end. Next validation round: ${list[n % list.length]}. Record it${s.phase === 1 ? " in .sprint/discover-log.json challengeRounds" : " in SPRINT.md"}, then continue.`);
   }
   if (s.exitRequested && !inp.stop_hook_active) {
     const fail = exitGate(root, s, cfg); if (fail.length) block(`[BLOCKED] Phase ${s.phase} exit gate still failing:\n- ${fail.join("\n- ")}`);
