@@ -81,7 +81,11 @@ description: Phase 4 of the 5-Hour Hackathon Sprint. Applies impeccable anti-slo
 7. **Visual Validation & Gravitas Verification**:
    - Run `ui-visual-validator` screenshot inspection.
    - Confirm zero regression on test suite.
-8. **Show the running app (exit step, mandatory)**: before the scorecard, open it in the user's own browser.
+8. **Logo for approval (mandatory)**: design 2-3 logo options for the product (authored SVG, one consistent mark plus
+   wordmark, in DESIGN.md tokens), save them to `frontend/public/logo-*.svg`, render each to PNG, and ask the user to pick
+   one with `AskUserQuestion` (previews, options = the logos plus "none of these, redo"). Put the approved logo in the
+   app header and favicon; Phase 6 uses it in the launch video. Never ship a product without a user-approved logo.
+9. **Show the running app (exit step, mandatory)**: before the scorecard, open it in the user's own browser.
    - Make sure the app is serving (`curl -s -f -o /dev/null -w "%{http_code}" <url>` returns 200).
    - Open it: `cmd.exe /c start "" "<url>"` (Windows), `open <url>` (macOS) or `xdg-open <url>` (Linux).
    - Print the clickable link on its own line, above the scorecard: `Open the app: <url>`.

@@ -72,6 +72,10 @@ description: Phase 6 of the 5-Hour Hackathon Sprint. Packages the judge-ready su
    - Default to high energy: chaotic (fast cuts, hard beats, glitch, kinetic type) or cinematic (big camera moves,
      dramatic contrast, a bass-heavy build). Never default to calm and polished. Use calm only if the user picks it.
    - Pass the chosen tone to `brag` in the brief and keep it for every scene, caption and transition.
+   - Music is UPBEAT by default: a major key, bright and energetic, uplifting (not tense or dark, even when the tone is
+     chaotic). Ask the music feel in the same question round (upbeat major / dark tense / cinematic build).
+   - Use the logo the user approved in Phase 4 on the title and outro cards; never ship a video with a plain-text wordmark
+     when an approved logo exists.
    - Run Remotion compilation script via `remotion-best-practices` / `brag`.
    - Verify `artifacts/launch_demo.mp4` exists with non-zero byte size (or fall back to animated WebP/GIF).
 5. **Interactive Judge Tools (Swagger & Postman)**:

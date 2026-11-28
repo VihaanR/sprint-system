@@ -46,7 +46,8 @@ validate before claiming, and keep core logic yourself.
 7. User questions in EVERY phase: at least 15 `AskUserQuestion` questions per phase (`gates.minUserQuestionsPerPhase`); a PostToolUse hook counts them in `questionsByPhase` and `advance` refuses below 15.
 8. After Phase 3 (frontend) and Phase 4 (polish): open the running app in the user's browser and print the clickable link before the scorecard; the phase skill writes `.sprint/showcase-<phase>.json` and `advance` requires it.
 9. Right after Phase 2 (backend): list every key in `.env.example` with comments, ask the user to copy it to `.env` and fill it in, then exercise the live paths with the real keys before advancing.
-10. Phase 6 launch video: ask the user the tone before building; default to high energy (chaotic or cinematic), never calm polished by default.
+10. Phase 6 launch video: ask the user the tone before building; default to high energy (chaotic or cinematic), never calm polished by default. Music is upbeat by default (major key, bright), never just tense.
+11. Phase 4 (polish): design 2-3 logo options and get the user to approve one (AskUserQuestion with previews) before the phase ends; the approved logo goes in the app header, favicon and the launch video.
 
 ## Sprint report (automatic)
 - A message starting with `wtf` is the user's complaint: the hook logs it word for word. Fix the cause if it is in
