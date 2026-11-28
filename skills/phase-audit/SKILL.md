@@ -59,9 +59,9 @@ flowchart TD
 
 ## Execution Checklist
 
-- **User questions (every phase):** ask at least 15 questions with `AskUserQuestion` before the phase may end
-  (`gates.minUserQuestionsPerPhase`). A PostToolUse hook counts them into `.sprint-state.json` `questionsByPhase`;
-  `advance` refuses below 15. Ask about this phase's real decisions (trade-offs, thresholds, edge cases, cuts), 4 per call.
+- **User questions (every phase):** get at least 15 answers via `AskUserQuestion` before the phase may end
+  (`gates.minUserQuestionsPerPhase`). The PostToolUse `AskUserQuestion` matcher counts answers into `.sprint-state.json` `questionsByPhase`;
+  `advance` refuses below 15 and checks `.sprint/user-asks.json` for unconfirmed cuts. Ask about real decisions (trade-offs, thresholds, edge cases, cuts), 4 per call.
 
 1. **Pre-Phase Gate**:
    - Deliver Phase 4 Executive Scorecard.

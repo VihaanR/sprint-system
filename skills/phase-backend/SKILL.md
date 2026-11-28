@@ -19,10 +19,10 @@ description: Phase 2 of the 5-Hour Hackathon Sprint. Implements backend services
    - Absolutely zero generic repository interfaces, abstract service factories, or premature microservice divisions.
    - Collocate route logic, query execution, and validation in concrete handlers.
 3. **Karpathy Core Rule 2 (Minimum Code)**:
-   - HARD GATE: <= `gates.backendMaxCoreLoc` (450) hand-written core backend LOC (excl. schemas/fixtures/tests), cyclomatic complexity <= 6, no single-implementation ABCs. `node scripts/hooks/sprint-gate.js advance` checks LOC + pytest exit 0.
-   - Core domain/scientific logic (algorithms, matching, scoring) stays with Claude, with measurable acceptance criteria (complexity bound + golden fixture match). Never delegate it to free models.
+   - HARD GATE: <= `gates.backendMaxCoreLoc` (450) hand-written core backend LOC (excl. schemas/fixtures/tests), cyclomatic complexity <= 6, no single-implementation ABCs. `node V:/Projects/sprint/scripts/hooks/sprint-gate.js advance` checks LOC + pytest exit 0.
+   - Core domain/scientific logic (algorithms, matching, scoring) stays with Opus (CEO), with measurable acceptance criteria (complexity bound + golden fixture match). Dispatch mechanical slices via Sonnet `builder`s (`ab-route.js --status` first, `--accept "<metric>"`); failed chains go to the Sonnet `builder`, never to Opus.
 4. **Minute-1 Immutable Kernel Contract**:
-   - Before parallel frontend subagents dispatch in Phase 3, the backend MUST lock and export `types.ts` (or OpenAPI JSON schema). Subagents code against this immutable contract without shared git lock contention.
+   - Before Phase 3 Sonnet `builder`s dispatch frontend slices via `ab-route.js`, the backend MUST lock and export `types.ts` (or OpenAPI JSON schema) so workers code against an immutable contract.
 5. **Declarative Security (opt-in)**:
    - Identity: auth only when the product needs accounts (`auth0` or `firebase`). Not by default.
    - Security Rules: If using Firebase Firestore, rules authoring is MANDATORILY delegated to `firestore-rules-author`. Wildcard rules (`allow read, write: if true;`) are strictly banned.
@@ -65,9 +65,9 @@ description: Phase 2 of the 5-Hour Hackathon Sprint. Implements backend services
 
 ## Execution Checklist
 
-- **User questions (every phase):** ask at least 15 questions with `AskUserQuestion` before the phase may end
-  (`gates.minUserQuestionsPerPhase`). A PostToolUse hook counts them into `.sprint-state.json` `questionsByPhase`;
-  `advance` refuses below 15. Ask about this phase's real decisions (trade-offs, thresholds, edge cases, cuts), 4 per call.
+- **User questions (every phase):** get at least 15 answers via `AskUserQuestion` before the phase may end
+  (`gates.minUserQuestionsPerPhase`). The PostToolUse `AskUserQuestion` matcher counts answers into `.sprint-state.json` `questionsByPhase`;
+  `advance` refuses below 15 and checks `.sprint/user-asks.json` for unconfirmed cuts. Ask about real decisions (trade-offs, thresholds, edge cases, cuts), 4 per call.
 
 1. **Pre-Phase Gate**:
    - Deliver Phase 1 Executive Scorecard.

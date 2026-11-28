@@ -6,16 +6,16 @@ description: Phase 3 of the 5-Hour Hackathon Sprint. Assembles frontend componen
 # Phase 3: Zero-Copy Swarm & Frontend Assembly (v2.0)
 
 **Target Time Budget**: ~75 minutes  
-**Goal**: Assemble a responsive, tactile, zero-slop frontend connected to the Phase 2 API. Coordinates parallel subagents in native shared worktrees with zero file contention, native HTML5 primitives, domain design tokens, and live Chrome DevTools verification.
+**Goal**: Assemble a responsive, tactile, zero-slop frontend connected to the Phase 2 API. Sonnet `builder` managers dispatch disjoint UI slices via `ab-route.js` in isolated `route-*` worktrees, review worker diffs, and fix failures; verified with native HTML5 primitives, domain design tokens, and live Chrome DevTools + `auditor` walkthroughs.
 
 ---
 
 ## Architectural Principles & Gating
 
-1. **Zero-Copy Shared Worktrees (`workspace: "share"`)**:
-   - Subagents author independent feature slices concurrently in isolated working directories over shared `.git` object storage.
-   - Central files (`App.tsx`, `routes.ts`, `main.py`) are strictly write-locked to avoid merge races.
-   - Slices are registered via inverted dynamic auto-discovery (`import.meta.glob('./features/*/index.tsx')` or router auto-loaders).
+1. **Isolated Router Worktrees (`route-*`)**:
+   - Sonnet `builder`s run `ab-route.js --status` once per phase, then dispatch independent feature slices (`--class large|agy|bulk --accept "<metric>" --accept-cmd "<check>"`) into isolated `route-*` worktrees. Never edit the main checkout while a `route-*` worktree is live.
+   - Central files (`App.tsx`, `routes.ts`, `main.py`) stay write-locked during parallel slices; failed chains go to the Sonnet `builder`, never to Opus.
+   - Slices register via inverted dynamic auto-discovery (`import.meta.glob('./features/*/index.tsx')` or router auto-loaders).
 2. **Domain Design Token Injection (`design-tokens.json`)**:
    - Before a single line of UI code is written, inject custom domain tokens:
      - *Dev Tools*: stark dark canvas (`#09090B`), JetBrains Mono, 1px neutral borders.
@@ -36,7 +36,7 @@ description: Phase 3 of the 5-Hour Hackathon Sprint. Assembles frontend componen
 6. **Pre-Commit Anti-Slop Linter**:
    - Auto-Fix with Hard Failback: automatically replaces banned gradients and buzzwords; if unfixable, blocks build with Exit Code 1.
 7. **Frontend Blast Radius Protection (Wednesday Solutions Pattern)**:
-   - Parallel workers in `workspace: "share"` must compute blast radius before editing shared files (`index.css`, `theme.ts`, `App.tsx`). If downstream components > 5, edits must use localized component props without mutating global tokens.
+   - Workers in `route-*` worktrees must compute blast radius before editing shared files (`index.css`, `theme.ts`, `App.tsx`). If downstream components > 5, edits must use localized component props without mutating global tokens.
 8. **Art Direction & Reference Image Verification (Taste-Skill Pattern)**:
    - Before writing markup, compare component specifications against visual design references (`mobbin` MCP or `gdrive` mockups) to guarantee high-taste visual layout over generic AI defaults.
 9. **AG-UI Streaming Event Client Consumption (`ag-ui-protocol/ag-ui` pattern)**:
@@ -61,18 +61,18 @@ description: Phase 3 of the 5-Hour Hackathon Sprint. Assembles frontend componen
 
 ## Execution Checklist
 
-- **User questions (every phase):** ask at least 15 questions with `AskUserQuestion` before the phase may end
-  (`gates.minUserQuestionsPerPhase`). A PostToolUse hook counts them into `.sprint-state.json` `questionsByPhase`;
-  `advance` refuses below 15. Ask about this phase's real decisions (trade-offs, thresholds, edge cases, cuts), 4 per call.
+- **User questions (every phase):** get at least 15 answers via `AskUserQuestion` before the phase may end
+  (`gates.minUserQuestionsPerPhase`). The PostToolUse `AskUserQuestion` matcher counts answers into `.sprint-state.json` `questionsByPhase`;
+  `advance` refuses below 15 and checks `.sprint/user-asks.json` for unconfirmed cuts. Ask about real decisions (trade-offs, thresholds, edge cases, cuts), 4 per call.
 
 1. **Pre-Phase Gate**:
    - Deliver Phase 2 Executive Scorecard.
-   - Lock in Domain Design Contract (`design-tokens.json`).
+   - Lock in Domain Design Contract (`design-tokens.json`) and complete impeccable preflight (`.sprint/impeccable.ok`).
 2. **Dev Server Boot & In-Browser Setup**:
    - Start Vite server (`npm run dev`) or mobile emulator as background daemon (`IsDaemon: true`).
    - Open browser via `chrome-devtools-plugin` at `http://localhost:5173`.
-3. **Parallel Subagent Dispatch in Shared Worktrees**:
-   - Launch workers (`workspace: "share"`) for disjoint feature slices (`Navbar`, `Hero`, `DataGrid`, `DetailDrawer`).
+3. **Parallel Slice Dispatch (Sonnet `builder`s + `ab-route.js`)**:
+   - Sonnet `builder`s dispatch disjoint feature slices (`Navbar`, `Hero`, `DataGrid`, `DetailDrawer`) through `ab-route.js`, review committed/staged `work`, and fix failures.
    - Slices register into host application via `import.meta.glob`.
 4. **Implement Ergonomics & Native Primitives**:
    - Build native `<dialog>` modals with popover API.
@@ -95,11 +95,11 @@ description: Phase 3 of the 5-Hour Hackathon Sprint. Assembles frontend componen
    - Write the proof the gate checks:
      `node -e "require('fs').writeFileSync('.sprint/showcase-frontend.json', JSON.stringify({url:'<url>',timestamp:new Date().toISOString()}))"`
    - `advance` refuses without `.sprint/showcase-frontend.json` (a url and a timestamp from this phase).
-9. **Design exit gate (mandatory)**: `advance` checks all five before leaving Phase 3:
+9. **Design exit gate & walkthrough (mandatory)**: `advance` checks all of these before leaving Phase 3:
+   - Run `auditor` human-click walkthrough and write `.sprint/phase3-proof.json` (`screenshot` exists + `axeViolations: 0`).
    - Run `/impeccable critique` on the running UI and save it to `.sprint/impeccable-critique-p3.md`.
-   - Save a desktop screenshot and a 375px-wide screenshot (file name contains `375`) to `.sprint/screens-p3/`.
-   - Load every `font-family` named in CSS (`@fontsource/*` import in `frontend/src` or `@font-face` in CSS).
-   - Set a real `<title>` in `frontend/index.html` (no `Vite + React` or placeholder).
-   - Replace the starter `frontend/public/favicon.svg`.
+   - Save a desktop screenshot and a 375px-wide screenshot (file name contains `375` or `mobile`) to `.sprint/screens-p3/`.
+   - Load every `font-family` and `--font-*` named in CSS (`@fontsource/*`, `@fontsource-variable/*`, `@font-face`, or Google Fonts `<link>` / `@import`).
+   - Set a real `<title>` in `frontend/index.html` (no `Vite + React` or placeholder) and replace starter `frontend/public/favicon.svg`.
 10. **Phase Checkpoint**:
    - Update `SPRINT.md` with DOM snapshot proofs for gate approval into **Phase 4 (Sleek Polish & Motion)**.

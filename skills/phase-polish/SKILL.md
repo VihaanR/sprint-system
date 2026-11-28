@@ -55,9 +55,9 @@ description: Phase 4 of the 5-Hour Hackathon Sprint. Applies impeccable anti-slo
 
 ## Execution Checklist
 
-- **User questions (every phase):** ask at least 15 questions with `AskUserQuestion` before the phase may end
-  (`gates.minUserQuestionsPerPhase`). A PostToolUse hook counts them into `.sprint-state.json` `questionsByPhase`;
-  `advance` refuses below 15. Ask about this phase's real decisions (trade-offs, thresholds, edge cases, cuts), 4 per call.
+- **User questions (every phase):** get at least 15 answers via `AskUserQuestion` before the phase may end
+  (`gates.minUserQuestionsPerPhase`). The PostToolUse `AskUserQuestion` matcher counts answers into `.sprint-state.json` `questionsByPhase`;
+  `advance` refuses below 15 and checks `.sprint/user-asks.json` for unconfirmed cuts. Ask about real decisions (trade-offs, thresholds, edge cases, cuts), 4 per call.
 
 1. **Pre-Phase Gate**:
    - Deliver Phase 3 Executive Scorecard.
@@ -94,8 +94,8 @@ description: Phase 4 of the 5-Hour Hackathon Sprint. Applies impeccable anti-slo
    - `advance` refuses without `.sprint/showcase-polish.json` (a url and a timestamp from this phase).
 10. **Design exit gate (mandatory)**: `advance` checks all five before leaving Phase 4:
    - Run `/impeccable critique` on the running UI and save it to `.sprint/impeccable-critique-p4.md`.
-   - Save a desktop screenshot and a 375px-wide screenshot (file name contains `375`) to `.sprint/screens-p4/`.
-   - Load every `font-family` named in CSS (`@fontsource/*` import in `frontend/src` or `@font-face` in CSS).
+   - Save a desktop screenshot and a 375px-wide screenshot (file name contains `375` or `mobile`) to `.sprint/screens-p4/`.
+   - Load every `font-family` and `--font-*` named in CSS (`@fontsource/*`, `@fontsource-variable/*`, `@font-face`, or Google Fonts `<link>` / `@import`).
    - Set a real `<title>` in `frontend/index.html` (no `Vite + React` or placeholder).
    - Replace the starter `frontend/public/favicon.svg`.
 11. **Phase Checkpoint**:

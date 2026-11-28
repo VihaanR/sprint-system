@@ -4,7 +4,7 @@ const test = require("node:test");
 const assert = require("node:assert");
 const fs = require("fs"), os = require("os"), path = require("path");
 const { spawnSync } = require("child_process");
-const { runChild, cooldownMin, mainSnapshot, newestConvMtime, guardrails, skipReason, sessionName } = require("./ab-route.js");
+const { runChild, cooldownMin, mainSnapshot, newestConvMtime, guardrails, skipReason, sessionName, CHAINS } = require("./ab-route.js");
 
 const IDLE_MS = 300000, SILENT_MS = 900000, STARTUP_MS = 180000, HARD_MS = 60000;
 const HEADER = "▶ antigravity ← task t1\n  workspace: W  (sandbox workspace-write, transport cli)\n  status file Claude reads:  S\n";
@@ -175,6 +175,21 @@ test("sessionName is unique per task id and honors explicit --session", () => {
   assert.ok(a.includes("job-1") && b.includes("job-2"));
   assert.strictEqual(sessionName("custom-s", 2, "large", "job-1", "sprint"), "custom-s");
   assert.strictEqual(sessionName(undefined, null, "large", "job-1", "sprint"), undefined);
+});
+
+test("light chain starts with Flash then Hydrogen; large keeps Hydrogen first", () => {
+  const models = c => CHAINS[c].filter(([b]) => b === "antigravity").map(([, cfg]) => cfg.model);
+  assert.deepStrictEqual(models("light").slice(0, 2), ["Gemini 3.8 Flash (Medium)", "Gemini 4 Hydrogen (High)"]);
+  assert.strictEqual(CHAINS.light[0][1].model, "Gemini 3.8 Flash (Medium)");
+  assert.strictEqual(CHAINS.large[0][1].model, "Gemini 4 Hydrogen (High)");
+  assert.strictEqual(CHAINS.agy[0][1].model, "Gemini 4 Hydrogen (High)");
+});
+
+test("router JSON output includes the agy session name", () => {
+  const r = spawnSync(process.execPath, [path.join(__dirname, "ab-route.js"), "--class", "light", "--repo", path.join(__dirname, ".."), "--session", "sess-reuse-1", "--dry", "noop"], { encoding: "utf8" });
+  const out = JSON.parse(r.stdout.slice(r.stdout.indexOf("{")));
+  assert.strictEqual(out.session, "sess-reuse-1", r.stdout.slice(0, 300));
+  assert.strictEqual(out.attempts[0].executor.startsWith("antigravity"), true);
 });
 
 test("skipReason returns parked reason for parked executors", () => {

@@ -14,6 +14,6 @@ You ship and prove it.
 4. README: every claim cites a test name or a fixture/data row. Delete claims you cannot cite.
 5. Write `.sprint/launch-proof.json`:
    `{"url": "...", "httpStatus": 200, "latencyS": 0.0, "videoSec": 0, "readmeClaimsChecked": true, "stripeSession": null}`
-6. Run `node V:/Projects/sprint/scripts/hooks/sprint-gate.js advance` (runs the exit gate, then the sprint repo's `scripts/evolve_skills.py`).
+6. Run `node V:/Projects/sprint/scripts/hooks/sprint-gate.js advance` (checks exit gate + `.sprint/user-asks.json` for unconfirmed cuts, then runs `scripts/evolve_skills.py`).
 
 Report the URL, status code and latency, video path and length, and the evolution deltas written.

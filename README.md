@@ -19,9 +19,9 @@
 
 # Sprint System v3
 
-A 6-phase, 5-hour build pipeline for Claude Code. You say **"start a sprint"**, and hooks hold Claude to the phase order. Each phase loads its skill first and ends at an exit gate that checks real output. Mechanical work goes to cheaper executors in isolated git worktrees. Claude keeps the domain logic and reviews every diff.
+A 6-phase, 5-hour build pipeline for Claude Code. You say **"start a sprint"**, and hooks hold the session to the phase order. Each phase loads its skill first and ends at an exit gate that checks real output. Opus (CEO) keeps decisions, architecture, and core domain logic; Sonnet `builder`s dispatch mechanical slices to cheaper workers in isolated git worktrees, review every diff, and fix failures.
 
-v3 rewrites v2 after the Sprint 1 post-mortem ([SPRINT-ISSUES.md](SPRINT-ISSUES.md)). Rules that v2 only wrote down are now hook checks that block the action ([SPRINT-fix.md](SPRINT-fix.md)).
+v3 rewrites v2 after the Sprint 1 post-mortem. Rules that v2 only wrote down are now hook checks that block the action.
 
 ---
 
@@ -35,10 +35,12 @@ flowchart TD
     P --> S["Load Skill(phase-N)<br/>edits to src/ app/ api/ blocked until loaded"]
 
     S --> W{"Who does the work?"}
-    W -->|"domain logic, scoring,<br/>algorithms"| C["Claude, directly<br/>in its own worktree"]
-    W -->|"mechanical, bulk,<br/>multi-file"| R["ab-route.js<br/>needs --accept + --status"]
-    R --> X["Executor in route-* worktree<br/>agy → freellmapi/auto"]
-    X --> RV["Claude reviews the real git diff"]
+    W -->|"domain logic, scoring,<br/>algorithms"| C["Opus (CEO)<br/>decisions & core logic"]
+    W -->|"mechanical, bulk,<br/>multi-file"| SB["Sonnet builder"]
+    SB --> R["ab-route.js<br/>needs --accept + --status"]
+    R --> X["Worker in route-* worktree<br/>agy → freellmapi/auto"]
+    X -->|"diff or fail"| SB
+    SB --> RV["Opus final review"]
     C --> G
     RV --> G
 
@@ -54,11 +56,11 @@ flowchart TD
     classDef exec fill:#1E293B,stroke:#94A3B8,color:#F8FAFC
     class U,E you
     class T,P,S,G hook
-    class C,RV claude
+    class C,RV,SB claude
     class R,X exec
 ```
 
-Amber is a hook that blocks the action, green is Claude, grey is a delegated executor.
+Amber is a hook that blocks the action, green is Opus/Sonnet, grey is a router worker.
 
 ## The six phases
 
@@ -68,25 +70,28 @@ Amber is a hook that blocks the action, green is Claude, grey is a delegated exe
 
 Budgets come from `sprint.config.json` (300 min total).
 
-| # | Phase | Budget | Exit gate checks (`sprint-gate.js advance`) |
+| # | Phase | Budget | Exit gate checks (`sprint-gate.js advance`) — every phase also checks floor (`budget − 5 min`), `15+` answered `AskUserQuestion`s, and `.sprint/user-asks.json` |
 |---|---|---|---|
-| 1 | discover | 30 min | `SPRINT.md`, `PRODUCT.md`, `DESIGN.md` and a golden fixture exist |
-| 2 | backend | 60 min | `pytest` exits 0, at most 450 hand-written core backend LOC |
-| 3 | frontend | 75 min | `.sprint/phase3-proof.json` has a human-click screenshot and `axeViolations: 0` |
-| 4 | polish | 45 min | no gate; the user's `go` |
-| 5 | audit | 45 min | no gate; the user's `go` |
-| 6 | launch | 45 min | `.sprint/launch-proof.json` has a live URL with HTTP 200, the video length and README claims checked; a Stripe `cs_test_` session only when `gates.stripeEnabled` is true |
+| 1 | discover | 30 min | `SPRINT.md`, `PRODUCT.md`, `DESIGN.md`, golden fixture, `.sprint/discover-log.json` (15+ questions, 5+ challenge rounds), `.sprint/preflight.json` (`router-smoke.mjs` + services), `.sprint/user-asks.json` |
+| 2 | backend | 60 min | `pytest` exits 0, `<= 450` hand-written core backend LOC |
+| 3 | frontend | 75 min | `.sprint/phase3-proof.json` (walkthrough screenshot + `axeViolations: 0`), `.sprint/showcase-frontend.json`, design gate (critique, desktop + `375`px screens, loaded fonts, real `<title>`, custom `favicon.svg`) |
+| 4 | polish | 45 min | `.sprint/showcase-polish.json`, design gate (critique, desktop + `375`px screens, loaded fonts, real `<title>`, custom `favicon.svg`) |
+| 5 | audit | 45 min | phase floor, `15+` user questions, `.sprint/user-asks.json`, then the user's `go` |
+| 6 | launch | 45 min | `.sprint/launch-proof.json` (live URL HTTP 200, video length, `readmeClaimsChecked: true`; Stripe `cs_test_` only when `gates.stripeEnabled` is true) |
 
 ## What the hooks block
 
-All checks live in [`scripts/hooks/sprint-gate.js`](scripts/hooks/sprint-gate.js). They do nothing unless `.sprint-state.json` has `active: true`. A block exits 2 with a `[BLOCKED]` reason sent to Claude.
+All checks live in [`scripts/hooks/sprint-gate.js`](scripts/hooks/sprint-gate.js), which writes `.sprint-state.json` atomically. They do nothing unless `.sprint-state.json` has `active: true` (except `UserPromptSubmit` start detection and the direct-executor route guard). A block exits 2 with `[BLOCKED]`.
 
-| Hook | Blocks when |
+| Hook | Behavior |
 |---|---|
-| PreToolUse · Edit/Write | code edited before `Skill(phase-N)` is loaded · Phase 2+ code with Phase 1 artifacts missing · `.tsx/.jsx/.css/.html` edited before `.sprint/impeccable.ok` exists · the main checkout edited while a `route-*` worktree is live |
-| PreToolUse · Bash | an `ab-route.js` write job (`bulk`, `large`, `agy`) without `--accept "<metric>"` or without `--status` run this phase · a Python heredoc in Git Bash on Windows |
-| PostToolUse | never blocks: records loaded skills, flags slop in UI files (`bg-slate-950`, `from-purple-*`, `to-indigo-*`, `linear` transitions), logs router failures to `~/.agent-bridge/telemetry.jsonl` |
-| Stop | stops Claude from ending its turn while a requested phase exit still fails its gate |
+| UserPromptSubmit | starts sprint on trigger phrase (requires `claude-opus-5-5` at `high` effort), logs `wtf`/frustrated prompts, handles `end sprint` and `skip floor` |
+| PreToolUse · Edit/Write | blocks code edited before `Skill(phase-N)` · Phase 2+ code with Phase 1 artifacts missing · `.tsx/.jsx/.css/.html` edited before `.sprint/impeccable.ok` · main checkout edited while a `route-*` worktree is live |
+| PreToolUse · Bash | blocks direct executor runs (`AB_DIRECT=1` bypasses) · `ab-route.js` write jobs (`bulk`, `large`, `agy`) without `--accept "<metric>"` or `--status` in the current phase · Python heredocs in Git Bash on Windows |
+| PostToolUse | records loaded skills, counts `AskUserQuestion` answers per phase (`questionsByPhase`), clears `inFlight`, records `ab-route.js --status`, flags UI slop, logs router outcomes to `~/.agent-bridge/telemetry.jsonl` |
+| Stop | blocks under the phase floor with phase-aware validation rounds (up to `maxFloorStopBlocks`), and blocks while a requested exit still fails its gate |
+
+The sprint clock pauses on hook-silent gaps over `idlePauseMin` (10 min) only when no tracked tool (`Bash|PowerShell|Edit|Write|MultiEdit`) is in flight; `AskUserQuestion` has no `PreToolUse` hook, so >10 min thinking on a question still counts as a pause.
 
 ## Delegation
 
@@ -97,7 +102,7 @@ flowchart LR
     L["--class large"] --> H["agy<br/>Gemini 4 Hydrogen"]
     H -->|"quota / stall"| F["agy<br/>Gemini 3.8 Flash"]
     F -->|"quota / stall"| A["opencode<br/>freellmapi/auto"]
-    A -->|"exhausted"| CL["Sonnet builder<br/>Claude reviews"]
+    A -->|"exhausted"| CL["Sonnet builder<br/>Opus reviews"]
     B["--class bulk / recon"] --> A
 
     classDef agy fill:#1E293B,stroke:#38BDF8,color:#F8FAFC
@@ -108,10 +113,12 @@ flowchart LR
     class CL claude
 ```
 
-- While agy is running, conversation-folder writes and worktree edits count as activity; an idle process with no output, edits, or conversation writes stalls after `agyIdleMs` (default `300000`, 5 min), and total silence (no output or edits) is capped at `agySilentMs` (default `900000`, 15 min).
-- Startup watchdog `agyStartupStallMs` (at least `180000`, 3 min) records a `startup-stall` only when agent-bridge never produced output, or when agy exits with no output and no edits.
-- Stall cooldown tolerates the first stall; a second stall in a row trips the executor for at most 30 min.
-- A whole chain is capped at 25 minutes of wall clock (`maxChainWallMs`, `1500000` in `sprint.config.json`). After one failed chain, hand the task to a Sonnet builder.
+- `agy` runs through `agent-bridge` in a per-job session `sprint-p<N>-<class>-<taskId>` with a no-subagents line in its brief. Parked executors (`opencode:go`, `hermes`) are skipped.
+- `agy` liveness tracks output, worktree edits, or writes to `~/.gemini/antigravity-cli/conversations`; idle stalls after `agyIdleMs` (`300000`, 5 min), and total silence (no output/edits) is capped at `agySilentMs` (`900000`, 15 min).
+- Startup watchdog `agyStartupStallMs` (`>= 180000`, 3 min) declares a `startup-stall` only after 3 min with no agent-bridge output, or on exit with no output and no edits.
+- One stall is tolerated; a second stall in a row trips the executor for at most 30 min (no sprint-long ban). Committed and/or staged worker work both count (JSON `work` field).
+- Chains are capped at 25 min (`maxChainWallMs`, `1500000`). A failed chain goes to the Sonnet `builder`, never to Opus.
+- Smoke-test at sprint start from any folder: `node V:/Projects/sprint/scripts/router-smoke.mjs --require antigravity` (flags: `--router`, `--timeout-min`, `--require`, `--dry`).
 
 ## Sidebar mod (`sprint-mod/`)
 
@@ -176,7 +183,6 @@ This runs the mod tests (`claude plugin test sprint-mod`), `claude plugin valida
 | `scripts/hooks/` | `sprint-gate.js` (all gates), `preflight.js` (SessionStart) |
 | `sprint-mod/` | Sidebar, status line and commands |
 | `AGENTS.md` | The rules any agent follows in this repo |
-| `SPRINT-ISSUES.md` · `SPRINT-fix.md` | Sprint 1 post-mortem and the v3 spec it produced |
 
 ## License
 
