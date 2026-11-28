@@ -4,7 +4,7 @@ const test = require("node:test");
 const assert = require("node:assert");
 const fs = require("fs"), os = require("os"), path = require("path");
 const { spawnSync } = require("child_process");
-const { runChild, cooldownMin, mainSnapshot, newestConvMtime, guardrails } = require("./ab-route.js");
+const { runChild, cooldownMin, mainSnapshot, newestConvMtime, guardrails, skipReason, sessionName } = require("./ab-route.js");
 
 const IDLE_MS = 300000, SILENT_MS = 900000, STARTUP_MS = 180000, HARD_MS = 60000;
 const HEADER = "▶ antigravity ← task t1\n  workspace: W  (sandbox workspace-write, transport cli)\n  status file Claude reads:  S\n";
@@ -166,4 +166,54 @@ test("guardrails: committed plus uncommitted work is labeled committed+staged", 
   assert.match(stat, /2 files changed/);
   assert.match(stat, /\(committed\+staged\)$/);
   assert.ok(!flags.includes("no-changes"));
+});
+
+test("sessionName is unique per task id and honors explicit --session", () => {
+  const a = sessionName(undefined, 2, "large", "job-1", "sprint");
+  const b = sessionName(undefined, 2, "large", "job-2", "sprint");
+  assert.notStrictEqual(a, b);
+  assert.ok(a.includes("job-1") && b.includes("job-2"));
+  assert.strictEqual(sessionName("custom-s", 2, "large", "job-1", "sprint"), "custom-s");
+  assert.strictEqual(sessionName(undefined, null, "large", "job-1", "sprint"), undefined);
+});
+
+test("skipReason returns parked reason for parked executors", () => {
+  const h = { executors: {} };
+  const hermesReason = skipReason(h, "hermes");
+  const goReason = skipReason(h, "opencode:go");
+  assert.ok(typeof hermesReason === "string" && hermesReason.length > 0);
+  assert.match(hermesReason, /parked/i);
+  assert.ok(typeof goReason === "string" && goReason.length > 0);
+  assert.match(goReason, /parked/i);
+});
+
+// Deterministic half of the log-stream fix: an 'error' on the log stream (here ENOENT) must not crash the router.
+test("runChild survives a log stream error and still returns the child's result", async () => {
+  const log = path.join(tmp(), "missing-dir", "run.log");
+  const r = await runChild(process.execPath, ["-e", "process.stdout.write('hello')"], tmp(), log, IDLE_MS, 0, HARD_MS, { tickMs: 10 });
+  assert.strictEqual(r.code, 0);
+  assert.strictEqual(r.text, "hello");
+});
+
+// Stress half (the race fires only sometimes on the old code): the writer is orphaned (its parent exits at once), so killTree cannot reach it, and it floods the child's stdout
+// pipe across the kill. Data landing between out.end() and the log stream's async close crashed the old code with
+// ERR_STREAM_WRITE_AFTER_END (later writes to the destroyed stream are dropped silently, hence the flood).
+test("runChild does not crash when a child keeps printing after it was killed", async () => {
+  const sd = tmp(), orphan = path.join(sd, "orphan.js"), mid = path.join(sd, "mid.js");
+  fs.writeFileSync(orphan, `require("fs").writeFileSync("late.txt", "1"); const t0 = Date.now(), chunk = "LATE-OUTPUT\\n".repeat(20000);
+    const pump = () => { if (Date.now() - t0 > 1500) process.exit(0); process.stdout.write(chunk, () => setImmediate(pump)); }; pump();`);
+  fs.writeFileSync(mid, `require("child_process").spawn(process.execPath, [${JSON.stringify(orphan)}], { detached: true, stdio: ["ignore", 1, 2] }).unref();`);
+  const { state, log, p } = fakeAgy(`const m = require("child_process").spawn(process.execPath, [${JSON.stringify(mid)}], { stdio: ["ignore", 1, 2] });
+    m.on("exit", () => process.stdout.write(${JSON.stringify(HEADER)})); setTimeout(() => {}, 30000);`);
+  await untilLogHas(log, "status file");
+  state.t = IDLE_MS + 1000;
+  const r = await p;
+  assert.strictEqual(r.why, "stall");
+  const marker = path.join(path.dirname(log), "late.txt");
+  for (let i = 0; i < 300 && !fs.existsSync(marker); i++) await wait(10);
+  assert.ok(fs.existsSync(marker), "orphan writer never ran: the test did not exercise late output");
+  await wait(100);
+  const size = fs.statSync(log).size;
+  await wait(400);
+  assert.strictEqual(fs.statSync(log).size, size, "log kept growing after finish");
 });

@@ -239,6 +239,7 @@ function cooldownMin(k, run, prev) {
   return STALLS.has(run.outcome) && STALLS.has(prev) ? Math.min(STALL_COOLDOWN_CAP_MIN, mins) : 0;
 }
 function skipReason(h, k) {
+  if (PARKED[k]) return PARKED[k];
   const e = ex(h, k);
   if (e.state === "tripped" && e.until && new Date(e.until) > new Date()) return `tripped until ${e.until} (${e.reason})`;
   if (e.state === "tripped") { e.state = "ok"; e.until = null; }
@@ -350,12 +351,14 @@ const agyOutput = text => text.replace(/^(▶ |\s+(workspace:|status file|status
 function runChild(bin, args, cwd, logFile, stallMs = STALL_MS, startupMs = 0, hardMs = HARD_TIMEOUT_MS, { clock = Date.now, tickMs = 15000, convMtime = startupMs ? newestConvMtime : null, maxSilentMs = startupMs ? AGY_SILENT_MS : 0 } = {}) {
   return new Promise(resolve => {
     const out = fs.createWriteStream(logFile), t0 = clock(); let text = "", last = t0, lastWork = t0, retries = 0, done = false;
+    out.on("error", () => {});
     // opencode trusts the PWD env var over the process cwd; Git Bash leaves PWD pointing at wherever the router was
     // launched, which made it work in the wrong directory (once the main repo, once the home dir). Force it.
     const env = { ...process.env, PWD: cwd, INIT_CWD: cwd }; delete env.OLDPWD;
     const c = spawn(bin, args, { cwd, env, stdio: ["ignore", "pipe", "pipe"], windowsHide: true });
     const kill = why => { if (done) return; done = true; killTree(c); finish(null, why); };
     const feed = b => {
+      if (done) return;
       const s = b.toString(); last = clock(); lastWork = last; text += s; out.write(s);
       const lines = s.split("\n").filter(l => /retrying \(attempt/i.test(l));
       retries += lines.length;
@@ -385,7 +388,7 @@ function runChild(bin, args, cwd, logFile, stallMs = STALL_MS, startupMs = 0, ha
       const why = watchVerdict({ idleMs: now - last, silentMs: now - lastWork, maxSilentMs, ageMs: now - t0, stallMs, startupMs, touched, text });
       if (why) kill(why);
     }, tickMs);
-    function finish(code, why) { clearTimeout(t1); clearInterval(t2); out.end(); resolve({ code, why, text }); }
+    function finish(code, why) { clearTimeout(t1); clearInterval(t2); c.stdout.off("data", feed); c.stderr.off("data", feed); out.end(); resolve({ code, why, text }); }
     // An agy that exits without output or edits never started: that (not silence) is a startup-stall.
     c.on("close", code => { if (!done) { done = true; finish(code, startupMs && !touched && !agyOutput(text) ? "startup-stall" : null); } });
     c.on("error", e => { if (!done) { done = true; text += String(e); finish(127, "spawn-error"); } });
@@ -414,6 +417,10 @@ async function ensureFreellm() {
   console.error("[ab-route] freellmapi was down: launched it, waiting up to 30s");
   for (let i = 0; i < 30; i++) { await new Promise(r => setTimeout(r, 1000)); if (await freellmUp()) return true; }
   return false;
+}
+function sessionName(explicit, phase, cls, id, prefix = CFG.router.agySessionPrefix || "sprint") {
+  if (explicit) return explicit;
+  return phase ? `${prefix}-p${phase}-${cls}-${id}` : undefined;
 }
 async function main() {
   const argv = process.argv.slice(2), o = { class: null, repo: process.cwd(), base: "main" }, rest = [];
@@ -452,7 +459,7 @@ async function main() {
   fs.mkdirSync(LOGS, { recursive: true });
   const attempts = [], st = sprintState(o.repo), phase = st && st.active ? st.phase : null;
   const wallMs = o.maxWall || CFG.router.maxChainWallMs || 600000, chainT0 = Date.now();
-  if (!o.session && phase) o.session = `${CFG.router.agySessionPrefix || "sprint"}-p${phase}-${o.class}`;
+  o.session = sessionName(o.session, phase, o.class, id);
   for (const [base, cfg] of chain) {
     const leftMs = wallMs - (Date.now() - chainT0);
     if (leftMs < 30000) { attempts.push({ executor: keyOf(base, cfg), skipped: `chain wall-clock cap ${Math.round(wallMs / 60000)} min reached` }); continue; }
@@ -539,4 +546,4 @@ async function main() {
   process.exit(o.dry ? 0 : 1);
 }
 if (require.main === module) main();
-else module.exports = { watchVerdict, runChild, cooldownMin, mainSnapshot, newestConvMtime, guardrails };
+else module.exports = { watchVerdict, runChild, cooldownMin, mainSnapshot, newestConvMtime, guardrails, skipReason, sessionName };
