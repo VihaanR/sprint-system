@@ -25,7 +25,7 @@ flowchart TD
         M1["Hacker News Show HN & AI Agent API Harvest (Algolia HN API)"]
         M2["GitHub Trending & MCP Server Discovery"]
         M3["Trendshift / Market Signal Taxonomy Classification"]
-        M4["Output to docs/MARKET_TRENDS.md & docs/market_trends.json"]
+        M4["Output a markdown report and docs/market_trends.json"]
     end
 
     subgraph S3["STAGE 3: MUTATION & PROMPT SHARPENING"]
@@ -52,7 +52,7 @@ flowchart TD
 ### 1. Market Trend RAG Harvester
 Runs the standalone, zero-dependency market crawler:
 ```bash
-python scripts/market_trend_rag.py --output docs/MARKET_TRENDS.md
+python scripts/market_trend_rag.py
 ```
 - Queries Hacker News Algolia Search API (`tags=show_hn&query=ai+agent+framework+tool`).
 - Queries GitHub Trending API (`q=mcp-server+OR+agentic+OR+ai-skills`).

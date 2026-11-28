@@ -21,7 +21,7 @@
 
 A 6-phase, 5-hour build pipeline for Claude Code. You say **"start a sprint"**, and hooks hold Claude to the phase order. Each phase loads its skill first and ends at an exit gate that checks real output. Mechanical work goes to cheaper executors in isolated git worktrees. Claude keeps the domain logic and reviews every diff.
 
-v3 rewrites v2 after the Sprint 1 post-mortem ([SPRINT-ISSUES.md](SPRINT-ISSUES.md)). Rules that v2 only wrote down are now hook checks that block the action ([SPRINT-fix.md](SPRINT-fix.md)).
+v3 rewrites v2 after the Sprint 1 post-mortem. Rules that v2 only wrote down are now hook checks that block the action.
 
 ---
 
@@ -176,7 +176,6 @@ This runs the mod tests (`claude plugin test sprint-mod`), `claude plugin valida
 | `scripts/hooks/` | `sprint-gate.js` (all gates), `preflight.js` (SessionStart) |
 | `sprint-mod/` | Sidebar, status line and commands |
 | `AGENTS.md` | The rules any agent follows in this repo |
-| `SPRINT-ISSUES.md` · `SPRINT-fix.md` | Sprint 1 post-mortem and the v3 spec it produced |
 
 ## License
 
