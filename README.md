@@ -108,7 +108,9 @@ flowchart LR
     class CL claude
 ```
 
-- If agy hasn't started within `agyStartupStallMs`, the router kills the attempt and drops agy for the rest of the sprint (`agyOneStrikeDrop`).
+- While agy is running, a live but silent process counts as working up to `agySilentMs` (default `900000`, 15 min).
+- Startup watchdog `agyStartupStallMs` (at least `180000`, 3 min) records a `startup-stall` only when agent-bridge never produced output, or when agy exits with no output and no edits.
+- Stall cooldown tolerates the first stall; a second stall in a row trips the executor for at most 30 min.
 - A whole chain is capped at 10 minutes of wall clock (`maxChainWallMs`). After one failed chain, Claude implements the task directly.
 
 ## Sidebar mod (`sprint-mod/`)
