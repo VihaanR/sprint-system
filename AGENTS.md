@@ -12,7 +12,7 @@ Applies to any AI assistant working in this repo or running a sprint. Tunables l
 - Delegated writes run in router worktrees (`~/.claude/bin/ab-route.js`, `~/.agent-bridge/worktrees/route-*`).
 - Never edit the main checkout while a route-* worktree is live: it trips `isolation-breach`.
 - Write jobs need `--accept "<measurable metric>"` and a `--status` check in the current phase.
-- One failed chain means implement directly. No blind `--reset` retries.
+- One failed chain means hand the job to a Sonnet `builder` agent; Claude (Opus) writes no code and only reviews. No blind `--reset` retries.
 
 ## 3. Core science stays on Claude
 - Domain and scientific logic (algorithms, matching, scoring) is written by Claude, not free models.
