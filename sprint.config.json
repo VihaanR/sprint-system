@@ -14,7 +14,7 @@
     "agyModels": ["Gemini 4 Hydrogen (High)", "Gemini 3.8 Flash (Medium)"],
     "agySessionPrefix": "sprint",
     "agyStartupStallMs": 180000,
-    "agyOneStrikeDrop": true,
+    "agySilentMs": 900000,
     "opencodeFallback": "freellmapi/auto",
     "maxChainWallMs": 1500000,
     "hardTimeoutMs": 1200000,
