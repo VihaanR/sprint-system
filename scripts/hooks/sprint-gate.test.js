@@ -77,6 +77,7 @@ test("Discover gate needs 15 answered questions and 5 challenge rounds", () => {
   const root = project({ phase: 1, phaseStartedAt: ago(26) });
   for (const f of ["SPRINT.md", "PRODUCT.md", "DESIGN.md"]) write(root, f, "x");
   write(root, "fixtures/golden.json", "{}");
+  write(root, ".sprint/preflight.json", { routerSmoke: { exitCode: 0 }, services: [] });
   const q = n => Array.from({ length: n }, (_, i) => ({ q: `q${i}`, answer: `a${i}` }));
   const rounds = n => Array.from({ length: n }, () => ({ claim: "c", attack: "a", verdict: "kept" }));
 
@@ -184,4 +185,51 @@ test("showcase gate (phases 3, 4): needs url + timestamp from this phase; stale 
   assert.match(run(root, { args: ["advance"] }).out, /showcase-frontend.json/);
   showcase(root, "frontend");
   assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
+});
+
+function phase1Ready() {
+  const root = project({ phase: 1, phaseStartedAt: ago(26) });
+  for (const f of ["SPRINT.md", "PRODUCT.md", "DESIGN.md"]) write(root, f, "x");
+  write(root, "fixtures/golden.json", "{}");
+  const userQuestions = Array.from({ length: 15 }, (_, i) => ({ q: `q${i}`, answer: `a${i}` }));
+  const challengeRounds = Array.from({ length: 5 }, () => ({ claim: "c", attack: "a", verdict: "kept" }));
+  write(root, ".sprint/discover-log.json", { userQuestions, challengeRounds });
+  return root;
+}
+
+test("Phase 1 advance is refused when preflight.json is missing", () => {
+  const root = phase1Ready();
+  const r = run(root, { args: ["advance"] });
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /preflight\.json/);
+  assert.strictEqual(state(root).phase, 1);
+});
+
+test("Phase 1 advance is refused on cut service without userConfirmed or nonzero routerSmoke without waiver", () => {
+  const root = phase1Ready();
+  write(root, ".sprint/preflight.json", {
+    routerSmoke: { exitCode: 2 },
+    services: [{ name: "OpenAI key", status: "cut", userConfirmed: false }, { name: "X", status: "pending" }],
+  });
+  const r = run(root, { args: ["advance"] });
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /routerSmoke: exit 2 and no user waiver/);
+  assert.match(r.out, /'OpenAI key' is cut without userConfirmed true/);
+  assert.match(r.out, /'X' status must be ok or cut/);
+  assert.strictEqual(state(root).phase, 1);
+});
+
+test("Phase 1 advance is allowed with valid preflight.json (exitCode 0 or waiver, ok or confirmed cut services)", () => {
+  const root = phase1Ready();
+  write(root, ".sprint/preflight.json", {
+    routerSmoke: { exitCode: 0 },
+    services: [{ name: "Earth Engine login", status: "ok", userConfirmed: false }, { name: "OpenAI key", status: "cut", userConfirmed: true }],
+  });
+  assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
+  assert.strictEqual(state(root).phase, 2);
+
+  const waived = phase1Ready();
+  write(waived, ".sprint/preflight.json", { routerSmoke: { exitCode: 2, waivedByUser: true, reason: "offline" }, services: [] });
+  assert.strictEqual(run(waived, { args: ["advance"] }).code, 0);
+  assert.strictEqual(state(waived).phase, 2);
 });

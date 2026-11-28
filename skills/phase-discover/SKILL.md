@@ -50,7 +50,18 @@ Repeat until the floor; each round goes in `challengeRounds` and in a SPRINT.md 
 
 Good rounds find something. Five rounds that all say "kept" means the attacks were too soft.
 
-## Step 4: freeze and hand off
+## Step 4: pre-flight (router and services)
+Before exiting Discover, verify execution tooling and every external dependency works right now:
+1. Run `node V:/Projects/sprint/scripts/router-smoke.mjs --require antigravity` and record `exitCode` (nonzero needs a user waiver via `AskUserQuestion`).
+2. List every external service, login, and API key the spec needs and test each once (log in, make one real call). For any failure, ask the user (`AskUserQuestion`) whether to fix it now or cut it.
+3. Write `.sprint/preflight.json` (`"services": []` if none needed):
+```json
+{ "routerSmoke": { "exitCode": 0 },
+  "services": [{ "name": "Earth Engine login", "status": "ok|cut", "userConfirmed": true }] }
+```
+(If router smoke failed and the user waived it: `{ "waivedByUser": true, "reason": "..." }`.)
+
+## Step 5: freeze and hand off
 - Freeze the schema (`types.ts`, OpenAPI or Pydantic). Changes after this need the user's go.
 - Post the scorecard with `[TIME] <used> / 30 min (floor 25)` and wait for go.
 - If you are over budget, the hook says so: post the scorecard at once.

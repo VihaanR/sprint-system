@@ -118,6 +118,26 @@ function discoverLogFails(root, g) {
   return fail;
 }
 
+function serviceFail(sv) {
+  const s = sv || {}, n = s.name || "?";
+  if (s.status === "cut") return s.userConfirmed === true ? null : `.sprint/preflight.json services: '${n}' is cut without userConfirmed true`;
+  return s.status === "ok" ? null : `.sprint/preflight.json services: '${n}' status must be ok or cut`;
+}
+
+function smokeFail(rs) {
+  const s = rs || {};
+  if (s.exitCode === 0 || s.waivedByUser === true) return [];
+  return [`.sprint/preflight.json routerSmoke: exit ${s.exitCode ?? "missing"} and no user waiver`];
+}
+
+// Discover's pre-flight record: router smoke and external service checks.
+function preflightFails(root) {
+  const p = readJson(path.join(root, ".sprint", "preflight.json"));
+  if (!p) return [".sprint/preflight.json missing: run router-smoke.mjs and check every login/API key (see phase-discover)"];
+  if (!Array.isArray(p.services)) return [...smokeFail(p.routerSmoke), ".sprint/preflight.json services: must be an array"];
+  return [...smokeFail(p.routerSmoke), ...p.services.map(serviceFail).filter(Boolean)];
+}
+
 // Every phase: the user answered at least gates.minUserQuestionsPerPhase questions (counted by the AskUserQuestion hook).
 function questionFails(s, g) {
   const min = g.minUserQuestionsPerPhase ?? 15, n = (s.questionsByPhase || {})[s.phase] || 0;
@@ -180,7 +200,7 @@ function exitGate(root, s, cfg) {
   const w = phaseWindow(s, cfg);
   if (w.elapsedMin < w.floorMin) fail.push(`Phase ${s.phase} floor: ${Math.ceil(w.floorMin - w.elapsedMin)} min left (floor ${w.floorMin} of ${w.ceilMin} min). Keep validating before advancing.`);
   fail.push(...questionFails(s, g), ...showcaseFails(root, s));
-  if (s.phase === 1) { const m = missingArtifacts(root); if (m.length) fail.push(`Phase 1 artifacts missing: ${m.join(", ")}`); fail.push(...discoverLogFails(root, g)); }
+  if (s.phase === 1) { const m = missingArtifacts(root); if (m.length) fail.push(`Phase 1 artifacts missing: ${m.join(", ")}`); fail.push(...discoverLogFails(root, g), ...preflightFails(root)); }
   if (s.phase === 2) {
     // uv projects keep deps in .venv, which the system python cannot see (pytest then exits 2 on import errors).
     const uv = fs.existsSync(path.join(root, "uv.lock"));
