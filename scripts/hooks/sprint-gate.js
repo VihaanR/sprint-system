@@ -28,7 +28,22 @@ function config(root) {
   return readJson(path.join(root, "sprint.config.json")) || readJson("V:/Projects/sprint/sprint.config.json") || {};
 }
 const statePath = root => path.join(root, ".sprint-state.json");
-const saveState = (root, s) => fs.writeFileSync(statePath(root), JSON.stringify(s, null, 2));
+function renameAtomic(tmp, p) {
+  try { fs.renameSync(tmp, p); return "ok"; }
+  catch (e) { return e.code === "EPERM" || e.code === "EBUSY" ? "retry" : "fail"; }
+}
+function saveState(root, s) {
+  const p = statePath(root), tmp = `${p}.${process.pid}.tmp`, data = JSON.stringify(s, null, 2);
+  fs.writeFileSync(tmp, data);
+  for (let i = 0; i < 4; i++) {
+    const res = renameAtomic(tmp, p);
+    if (res === "ok") return;
+    if (res === "fail") break;
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 15);
+  }
+  try { fs.unlinkSync(tmp); } catch {}
+  fs.writeFileSync(p, data);
+}
 
 // Phase 1 artifacts that every later phase depends on.
 function missingArtifacts(root) {
@@ -41,14 +56,15 @@ function missingArtifacts(root) {
 // Live router worktrees registered on this repo (stale/prunable ones ignored).
 function liveRouteTrees(root) {
   const r = spawnSync("git", ["worktree", "list", "--porcelain"], { cwd: root, encoding: "utf8", timeout: 3000 });
-  return (r.stdout || "").split(/\n\n/).filter(b => /branch refs\/heads\/route\//.test(b) && !/prunable/.test(b))
-    .map(b => (/^worktree (.+)$/m.exec(b) || [])[1]).filter(p => p && fs.existsSync(p));
+  return (r.stdout || "").split(/\r?\n\r?\n/).filter(b => /branch refs\/heads\/route\//.test(b) && !/prunable/.test(b))
+    .map(b => ((/^worktree (.+)$/m.exec(b) || [])[1] || "").trim()).filter(p => p && fs.existsSync(p));
 }
 
 function preEdit(root, s, file) {
   const abs = path.resolve(root, file || ""), rel = path.relative(root, abs);
   if (rel.startsWith("..")) return; // outside the project (scratch, ~/.claude): not gated
-  const trees = liveRouteTrees(root);
+  const inAgentTree = /^\.claude[\\/]worktrees[\\/]/.test(rel);
+  const trees = inAgentTree ? [] : liveRouteTrees(root);
   if (trees.length) block(`[BLOCKED] Router worktree active (${trees[0]}). Editing the main checkout now trips isolation-breach. Wait for the route job, or edit inside the worktree.`);
   const name = NAMES[s.phase - 1];
   const isCode = CODE_DIR.test(rel), isUi = UI_FILE.test(rel);
@@ -68,13 +84,30 @@ function preBash(s, cmd) {
   }
 }
 
+function answerCount(inp) {
+  const ans = (inp.tool_response || {}).answers;
+  if (Object.prototype.toString.call(ans) === "[object Object]")
+    return Object.values(ans).filter(v => String(v ?? "").trim()).length;
+  const qs = (inp.tool_input || {}).questions;
+  return Array.isArray(qs) ? qs.length : 1;
+}
+
+// PreToolUse marks a tool_use_id in flight, PostToolUse/PostToolUseFailure clears it (pauseClock reads it first).
+function trackInFlight(root, s, inp, ev) {
+  const id = inp.tool_use_id;
+  if (!id) return;
+  if (ev === "PreToolUse") { s.inFlight = { ...(s.inFlight || {}), [id]: new Date().toISOString() }; saveState(root, s); return; }
+  const post = ev === "PostToolUse" || ev === "PostToolUseFailure";
+  if (post && Object.prototype.hasOwnProperty.call(s.inFlight || {}, id)) { delete s.inFlight[id]; saveState(root, s); }
+}
+
 function postTool(root, s, inp) {
   const t = inp.tool_name, ti = inp.tool_input || {};
   // Rule: >= gates.minUserQuestionsPerPhase answered questions in EVERY phase. The tool returns after the user answered.
   if (t === "AskUserQuestion") {
-    const n = Array.isArray(ti.questions) ? ti.questions.length : 1;
-    s.questionsByPhase = { ...(s.questionsByPhase || {}), [s.phase]: ((s.questionsByPhase || {})[s.phase] || 0) + n };
-    saveState(root, s); return;
+    const n = answerCount(inp);
+    if (n) { s.questionsByPhase = { ...(s.questionsByPhase || {}), [s.phase]: ((s.questionsByPhase || {})[s.phase] || 0) + n }; saveState(root, s); }
+    return;
   }
   if (t === "Skill" && ti.skill) { s.skillsLoaded = [...new Set([...(s.skillsLoaded || []), ti.skill])]; saveState(root, s); return; }
   if (t === "Bash" && /ab-route\.js\s+--status/.test(ti.command || "")) { s.statusPhase = s.phase; saveState(root, s); }
@@ -92,12 +125,24 @@ function postTool(root, s, inp) {
 }
 
 // ---- phase window: a phase may not end before budget - lead (floor) and should end by its budget (ceiling) ----
+function pausedMs(pauses, phase, since, until) {
+  let ms = 0;
+  for (const p of pauses || []) {
+    const to = Date.parse(p?.to);
+    if (p?.phase !== phase || !(to >= since)) continue;
+    const from = Date.parse(p.from) || since;
+    ms += Math.max(0, Math.min(until, to) - Math.max(since, from));
+  }
+  return ms;
+}
+
 function phaseWindow(s, cfg, now = Date.now()) {
   const budget = ((cfg.phases || {})[s.phase] || {}).budgetMin || 0;
   const lead = (cfg.gates || {}).phaseFloorLeadMin ?? 5;
   const started = Date.parse(s.phaseStartedAt || s.startedAt || "") || now;
+  const paused = pausedMs(s.pauses, s.phase, started, now);
   const floor = s.floorSkippedPhase === s.phase ? 0 : Math.max(0, budget - lead); // the user typed "skip floor"
-  return { elapsedMin: (now - started) / 60000, floorMin: floor, ceilMin: budget };
+  return { elapsedMin: Math.max(0, (now - started - paused) / 60000), floorMin: floor, ceilMin: budget };
 }
 const CHALLENGES = [
   { phases: [3, 4], text: "run /impeccable critique on the running UI, have a builder fix the top finding, re-screenshot into .sprint/screens-p<N>/" },
@@ -221,7 +266,33 @@ function fontFaceFamilies(css) {
   return out;
 }
 
-const fontsourceImports = txt => [...txt.matchAll(/['"]@fontsource(?:-variable)?\/([a-z0-9-]+)(?:\/[^'"]*)?['"]/gi)].map(m => m[1].toLowerCase());
+const fontsourceImports = txt => [...txt.matchAll(/['"]@fontsource(-variable)?\/([a-z0-9-]+)(?:\/[^'"]*)?['"]/gi)]
+  .map(m => `${m[2].toLowerCase().replace(/-/g, " ")}${m[1] ? " variable" : ""}`);
+
+function googleFontFamilies(url) {
+  const qi = url.indexOf("?");
+  if (qi < 0) return [];
+  const params = url.slice(qi + 1).split("#")[0].replace(/&amp;/gi, "&").split("&");
+  const out = [];
+  for (const p of params.filter(x => /^family=/i.test(x))) {
+    let val = p.slice(7).replace(/\+/g, " ");
+    try { val = decodeURIComponent(val); } catch {}
+    out.push(...val.split("|").map(f => f.split(":")[0].trim().toLowerCase()));
+  }
+  return out.filter(Boolean);
+}
+
+const cssGoogleImports = css => [...css.matchAll(/@import\s+(?:url\(\s*)?(?:"([^"]*)"|'([^']*)'|([^)\s;]+))\s*\)?/gi)]
+  .map(m => m.slice(1, 4).find(Boolean) || "").filter(u => /fonts\.googleapis\.com/i.test(u)).flatMap(googleFontFamilies);
+
+function htmlGoogleLinks(root) {
+  const p = path.join(root, "frontend", "index.html");
+  if (!fs.existsSync(p)) return [];
+  const html = fs.readFileSync(p, "utf8").replace(/<!--[\s\S]*?-->/g, "");
+  return [...html.matchAll(/<link\b[^>]*\shref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi)]
+    .map(m => m.slice(1, 4).find(Boolean) || "").filter(u => /fonts\.googleapis\.com/i.test(u)).flatMap(googleFontFamilies);
+}
+
 function parseFamilies(raw) {
   return raw.replace(/var\([^()]*\)/gi, "").split(",").map(stripQuotes)
     .filter(x => x && !/^var\(/i.test(x) && !IGNORED_FONTS.has(x.toLowerCase()));
@@ -237,24 +308,26 @@ function usedFontFamilies(css) {
 }
 
 function collectFonts(files) {
-  const faces = new Set(), imports = new Set(), used = new Map();
+  const loaded = new Set(), used = new Map();
   for (const f of files) {
     const txt = fs.readFileSync(f, "utf8");
-    fontsourceImports(txt).forEach(s => imports.add(s));
+    fontsourceImports(txt).forEach(s => loaded.add(s));
     if (!/\.css$/i.test(f)) continue;
     const clean = txt.replace(/\/\*[\s\S]*?\*\//g, "");
-    fontFaceFamilies(clean).forEach(fam => faces.add(fam));
+    fontFaceFamilies(clean).forEach(fam => loaded.add(fam));
+    cssGoogleImports(clean).forEach(fam => loaded.add(fam));
     usedFontFamilies(clean).forEach(fam => { const k = fam.toLowerCase(); used.set(k, used.get(k) || fam); });
   }
-  return { faces, imports, used };
+  return { loaded, used };
 }
 
 function fontFail(root) {
   const src = path.join(root, "frontend", "src");
   if (!fs.existsSync(src)) return null;
-  const { faces, imports, used } = collectFonts(walkFiles(src, /\.(css|js|jsx|ts|tsx)$/i, []));
-  const unloaded = [...used.entries()].filter(([k]) => !faces.has(k) && !imports.has(k.replace(/\s+/g, "-"))).map(([, v]) => v);
-  return unloaded.length ? `fonts not loaded (no @font-face or @fontsource import in frontend/src): ${unloaded.join(", ")}` : null;
+  const { loaded, used } = collectFonts(walkFiles(src, /\.(css|js|jsx|ts|tsx)$/i, []));
+  htmlGoogleLinks(root).forEach(fam => loaded.add(fam));
+  const unloaded = [...used.entries()].filter(([k]) => !loaded.has(k)).map(([, v]) => v);
+  return unloaded.length ? `fonts not loaded (no @font-face, @fontsource, or Google Fonts link/import): ${unloaded.join(", ")}` : null;
 }
 
 function titleFail(root) {
@@ -361,18 +434,36 @@ function routeGuard(cmd) {
 
 // ---- SPRINT-REPORT.md: your words, phase times and friction, for the post-mortem ----
 // Paused clock: a gap with no hook activity longer than idlePauseMin (terminal closed, usage exhausted, session
-// restart) is not sprint time. Shift the sprint and phase start forward by the gap, so every reader of the clock
-// (gate, sidebar, scorecard, report) sees it paused, and record the pause.
-function pauseClock(root, s, cfg) {
-  const now = Date.now(), idle = ((cfg.gates || {}).idlePauseMin ?? 10) * 60000;
-  const last = Date.parse(s.lastActivityAt || "") || now, gap = now - last;
-  if (gap > idle) {
-    const shift = t => (t ? new Date(Date.parse(t) + gap).toISOString() : t);
-    s.startedAt = shift(s.startedAt); s.phaseStartedAt = shift(s.phaseStartedAt);
-    s.pauses = [...(s.pauses || []), { from: new Date(last).toISOString(), to: new Date(now).toISOString(), min: Math.round(gap / 60000) }];
+// restart) is not sprint time. Record the pause with its phase instead of shifting start timestamps, so
+// showcase/report checks still match real start times while phaseWindow/report subtract paused ms.
+// Signal: a long tool call (router chain, test run) is hook-silent between its PreToolUse and PostToolUse, so a
+// tool_use_id in s.inFlight younger than maxChainWallMs + idlePauseMin suppresses the pause; an older entry is a
+// tool that died with the session and is dropped. Limitation: only tools matched by the PreToolUse hook
+// (Bash|PowerShell|Edit|Write|MultiEdit in settings.json) are tracked, so a long gap inside an unmatched tool
+// (e.g. the user thinking over AskUserQuestion) may still count as a pause.
+function pauseBounds(cfg) {
+  const idle = (cfg.gates?.idlePauseMin ?? 10) * 60000;
+  return { idle, cap: (cfg.router?.maxChainWallMs ?? 1500000) + idle };
+}
+function pruneInFlight(s, now, cap) {
+  const next = {};
+  let changed = false;
+  for (const [id, ts] of Object.entries(s.inFlight || {})) {
+    const t = Date.parse(ts);
+    if (t && now - t < cap) next[id] = ts;
+    else changed = true;
   }
+  if (changed) s.inFlight = next;
+  return { changed, busy: Object.keys(next).length > 0 };
+}
+function pauseClock(root, s, cfg) {
+  const now = Date.now(), { idle, cap } = pauseBounds(cfg);
+  const stored = Date.parse(s.lastActivityAt), gap = stored ? now - stored : 0;
+  const { changed, busy } = pruneInFlight(s, now, cap);
+  const paused = gap > idle && !busy;
+  if (paused) s.pauses = [...(s.pauses || []), { from: new Date(stored).toISOString(), to: new Date(now).toISOString(), min: Math.round(gap / 60000), phase: s.phase }];
   s.lastActivityAt = new Date(now).toISOString();
-  saveState(root, s);
+  if ([paused, changed, !stored, gap > 60000].some(Boolean)) saveState(root, s);
 }
 
 const endPhase = (s, now) => { s.phaseLog = [...(s.phaseLog || []), { phase: s.phase, startedAt: s.phaseStartedAt || s.startedAt, endedAt: now }]; };
@@ -408,7 +499,8 @@ function writeReport(root, s, cfg, status) {
     `### Interrupts (Esc): ${Object.values(interrupts).reduce((a, b) => a + b, 0)}`,
     ...Object.entries(interrupts).map(([p, n]) => `- ${label(+p)}: ${n}`), "",
     "## Time per phase", "", "| Phase | Used (min) | Budget (min) | |", "|---|---|---|---|",
-    ...phases.map(x => { const used = Math.round(((x.endedAt ? at(x.endedAt) : now) - at(x.startedAt)) / 60000), b = ((cfg.phases || {})[x.phase] || {}).budgetMin;
+    ...phases.map(x => { const start = at(x.startedAt), end = x.endedAt ? at(x.endedAt) : now;
+      const used = Math.max(0, Math.round((end - start - pausedMs(s.pauses, x.phase, start, end)) / 60000)), b = ((cfg.phases || {})[x.phase] || {}).budgetMin;
       return `| ${label(x.phase)} | ${used} | ${b ?? "-"} | ${!x.endedAt ? "running" : b && used > b ? "**over**" : ""} |`; }), "",
     "## Friction (blocks, failures, router)", "", "| Phase | Source | Event | Count | Example |", "|---|---|---|---|---|",
     ...Object.values(friction).sort((a, b) => b.n - a.n).map(f => `| ${f.phase ?? "?"} | ${f.to} | ${oneLine(f.outcome)} | ${f.n} | ${f.ex.slice(0, 120)} |`), "",
@@ -483,7 +575,8 @@ function main() {
   const ti = inp.tool_input || {};
   if (ev === "PreToolUse" && (inp.tool_name === "Edit" || inp.tool_name === "Write")) preEdit(root, s, ti.file_path);
   else if (ev === "PreToolUse" && inp.tool_name === "Bash") preBash(s, ti.command || "");
-  else if (ev === "PostToolUse") postTool(root, s, inp);
+  trackInFlight(root, s, inp, ev); // after the pre-gates: a blocked call never ran
+  if (ev === "PostToolUse") postTool(root, s, inp);
   else if (ev === "PostToolUseFailure") log({ phase: s.phase, to: inp.tool_name, outcome: "tool-failure", flags: [String(inp.error || "").slice(0, 200)] });
   else if (ev === "Stop") stopGate(root, s, cfg, inp);
   if (ev === "UserPromptSubmit" || ev === "PostToolUse") ceilingNotice(root, s, cfg, ev);

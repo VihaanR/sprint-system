@@ -321,7 +321,7 @@ test("design exit gate (Phase 3 + font variants): accepts @font-face, @fontsourc
   write(root, "frontend/src/main.tsx", 'import "@fontsource-variable/inter-tight";\n');
   write(root, "frontend/src/styles/app.css", [
     '@font-face { font-family: "JetBrains Mono"; src: url("/jb.woff2"); }',
-    'body { font-family: "Inter Tight", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif; }',
+    'body { font-family: "Inter Tight Variable", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif; }',
     'code { font-family: "JetBrains Mono", Menlo, Consolas, Monaco, var(--mono), ui-monospace, monospace; }',
   ].join("\n"));
 
@@ -343,6 +343,49 @@ test("design exit gate: fonts named in CSS custom properties (--font-*) must loa
   assert.strictEqual(r.code, 1);
   assert.match(r.out, /fonts not loaded.*: Inter, JetBrains Mono$/m);
   write(root, "frontend/src/main.tsx", 'import "@fontsource/inter";\nimport "@fontsource/jetbrains-mono";\n');
+  assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
+});
+
+test("font check: @fontsource-variable/inter satisfies Inter Variable", () => {
+  const root = project({ phase: 4, phaseStartedAt: ago(41) }); showcase(root, "polish"); designOk(root, 4);
+  write(root, "frontend/src/main.tsx", 'import "@fontsource-variable/inter";\n');
+  write(root, "frontend/src/index.css", 'body { font-family: "Inter Variable", sans-serif; }');
+  assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
+});
+
+test("font check: @fontsource-variable/inter-tight rejects non-variable Inter Tight", () => {
+  const root = project({ phase: 4, phaseStartedAt: ago(41) }); showcase(root, "polish"); designOk(root, 4);
+  write(root, "frontend/src/main.tsx", 'import "@fontsource-variable/inter-tight";\n');
+  write(root, "frontend/src/index.css", 'body { font-family: "Inter Tight", sans-serif; }');
+  const r = run(root, { args: ["advance"] });
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /fonts not loaded.*: Inter Tight$/m);
+});
+
+test("font check: @fontsource/inter-tight satisfies Inter Tight", () => {
+  const root = project({ phase: 4, phaseStartedAt: ago(41) }); showcase(root, "polish"); designOk(root, 4);
+  write(root, "frontend/src/main.tsx", 'import "@fontsource/inter-tight";\n');
+  write(root, "frontend/src/index.css", 'body { font-family: "Inter Tight", sans-serif; }');
+  assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
+});
+
+test("font check: Google Fonts <link> in frontend/index.html loads Inter Tight and JetBrains Mono", () => {
+  const root = project({ phase: 4, phaseStartedAt: ago(41) }); showcase(root, "polish"); designOk(root, 4);
+  write(root, "frontend/index.html", '<html><head><title>Watershed Pulse</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;700&family=JetBrains+Mono&display=swap"></head></html>');
+  write(root, "frontend/src/index.css", 'body { font-family: "Inter Tight", sans-serif; }\ncode { font-family: "JetBrains Mono", monospace; }');
+  assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
+});
+
+test("font check: CSS @import url(fonts.googleapis.com ... family=Fraunces) loads Fraunces", () => {
+  const root = project({ phase: 4, phaseStartedAt: ago(41) }); showcase(root, "polish"); designOk(root, 4);
+  write(root, "frontend/src/index.css", '@import url(fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&display=swap);\nbody { font-family: "Fraunces", serif; }');
+  assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
+});
+
+test("font check: legacy Google Fonts css?family=A|B loads both families", () => {
+  const root = project({ phase: 4, phaseStartedAt: ago(41) }); showcase(root, "polish"); designOk(root, 4);
+  write(root, "frontend/index.html", '<html><head><title>Watershed Pulse</title><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter+Tight:400,700|JetBrains+Mono"></head></html>');
+  write(root, "frontend/src/index.css", 'body { font-family: "Inter Tight", sans-serif; }\ncode { font-family: "JetBrains Mono", monospace; }');
   assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
 });
 
@@ -371,4 +414,141 @@ test("Phase 1 and 2 floor Stops can yield golden hand-check and never yield impe
     });
     assert.ok(outs.some(o => /check one golden expected output/.test(o)), `Phase ${phase} should yield golden hand-check`);
   }
+});
+
+test("AskUserQuestion counts only non-empty answers in tool_response.answers and accumulates", () => {
+  const root = project({ phase: 2, phaseStartedAt: ago(10), lastActivityAt: new Date().toISOString(), questionsByPhase: {} });
+  const qInput = [
+    { question: "Auth mode?", header: "Auth", options: [], multiSelect: false },
+    { question: "DB engine?", header: "DB", options: [], multiSelect: false },
+    { question: "Theme?", header: "UI", options: [], multiSelect: false },
+  ];
+  const ev1 = {
+    hook_event_name: "PostToolUse",
+    tool_name: "AskUserQuestion",
+    tool_input: { questions: qInput },
+    tool_response: { questions: qInput, answers: { "Auth mode?": "JWT", "DB engine?": "", "Theme?": "Dark" } },
+  };
+  assert.strictEqual(run(root, { input: ev1 }).code, 0);
+  assert.strictEqual(state(root).questionsByPhase[2], 2);
+
+  const ev2 = {
+    hook_event_name: "PostToolUse",
+    tool_name: "AskUserQuestion",
+    tool_input: { questions: [{ question: "Deploy target?", header: "Ops", options: [], multiSelect: false }] },
+    tool_response: { questions: [{ question: "Deploy target?" }], answers: { "Deploy target?": "Vercel" } },
+  };
+  assert.strictEqual(run(root, { input: ev2 }).code, 0);
+  assert.strictEqual(state(root).questionsByPhase[2], 3);
+});
+
+test("preEdit blocks main checkout when live route worktree exists, but allows .claude/worktrees/", (t) => {
+  const root = project({ phase: 2, phaseStartedAt: ago(10), lastActivityAt: new Date().toISOString(), skillsLoaded: ["phase-backend"] });
+  for (const f of ["SPRINT.md", "PRODUCT.md", "DESIGN.md"]) write(root, f, "x");
+  write(root, "fixtures/golden.json", "{}");
+  write(root, "src/a.js", "export const a = 1;\n");
+  write(root, ".claude/worktrees/agent-1/notes.txt", "notes\n");
+  write(root, ".claude/worktrees/agent-1/src/a.js", "export const b = 2;\n");
+
+  const git = (args, cwd = root) => {
+    const r = spawnSync("git", args, { cwd, encoding: "utf8" });
+    assert.strictEqual(r.status, 0, `git ${args.join(" ")} failed: ${r.stderr}`);
+  };
+  git(["init"]);
+  git(["config", "user.email", "test@example.com"]);
+  git(["config", "user.name", "Test"]);
+  git(["add", "."]);
+  git(["commit", "-m", "init"]);
+
+  const wtDir = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "sprint-wt-")), "route-x");
+  t.after(() => fs.rmSync(path.dirname(wtDir), { recursive: true, force: true }));
+  git(["worktree", "add", "-b", "route/x", wtDir]);
+
+  const blocked = run(root, { input: { hook_event_name: "PreToolUse", tool_name: "Edit", tool_input: { file_path: path.join(root, "src/a.js") } } });
+  assert.strictEqual(blocked.code, 2);
+  assert.match(blocked.out, /Router worktree/);
+
+  const agentNotes = run(root, { input: { hook_event_name: "PreToolUse", tool_name: "Edit", tool_input: { file_path: path.join(root, ".claude/worktrees/agent-1/notes.txt") } } });
+  assert.strictEqual(agentNotes.code, 0);
+
+  write(root, ".sprint-state.json", { active: true, phase: 2, phaseStartedAt: ago(10), lastActivityAt: new Date().toISOString(), skillsLoaded: [], questionsByPhase: { 2: 15 } });
+  const skillBlocked = run(root, { input: { hook_event_name: "PreToolUse", tool_name: "Edit", tool_input: { file_path: path.join(root, ".claude/worktrees/agent-1/src/a.js") } } });
+  assert.strictEqual(skillBlocked.code, 2);
+  assert.match(skillBlocked.out, /Skill\(phase-backend\)/);
+});
+
+test("pauseClock skips pause while inFlight tool is younger than cap, clears on PostToolUse, and records pause when idle or stale", () => {
+  const busy = project({
+    phase: 2,
+    startedAt: ago(30),
+    phaseStartedAt: ago(30),
+    lastActivityAt: ago(22),
+    inFlight: { "tool-1": ago(22) },
+  });
+  assert.strictEqual(run(busy, { input: { hook_event_name: "PostToolUse", tool_name: "Bash", tool_use_id: "tool-1", tool_input: { command: "npm test" } } }).code, 0);
+  const bs = state(busy);
+  assert.strictEqual((bs.pauses || []).length, 0);
+  assert.deepStrictEqual(bs.inFlight, {});
+
+  const idle = project({ phase: 2, startedAt: ago(30), phaseStartedAt: ago(30), lastActivityAt: ago(22) });
+  assert.strictEqual(run(idle, { input: { hook_event_name: "PostToolUse", tool_name: "Read", tool_input: {} } }).code, 0);
+  const is = state(idle);
+  assert.strictEqual(is.pauses.length, 1);
+  assert.strictEqual(is.pauses[0].phase, 2);
+
+  const pre = project({ phase: 2, startedAt: ago(50), phaseStartedAt: ago(50), lastActivityAt: ago(22), inFlight: { "dead-1": ago(40) } });
+  assert.strictEqual(run(pre, { input: { hook_event_name: "PreToolUse", tool_name: "Read", tool_use_id: "live-2", tool_input: {} } }).code, 0);
+  const ps = state(pre);
+  assert.strictEqual(ps.pauses.length, 1);
+  assert.strictEqual(ps.inFlight["dead-1"], undefined);
+  assert.ok(ps.inFlight["live-2"]);
+  assert.strictEqual(run(pre, { input: { hook_event_name: "PostToolUseFailure", tool_name: "Read", tool_use_id: "live-2", error: "boom" } }).code, 0);
+  assert.deepStrictEqual(state(pre).inFlight, {});
+});
+
+test("pauses never shift startedAt/phaseStartedAt; phaseWindow and report subtract phase pauses while showcase checks real start", () => {
+  const root = project({
+    phase: 4,
+    startedAt: ago(50),
+    phaseStartedAt: ago(50),
+    lastActivityAt: new Date().toISOString(),
+    pauses: [{ from: ago(30), to: ago(10), min: 20, phase: 4 }],
+  });
+  designOk(root, 4);
+  write(root, ".sprint/showcase-polish.json", { url: "http://localhost:5173", timestamp: ago(45) });
+  const r = run(root, { args: ["advance"] });
+  assert.strictEqual(r.code, 1);
+  assert.doesNotMatch(r.out, /showcase-polish\.json/);
+  assert.match(r.out, /Phase 4 floor: 10 min left/);
+
+  const origStart = ago(40), origPhaseStart = ago(35);
+  const pRoot = project({ phase: 2, startedAt: origStart, phaseStartedAt: origPhaseStart, lastActivityAt: ago(20) });
+  assert.strictEqual(run(pRoot, { input: { hook_event_name: "PostToolUse", tool_name: "Read", tool_input: {} } }).code, 0);
+  const ps = state(pRoot);
+  assert.strictEqual(ps.startedAt, origStart);
+  assert.strictEqual(ps.phaseStartedAt, origPhaseStart);
+  assert.strictEqual(ps.pauses.length, 1);
+  assert.strictEqual(ps.pauses[0].phase, 2);
+
+  assert.strictEqual(run(pRoot, { input: { hook_event_name: "UserPromptSubmit", prompt: "end sprint" } }).code, 0);
+  const md = fs.readFileSync(path.join(pRoot, "SPRINT-REPORT.md"), "utf8");
+  assert.match(md, /\| P2 backend \| 15 \| - \|/);
+});
+
+test("saveState writes valid JSON with no .tmp left; pauseClock skips write within 60s when nothing changed and updates after 60s", () => {
+  const recentTs = new Date(Date.now() - 10000).toISOString();
+  const root = project({ phase: 4, startedAt: ago(10), phaseStartedAt: ago(10), lastActivityAt: recentTs });
+  const stateFile = path.join(root, ".sprint-state.json");
+  const before = fs.readFileSync(stateFile, "utf8");
+
+  assert.strictEqual(run(root, { input: { hook_event_name: "PostToolUse", tool_name: "Read", tool_input: {} } }).code, 0);
+  assert.strictEqual(fs.readFileSync(stateFile, "utf8"), before);
+  assert.strictEqual(fs.readdirSync(root).filter(f => f.endsWith(".tmp")).length, 0);
+
+  const staleTs = ago(2);
+  write(root, ".sprint-state.json", { active: true, phase: 4, startedAt: ago(10), phaseStartedAt: ago(10), lastActivityAt: staleTs, skillsLoaded: [], questionsByPhase: { 4: 15 } });
+  assert.strictEqual(run(root, { input: { hook_event_name: "PostToolUse", tool_name: "Read", tool_input: {} } }).code, 0);
+  const updated = state(root);
+  assert.ok(Date.parse(updated.lastActivityAt) > Date.parse(staleTs));
+  assert.strictEqual(fs.readdirSync(root).filter(f => f.endsWith(".tmp")).length, 0);
 });
