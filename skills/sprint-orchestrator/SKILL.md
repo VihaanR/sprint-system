@@ -41,8 +41,12 @@ validate before claiming, and keep core logic yourself.
    Run `--status` first. Not started in 60 s, or one failed chain: implement directly, no `--reset`, no retry.
    Never edit the main checkout while a route-* worktree is live.
 6. Phase end: post the scorecard, wait for the user to type `go`, then run `node V:/Projects/sprint/scripts/hooks/sprint-gate.js advance`
-   (runs the exit gate: every phase its floor, P1 15+ user questions + 5 challenge rounds, P2 pytest + LOC,
-   P3 walkthrough + axe 0, P6 live URL + video + README claims).
+   (runs the exit gate: every phase its floor and 15+ answered user questions, P1 5 challenge rounds, P2 pytest + LOC,
+   P3 walkthrough + axe 0 + showcase, P4 showcase, P6 live URL + video + README claims).
+7. User questions in EVERY phase: at least 15 `AskUserQuestion` questions per phase (`gates.minUserQuestionsPerPhase`); a PostToolUse hook counts them in `questionsByPhase` and `advance` refuses below 15.
+8. After Phase 3 (frontend) and Phase 4 (polish): open the running app in the user's browser and print the clickable link before the scorecard; the phase skill writes `.sprint/showcase-<phase>.json` and `advance` requires it.
+9. Right after Phase 2 (backend): list every key in `.env.example` with comments, ask the user to copy it to `.env` and fill it in, then exercise the live paths with the real keys before advancing.
+10. Phase 6 launch video: ask the user the tone before building; default to high energy (chaotic or cinematic), never calm polished by default.
 
 ## Sprint report (automatic)
 - A message starting with `wtf` is the user's complaint: the hook logs it word for word. Fix the cause if it is in
@@ -63,3 +67,11 @@ validate before claiming, and keep core logic yourself.
 ## Learned guardrails (auto, evolve_skills.py)
 - executor quota trips seen 2x: prefer freellmapi/auto; batch slices into one dispatch.
 - chain exhausted 4x: implement directly after one failed chain; no re-dispatch.
+
+## Delegation lessons (2026-11-27 sprint, by hand)
+- Delegate UI slices with `--accept-cmd "<real check>"`: the router runs it in the worktree. A stub slice once came back "ok".
+- The router adds the worktree-only rule to every write brief; never put the main checkout's absolute path in a brief.
+- agy through agent-bridge stayed `status: queued` and never started, while agy called directly answered in ~110 s. Smoke-test agy through the router at sprint start and treat it as down until that passes. Disable slow MCP servers in agy (`agy mcp disable <name>`).
+- Free models (opencode freellmapi/auto) return stubs or stall on multi-file UI slices: one file or one mechanical job each, with an accept-cmd; dispatch parallel jobs at least 30 s apart.
+- Earth Engine bakes: filterBounds every collection, pick ERA5 hours by system:index (never calendarRange), cache Overpass, checkpoint per batch, run long bakes in a separate terminal (a Claude Code restart kills background jobs).
+- The sprint clock pauses on any hook-silent gap over `gates.idlePauseMin` (default 10 min).

@@ -10,7 +10,7 @@ const GATE = path.join(__dirname, "sprint-gate.js");
 const CFG = {
   phases: { 1: { budgetMin: 30 }, 4: { budgetMin: 45 } },
   orchestrator: { model: "claude-opus-5-5", effort: "high" },
-  gates: { phaseFloorLeadMin: 5, maxFloorStopBlocks: 3, discoverMinUserQuestions: 15, discoverMinChallengeRounds: 5 },
+  gates: { phaseFloorLeadMin: 5, maxFloorStopBlocks: 3, discoverMinUserQuestions: 15, minUserQuestionsPerPhase: 15, discoverMinChallengeRounds: 5 },
 };
 const ago = min => new Date(Date.now() - min * 60000).toISOString();
 
@@ -18,7 +18,7 @@ function project(state) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "sprint-gate-"));
   fs.mkdirSync(path.join(root, "home"));
   fs.writeFileSync(path.join(root, "sprint.config.json"), JSON.stringify(CFG));
-  if (state) fs.writeFileSync(path.join(root, ".sprint-state.json"), JSON.stringify({ active: true, skillsLoaded: [], ...state }));
+  if (state) fs.writeFileSync(path.join(root, ".sprint-state.json"), JSON.stringify({ active: true, skillsLoaded: [], questionsByPhase: { 1: 15, 2: 15, 3: 15, 4: 15, 5: 15, 6: 15 }, ...state }));
   return root;
 }
 function run(root, { args = [], input, env = {} } = {}) {
@@ -30,6 +30,7 @@ function run(root, { args = [], input, env = {} } = {}) {
 }
 const state = root => JSON.parse(fs.readFileSync(path.join(root, ".sprint-state.json"), "utf8"));
 const write = (root, f, v) => { fs.mkdirSync(path.dirname(path.join(root, f)), { recursive: true }); fs.writeFileSync(path.join(root, f), typeof v === "string" ? v : JSON.stringify(v)); };
+const showcase = (root, name) => write(root, `.sprint/showcase-${name}.json`, { url: "http://localhost:5173", timestamp: new Date().toISOString() });
 function transcript(root, model) {
   write(root, "t.jsonl", [{ type: "user", message: {} }, { type: "assistant", message: { model } }].map(x => JSON.stringify(x)).join("\n"));
   return path.join(root, "t.jsonl");
@@ -41,7 +42,7 @@ test("advance is refused before the floor and allowed after it", () => {
   assert.strictEqual(r.code, 1); assert.match(r.out, /Phase 4 floor: 30 min left/);
   assert.strictEqual(state(early).phase, 4);
 
-  const late = project({ phase: 4, phaseStartedAt: ago(41) });
+  const late = project({ phase: 4, phaseStartedAt: ago(41) }); showcase(late, "polish");
   assert.strictEqual(run(late, { args: ["advance"] }).code, 0);
   const s = state(late);
   assert.strictEqual(s.phase, 5); assert.ok(Date.now() - Date.parse(s.phaseStartedAt) < 60000, "new phase clock starts now");
@@ -59,7 +60,7 @@ test("Stop is blocked under the floor, at most maxFloorStopBlocks times", () => 
 });
 
 test("only the user's 'skip floor' lifts the floor", () => {
-  const root = project({ phase: 4, phaseStartedAt: ago(2) });
+  const root = project({ phase: 4, phaseStartedAt: ago(2) }); showcase(root, "polish");
   const r = run(root, { input: { hook_event_name: "UserPromptSubmit", prompt: "skip floor" } });
   assert.match(r.out, /floor lifted/);
   assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
@@ -148,11 +149,39 @@ test("end sprint closes the sprint and writes SPRINT-REPORT.md with quotes, inte
 
 test("advance writes the report and counts blocks from this sprint as friction", () => {
   const root = project({ phase: 4, startedAt: ago(60), phaseStartedAt: ago(60) });
-  write(root, "src/app.tsx", "x");
+  write(root, "src/app.tsx", "x"); showcase(root, "polish");
   run(root, { input: { hook_event_name: "PreToolUse", tool_name: "Edit", tool_input: { file_path: path.join(root, "src/app.tsx") } } });
   assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
   const md = fs.readFileSync(path.join(root, "SPRINT-REPORT.md"), "utf8");
   assert.match(md, /status: \*\*in progress\*\*/);
   assert.match(md, /\| P4 polish \| 60 \| 45 \| \*\*over\*\* \|/);
   assert.match(md, /\| 4 \| block \| \[BLOCKED\] Phase 4\/6 \(polish\): call Skill\(phase-polish\) before editing code\. \| 1 \|/);
+});
+
+const ask = (root, n) => run(root, { input: { hook_event_name: "PostToolUse", tool_name: "AskUserQuestion", tool_input: { questions: Array.from({ length: n }, (_, i) => ({ question: `q${i}` })) } } });
+
+test("per-phase question gate: 14 answered questions refuse advance, 15 allow it, in any phase", () => {
+  // Phase 4 (floor and showcase already satisfied) isolates the question count.
+  const root = project({ phase: 4, phaseStartedAt: ago(41), questionsByPhase: { 3: 15 } }); showcase(root, "polish");
+  for (const n of [4, 4, 4, 2]) assert.strictEqual(ask(root, n).code, 0); // 14, counted into the current phase only
+  assert.deepStrictEqual(state(root).questionsByPhase, { 3: 15, 4: 14 });
+  const refused = run(root, { args: ["advance"] });
+  assert.strictEqual(refused.code, 1); assert.match(refused.out, /Phase 4 user questions: 14.15/);
+  assert.strictEqual(state(root).phase, 4);
+
+  ask(root, 1);
+  assert.strictEqual(state(root).questionsByPhase[4], 15);
+  assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
+  assert.strictEqual(state(root).phase, 5);
+  assert.match(run(root, { args: ["advance"] }).out, /Phase 5 user questions: 0.15/); // the 15 do not carry over
+});
+
+test("showcase gate (phases 3, 4): needs url + timestamp from this phase; stale or missing is refused", () => {
+  const root = project({ phase: 3, phaseStartedAt: ago(71) });
+  write(root, ".sprint/phase3-proof.json", { screenshot: "shot.png", axeViolations: 0 }); write(root, "shot.png", "x");
+  assert.match(run(root, { args: ["advance"] }).out, /showcase-frontend.json/);
+  write(root, ".sprint/showcase-frontend.json", { url: "http://localhost:5173", timestamp: ago(80) });
+  assert.match(run(root, { args: ["advance"] }).out, /showcase-frontend.json/);
+  showcase(root, "frontend");
+  assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
 });

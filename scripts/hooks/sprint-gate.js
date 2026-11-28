@@ -70,6 +70,12 @@ function preBash(s, cmd) {
 
 function postTool(root, s, inp) {
   const t = inp.tool_name, ti = inp.tool_input || {};
+  // Rule: >= gates.minUserQuestionsPerPhase answered questions in EVERY phase. The tool returns after the user answered.
+  if (t === "AskUserQuestion") {
+    const n = Array.isArray(ti.questions) ? ti.questions.length : 1;
+    s.questionsByPhase = { ...(s.questionsByPhase || {}), [s.phase]: ((s.questionsByPhase || {})[s.phase] || 0) + n };
+    saveState(root, s); return;
+  }
   if (t === "Skill" && ti.skill) { s.skillsLoaded = [...new Set([...(s.skillsLoaded || []), ti.skill])]; saveState(root, s); return; }
   if (t === "Bash" && /ab-route\.js\s+--status/.test(ti.command || "")) { s.statusPhase = s.phase; saveState(root, s); }
   if (t === "Bash" && /ab-route\.js/.test(ti.command || "")) {
@@ -110,6 +116,22 @@ function discoverLogFails(root, g) {
   if (qs.length < minQ) fail.push(`.sprint/discover-log.json: ${qs.length}/${minQ} answered user questions`);
   if (rs.length < minR) fail.push(`.sprint/discover-log.json: ${rs.length}/${minR} self-challenge rounds (claim, attack, verdict)`);
   return fail;
+}
+
+// Every phase: the user answered at least gates.minUserQuestionsPerPhase questions (counted by the AskUserQuestion hook).
+function questionFails(s, g) {
+  const min = g.minUserQuestionsPerPhase ?? 15, n = (s.questionsByPhase || {})[s.phase] || 0;
+  return n < min ? [`Phase ${s.phase} user questions: ${n}/${min} answered (counted by the AskUserQuestion PostToolUse hook). Ask the rest with AskUserQuestion: real decisions and trade-offs for this phase, not filler.`] : [];
+}
+// Phases 3 and 4: the running app was opened in the user's browser; the phase skill writes .sprint/showcase-<phase>.json.
+const SHOWCASE_PHASES = [3, 4];
+function showcaseFails(root, s) {
+  if (!SHOWCASE_PHASES.includes(s.phase)) return [];
+  const f = `.sprint/showcase-${NAMES[s.phase - 1]}.json`, p = readJson(path.join(root, f)) || {};
+  const at = Date.parse(p.timestamp || ""), since = Date.parse(s.phaseStartedAt || s.startedAt || "") || 0;
+  if (!/^https?:\/\/\S+/.test(p.url || "") || !at || at < since)
+    return [`${f}: {url, timestamp} written in this phase, after opening the running app in the user's browser and printing the link`];
+  return [];
 }
 
 // ---- orchestrator model: the sprint runs on cfg.orchestrator (Opus 5.5, high effort) ----
@@ -157,6 +179,7 @@ function exitGate(root, s, cfg) {
   const g = cfg.gates || {}, fail = [];
   const w = phaseWindow(s, cfg);
   if (w.elapsedMin < w.floorMin) fail.push(`Phase ${s.phase} floor: ${Math.ceil(w.floorMin - w.elapsedMin)} min left (floor ${w.floorMin} of ${w.ceilMin} min). Keep validating before advancing.`);
+  fail.push(...questionFails(s, g), ...showcaseFails(root, s));
   if (s.phase === 1) { const m = missingArtifacts(root); if (m.length) fail.push(`Phase 1 artifacts missing: ${m.join(", ")}`); fail.push(...discoverLogFails(root, g)); }
   if (s.phase === 2) {
     // uv projects keep deps in .venv, which the system python cannot see (pytest then exits 2 on import errors).
@@ -288,7 +311,7 @@ function main() {
         transcripts: inp.transcript_path ? [inp.transcript_path] : [], gripes: [], phaseLog: [] };
       saveState(root, s); log({ phase: 1, to: "phase", outcome: "sprint-started" });
       const w = phaseWindow(s, cfg);
-      context(ev, `SPRINT ACTIVE (Phase 1/6: Discover, window ${w.floorMin}-${w.ceilMin} min). Your FIRST tool call MUST be Skill(sprint-orchestrator) then Skill(phase-discover). Ask the user at least ${(cfg.gates || {}).discoverMinUserQuestions ?? 15} questions and keep challenging the spec until the floor; advance refuses earlier. Automatic ab-route.js routing is ${s.autoRoute ? "ON" : "OFF"} (sprint.config.json). Advance phases only with \`${GATE_CMD}\` (run from the project root) after the user says go. The user can start any message with "wtf" to log a complaint for SPRINT-REPORT.md, or say "end sprint" to stop early.`);
+      context(ev, `SPRINT ACTIVE (Phase 1/6: Discover, window ${w.floorMin}-${w.ceilMin} min). Your FIRST tool call MUST be Skill(sprint-orchestrator) then Skill(phase-discover). Ask the user at least ${(cfg.gates || {}).minUserQuestionsPerPhase ?? 15} questions in EVERY phase (AskUserQuestion; the hook counts them) and keep challenging the spec until the floor; advance refuses earlier. Automatic ab-route.js routing is ${s.autoRoute ? "ON" : "OFF"} (sprint.config.json). Advance phases only with \`${GATE_CMD}\` (run from the project root) after the user says go. The user can start any message with "wtf" to log a complaint for SPRINT-REPORT.md, or say "end sprint" to stop early.`);
     }
   }
   const s = readJson(statePath(root)); if (!s || !s.active) return;

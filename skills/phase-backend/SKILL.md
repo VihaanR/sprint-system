@@ -65,6 +65,10 @@ description: Phase 2 of the 5-Hour Hackathon Sprint. Implements backend services
 
 ## Execution Checklist
 
+- **User questions (every phase):** ask at least 15 questions with `AskUserQuestion` before the phase may end
+  (`gates.minUserQuestionsPerPhase`). A PostToolUse hook counts them into `.sprint-state.json` `questionsByPhase`;
+  `advance` refuses below 15. Ask about this phase's real decisions (trade-offs, thresholds, edge cases, cuts), 4 per call.
+
 1. **Pre-Phase Gate**:
    - Deliver Phase 1 Executive Scorecard.
    - Confirm backend archetype (FastAPI or Next.js 15) and data model.
@@ -85,6 +89,15 @@ description: Phase 2 of the 5-Hour Hackathon Sprint. Implements backend services
    - Implement Stripe checkout session endpoint (`/api/v1/billing/create-checkout-session`).
 6. **Lock Kernel Contract**:
    - Generate and export immutable `types.ts` / OpenAPI schema for Phase 3 frontend consumption.
-7. **Phase Checkpoint & Gravitas Evidence Pass**:
+7. **Secrets and live-key check (exit step, mandatory)**:
+   - List every key and secret the app needs in `.env.example`, one per line with a comment: what it is, where to
+     get it, whether it is required or optional, and what the app does without it. Never put a real value there.
+     Make sure `.env` is in `.gitignore`.
+   - Ask the user (`AskUserQuestion`, plus plain text) to copy it to `.env` and fill it in. Wait until they say it is done.
+   - With the real keys loaded, exercise every live path: each external API and the LLM call, one real request each
+     (never in the committed test suite). Record the status code or output per path in `SPRINT.md`.
+     A path that fails with a real key is a Phase 2 bug, not a Phase 3 problem. Do not advance until each one works
+     or the user explicitly accepts the stub.
+8. **Phase Checkpoint & Gravitas Evidence Pass**:
    - Run test suite (`pytest`) and verify exit code 0.
    - Update `SPRINT.md` with mechanical test logs for gate approval into **Phase 3 (Frontend Build)**.

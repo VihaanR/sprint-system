@@ -25,6 +25,7 @@
     "phaseFloorLeadMin": 5,
     "maxFloorStopBlocks": 10,
     "discoverMinUserQuestions": 15,
+    "minUserQuestionsPerPhase": 15,
     "discoverMinChallengeRounds": 5,
     "backendMaxCoreLoc": 450,
     "maxCyclomaticComplexity": 6,

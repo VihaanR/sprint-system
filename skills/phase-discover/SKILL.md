@@ -16,6 +16,10 @@ Record everything in `.sprint/discover-log.json`:
 ```
 The exit gate needs at least 15 answered questions and 5 challenge rounds (`sprint.config.json` gates).
 
+- **User questions (every phase):** ask at least 15 questions with `AskUserQuestion` before the phase may end (this is on top of the discover-log checks above)
+  (`gates.minUserQuestionsPerPhase`). A PostToolUse hook counts them into `.sprint-state.json` `questionsByPhase`;
+  `advance` refuses below 15. Ask about this phase's real decisions (trade-offs, thresholds, edge cases, cuts), 4 per call.
+
 ## Step 1: interrogate the user (15+ questions, about 10 min)
 Ask with `AskUserQuestion`, 4 questions per call, in at least 4 rounds. Never answer a question for the user
 when the repo and the brief don't settle it. Write each answer to the log as soon as it arrives.

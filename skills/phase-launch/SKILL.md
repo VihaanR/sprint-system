@@ -23,6 +23,7 @@ description: Phase 6 of the 5-Hour Hackathon Sprint. Packages the judge-ready su
 3. **Commercial Monetization Gate**:
    - Mechanical execution against `/api/v1/billing/create-checkout-session` returning an active `cs_test_...` Stripe checkout session URL.
 4. **Programmatic Remotion React Video**:
+   - Tone is the user's call: ask before building (checklist step 4); default high energy (chaotic or cinematic), never calm polished.
    - Render code-driven 15-25s video directly from React components (`remotion-best-practices` + `brag`) with Spring physics (`cubic-bezier(0.25, 1, 0.5, 1)`).
    - If headless Chromium rendering times out in CI, fall back gracefully to animated WebP/GIF screencast.
 
@@ -44,6 +45,10 @@ description: Phase 6 of the 5-Hour Hackathon Sprint. Packages the judge-ready su
 
 ## Execution Checklist
 
+- **User questions (every phase):** ask at least 15 questions with `AskUserQuestion` before the phase may end
+  (`gates.minUserQuestionsPerPhase`). A PostToolUse hook counts them into `.sprint-state.json` `questionsByPhase`;
+  `advance` refuses below 15. Ask about this phase's real decisions (trade-offs, thresholds, edge cases, cuts), 4 per call.
+
 1. **Pre-Phase Gate**:
    - Deliver Phase 5 Executive Scorecard (clean 2-pass audit, 0 vulnerabilities, 0 a11y violations).
    - Confirm cloud deployment target.
@@ -62,6 +67,11 @@ description: Phase 6 of the 5-Hour Hackathon Sprint. Packages the judge-ready su
      ```
      Verify response contains active `cs_test_...` URL.
 4. **Compile 15-25s Demo Video (`brag`)**:
+   - FIRST ask the user the tone, with `AskUserQuestion` (one question, options: chaotic and loud, cinematic,
+     deadpan funny, calm and polished). Do not build before the answer. Recommend the first option.
+   - Default to high energy: chaotic (fast cuts, hard beats, glitch, kinetic type) or cinematic (big camera moves,
+     dramatic contrast, a bass-heavy build). Never default to calm and polished. Use calm only if the user picks it.
+   - Pass the chosen tone to `brag` in the brief and keep it for every scene, caption and transition.
    - Run Remotion compilation script via `remotion-best-practices` / `brag`.
    - Verify `artifacts/launch_demo.mp4` exists with non-zero byte size (or fall back to animated WebP/GIF).
 5. **Interactive Judge Tools (Swagger & Postman)**:

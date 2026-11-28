@@ -55,6 +55,10 @@ description: Phase 4 of the 5-Hour Hackathon Sprint. Applies impeccable anti-slo
 
 ## Execution Checklist
 
+- **User questions (every phase):** ask at least 15 questions with `AskUserQuestion` before the phase may end
+  (`gates.minUserQuestionsPerPhase`). A PostToolUse hook counts them into `.sprint-state.json` `questionsByPhase`;
+  `advance` refuses below 15. Ask about this phase's real decisions (trade-offs, thresholds, edge cases, cuts), 4 per call.
+
 1. **Pre-Phase Gate**:
    - Deliver Phase 3 Executive Scorecard.
    - Confirm visual archetype and motion requirements.
@@ -77,5 +81,12 @@ description: Phase 4 of the 5-Hour Hackathon Sprint. Applies impeccable anti-slo
 7. **Visual Validation & Gravitas Verification**:
    - Run `ui-visual-validator` screenshot inspection.
    - Confirm zero regression on test suite.
-8. **Phase Checkpoint**:
+8. **Show the running app (exit step, mandatory)**: before the scorecard, open it in the user's own browser.
+   - Make sure the app is serving (`curl -s -f -o /dev/null -w "%{http_code}" <url>` returns 200).
+   - Open it: `cmd.exe /c start "" "<url>"` (Windows), `open <url>` (macOS) or `xdg-open <url>` (Linux).
+   - Print the clickable link on its own line, above the scorecard: `Open the app: <url>`.
+   - Write the proof the gate checks:
+     `node -e "require('fs').writeFileSync('.sprint/showcase-polish.json', JSON.stringify({url:'<url>',timestamp:new Date().toISOString()}))"`
+   - `advance` refuses without `.sprint/showcase-polish.json` (a url and a timestamp from this phase).
+9. **Phase Checkpoint**:
    - Update `SPRINT.md` and prepare Executive Scorecard with screenshot evidence for gate approval into **Phase 5 (Audit & Hardening)**.
