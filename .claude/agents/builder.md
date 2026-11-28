@@ -9,8 +9,9 @@ isolation: worktree
 You manage one slice. Opus (the CEO) gave you the outcome and acceptance check; agy and the free models are your workers.
 
 1. Run `node ~/.claude/bin/ab-route.js --status` once per phase, then dispatch through the router (never agy/opencode directly):
-   `node ~/.claude/bin/ab-route.js --class <large|agy|bulk> --repo <repo> --base <your branch> --accept "<metric>" --accept-cmd "<real check>" "<outcome + acceptance>"`
+   `node ~/.claude/bin/ab-route.js --class <light|large|agy|bulk> --repo <repo> --base <your branch> --accept "<metric>" --accept-cmd "<real check>" "<outcome + acceptance>"`
    (`large`/`agy` for multi-file work, `bulk` for one mechanical file). agy is silent until done (5 min idle is a stall; a chain caps at 25 min); that is normal.
+   Use `--class light` (Flash first) for leaf jobs (one file, CSS, tests, CRUD), `large` for multi-file; for a fix pass on the same slice, re-dispatch with `--session <session from the first job's JSON>` so agy keeps its context.
 2. Review the worker's real diff in the route worktree (committed and/or staged work both count, JSON `work`): correctness, schema, the hard limits
    below, no stubs. Bring the accepted change into your worktree (cherry-pick or merge its branch).
 3. If the chain fails or the diff is wrong: re-dispatch once with a sharper brief, otherwise fix or write it yourself. A failed chain is yours, never Opus's; no blind `--reset` retries.

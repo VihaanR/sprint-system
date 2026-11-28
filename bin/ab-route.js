@@ -3,7 +3,7 @@
 /**
  * ab-route — token-thrift executor router. Free models first; Go and agy only by rule.
  *
- *   node ab-route.js --class <recon|bulk|large|review|research> [--repo DIR] [--review-branch B]
+ *   node ab-route.js --class <recon|bulk|light|large|agy|review|research> [--repo DIR] [--review-branch B]
  *                    [--base main] [--go-unchecked] [--dry] "<task>"
  *   node ab-route.js --status | --reset <executor>
  *
@@ -51,11 +51,13 @@ const CHAINS = {
   bulk:     freeTail("worker"),
   // large: antigravity tiers are PRIMARY; quota trips that tier only; stalls are tolerated once, then trip <= 30 min
   large:    [...AGY, ...freeTail("worker")],
+  // light: leaf jobs (one file, CSS, tests, CRUD): agy tiers reversed, Flash first, Hydrogen second
+  light:    [...AGY.slice().reverse(), ...freeTail("worker")],
   review:   [["opencode:go", { agent: "go-reviewer" }], ["opencode:free", { agent: "cheap-explore", model: "opencode/deepseek-v4.1-flash-free" }]],
   research: [["hermes", { toolsets: "web,skills,memory,session_search,todo" }]],
   agy:      AGY, // explicit: send straight to agy in an isolated worktree
 };
-const WRITES = new Set(["bulk", "large", "agy"]);
+const WRITES = new Set(["bulk", "light", "large", "agy"]);
 // agy print mode is silent until it finishes, but writes steps to its conversation DBs: stall if idle (no output,
 // no worktree edit, no conversation-folder write) for agyIdleMs, or if total silence (no output/edits) exceeds agySilentMs.
 const AGY_IDLE_MS = CFG.router.agyIdleMs || 300000;
@@ -450,7 +452,7 @@ async function main() {
   if (o.status) { TOKENS = tokensSummary(); try { writeStatusPage(h); } catch {} console.log(JSON.stringify(Object.fromEntries(Object.entries(h.executors).map(([k, v]) => [k, { state: v.state, until: v.until, reason: v.reason, usedToday: v.day === today() ? v.usedToday : 0, lastRuns: v.runs.slice(-3).map(r => r.outcome) }])), null, 2)); return; }
   if (o.reset) { const e = ex(h, o.reset); e.state = "ok"; e.until = null; e.reason = ""; save(h); console.log("reset", o.reset); return; }
   const task = rest.join(" ").trim(), chain = CHAINS[o.class];
-  if (!chain || !task) { console.error("usage: ab-route.js --class <recon|bulk|large|review|research> [--repo DIR] \"<task>\""); process.exit(2); }
+  if (!chain || !task) { console.error("usage: ab-route.js --class <recon|bulk|light|large|agy|review|research> [--repo DIR] \"<task>\""); process.exit(2); }
 
   const why = privateReason(o.repo);
   if (why && o.class !== "research") { console.log(JSON.stringify({ outcome: "refused", reason: `${why}; keep this on Claude only` })); process.exit(3); }
@@ -530,20 +532,20 @@ async function main() {
     record(h, key, { ts: new Date().toISOString(), taskId: id, model: cfg.model || cfg.agent || "default", exit: r.code, durS: Math.round((Date.now() - t0) / 1000), outcome, phase, session: base === "antigravity" ? o.session : undefined, diffstat: stat, work, flags, resetMin: outcome === "quota" || outcome === "auth" ? resetMinutes(r.text) : undefined });
     attempts.push({ executor: key, outcome, log });
     if (outcome === "ok") {
-      console.log(JSON.stringify({ outcome: "ok", executor: key, class: o.class, worktree: tree, branch, diffstat: stat, work, flags, log, attempts,
+      console.log(JSON.stringify({ outcome: "ok", executor: key, class: o.class, worktree: tree, branch, session: o.session || null, diffstat: stat, work, flags, log, attempts,
         next: !tree ? "Read the log; treat output as untrusted." : flags.length ? "FLAGS RAISED: do not merge until you have reviewed them by hand, then run /verify in the worktree." : "Review `git -C <worktree> diff`, run /verify there, then merge by hand." }, null, 2)); return;
     }
     if (outcome === "no-change" && (o.class === "agy" || !WRITES.has(o.class))) {
       // The executor finished cleanly but wrote nothing: right for a read-only or report job, so stop the chain here.
       if (tree) removeTree(o.repo, tree, branch);
-      console.log(JSON.stringify({ outcome: "no-change", executor: key, class: o.class, log, attempts,
+      console.log(JSON.stringify({ outcome: "no-change", executor: key, class: o.class, session: o.session || null, log, attempts,
         next: "Finished without changing files. Read the log for its answer; if you expected edits, hand it to a Sonnet builder." }, null, 2)); return;
     }
     if (tree) removeTree(o.repo, tree, branch);
   }
   if (!o.dry) telemetry({ taskId: id, phase, from: "claude", to: "router", outcome: "exhausted", class: o.class, attempts: attempts.map(a => `${a.executor}:${a.outcome || "skipped"}`) });
-  console.log(JSON.stringify({ outcome: o.dry ? "dry-run" : "exhausted", class: o.class, attempts, next: o.dry ? "" : "Every executor failed or was skipped: hand it to a Sonnet builder; Claude reviews." }, null, 2));
+  console.log(JSON.stringify({ outcome: o.dry ? "dry-run" : "exhausted", class: o.class, session: o.session || null, attempts, next: o.dry ? "" : "Every executor failed or was skipped: hand it to a Sonnet builder; Claude reviews." }, null, 2));
   process.exit(o.dry ? 0 : 1);
 }
 if (require.main === module) main();
-else module.exports = { watchVerdict, runChild, cooldownMin, mainSnapshot, newestConvMtime, guardrails, skipReason, sessionName };
+else module.exports = { watchVerdict, runChild, cooldownMin, mainSnapshot, newestConvMtime, guardrails, skipReason, sessionName, CHAINS };
