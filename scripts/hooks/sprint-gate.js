@@ -92,18 +92,25 @@ function answerCount(inp) {
   return Array.isArray(qs) ? qs.length : 1;
 }
 
-function postTool(root, s, inp, dirty = false) {
+// PreToolUse marks a tool_use_id in flight, PostToolUse/PostToolUseFailure clears it (pauseClock reads it first).
+function trackInFlight(root, s, inp, ev) {
+  const id = inp.tool_use_id;
+  if (!id) return;
+  if (ev === "PreToolUse") { s.inFlight = { ...(s.inFlight || {}), [id]: new Date().toISOString() }; saveState(root, s); return; }
+  const post = ev === "PostToolUse" || ev === "PostToolUseFailure";
+  if (post && Object.prototype.hasOwnProperty.call(s.inFlight || {}, id)) { delete s.inFlight[id]; saveState(root, s); }
+}
+
+function postTool(root, s, inp) {
   const t = inp.tool_name, ti = inp.tool_input || {};
   // Rule: >= gates.minUserQuestionsPerPhase answered questions in EVERY phase. The tool returns after the user answered.
   if (t === "AskUserQuestion") {
     const n = answerCount(inp);
-    if (n) s.questionsByPhase = { ...(s.questionsByPhase || {}), [s.phase]: ((s.questionsByPhase || {})[s.phase] || 0) + n };
-    if (n || dirty) saveState(root, s);
+    if (n) { s.questionsByPhase = { ...(s.questionsByPhase || {}), [s.phase]: ((s.questionsByPhase || {})[s.phase] || 0) + n }; saveState(root, s); }
     return;
   }
   if (t === "Skill" && ti.skill) { s.skillsLoaded = [...new Set([...(s.skillsLoaded || []), ti.skill])]; saveState(root, s); return; }
-  if (t === "Bash" && /ab-route\.js\s+--status/.test(ti.command || "")) { s.statusPhase = s.phase; dirty = true; }
-  if (dirty) saveState(root, s);
+  if (t === "Bash" && /ab-route\.js\s+--status/.test(ti.command || "")) { s.statusPhase = s.phase; saveState(root, s); }
   if (t === "Bash" && /ab-route\.js/.test(ti.command || "")) {
     const out = JSON.stringify(inp.tool_response || "");
     const m = /isolation-breach|exhausted|startup-stall|"quota"|"stall"/.exec(out);
@@ -401,8 +408,11 @@ function routeGuard(cmd) {
 // Paused clock: a gap with no hook activity longer than idlePauseMin (terminal closed, usage exhausted, session
 // restart) is not sprint time. Record the pause with its phase instead of shifting start timestamps, so
 // showcase/report checks still match real start times while phaseWindow/report subtract paused ms.
-// Track active tool_use_id values across hook events: long tool calls (router chains, tests, AskUserQuestion)
-// are hook-silent between PreToolUse and PostToolUse, so a young in-flight entry suppresses false idle pauses.
+// Signal: a long tool call (router chain, test run) is hook-silent between its PreToolUse and PostToolUse, so a
+// tool_use_id in s.inFlight younger than maxChainWallMs + idlePauseMin suppresses the pause; an older entry is a
+// tool that died with the session and is dropped. Limitation: only tools matched by the PreToolUse hook
+// (Bash|PowerShell|Edit|Write|MultiEdit in settings.json) are tracked, so a long gap inside an unmatched tool
+// (e.g. the user thinking over AskUserQuestion) may still count as a pause.
 function pauseBounds(cfg) {
   const idle = (cfg.gates?.idlePauseMin ?? 10) * 60000;
   return { idle, cap: (cfg.router?.maxChainWallMs ?? 1500000) + idle };
@@ -534,17 +544,12 @@ function main() {
     s.floorSkippedPhase = s.phase; saveState(root, s); log({ phase: s.phase, to: "phase", outcome: "floor-skipped" });
     context(ev, `[DONE] Phase ${s.phase}/6 floor lifted by the user. The exit gate's other checks still apply; post the scorecard and ask for go.`);
   }
-  const ti = inp.tool_input || {}, id = inp.tool_use_id;
-  if (ev === "PreToolUse") {
-    if (inp.tool_name === "Edit" || inp.tool_name === "Write") preEdit(root, s, ti.file_path);
-    else if (inp.tool_name === "Bash") preBash(s, ti.command || "");
-    if (id) { s.inFlight = { ...(s.inFlight || {}), [id]: new Date().toISOString() }; saveState(root, s); }
-  } else if (ev === "PostToolUse" || ev === "PostToolUseFailure") {
-    const dropped = Boolean(id && s.inFlight && Object.prototype.hasOwnProperty.call(s.inFlight, id));
-    if (dropped) delete s.inFlight[id];
-    if (ev === "PostToolUse") postTool(root, s, inp, dropped);
-    else { if (dropped) saveState(root, s); log({ phase: s.phase, to: inp.tool_name, outcome: "tool-failure", flags: [String(inp.error || "").slice(0, 200)] }); }
-  }
+  const ti = inp.tool_input || {};
+  if (ev === "PreToolUse" && (inp.tool_name === "Edit" || inp.tool_name === "Write")) preEdit(root, s, ti.file_path);
+  else if (ev === "PreToolUse" && inp.tool_name === "Bash") preBash(s, ti.command || "");
+  trackInFlight(root, s, inp, ev); // after the pre-gates: a blocked call never ran
+  if (ev === "PostToolUse") postTool(root, s, inp);
+  else if (ev === "PostToolUseFailure") log({ phase: s.phase, to: inp.tool_name, outcome: "tool-failure", flags: [String(inp.error || "").slice(0, 200)] });
   else if (ev === "Stop") stopGate(root, s, cfg, inp);
   if (ev === "UserPromptSubmit" || ev === "PostToolUse") ceilingNotice(root, s, cfg, ev);
 }
