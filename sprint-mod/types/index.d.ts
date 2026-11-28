@@ -28,6 +28,8 @@ declare module 'claude-code' {
       critiques: Critique[]
       hold: HoldMode
       effort: string[]
+      expandedBtw: string[]
+      paneWaiting: boolean
     }
   }
 }

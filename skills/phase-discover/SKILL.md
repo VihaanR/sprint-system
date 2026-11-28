@@ -16,6 +16,10 @@ Record everything in `.sprint/discover-log.json`:
 ```
 The exit gate needs at least 15 answered questions and 5 challenge rounds (`sprint.config.json` gates).
 
+- **User questions (every phase):** ask at least 15 questions with `AskUserQuestion` before the phase may end (this is on top of the discover-log checks above)
+  (`gates.minUserQuestionsPerPhase`). A PostToolUse hook counts them into `.sprint-state.json` `questionsByPhase`;
+  `advance` refuses below 15. Ask about this phase's real decisions (trade-offs, thresholds, edge cases, cuts), 4 per call.
+
 ## Step 1: interrogate the user (15+ questions, about 10 min)
 Ask with `AskUserQuestion`, 4 questions per call, in at least 4 rounds. Never answer a question for the user
 when the repo and the brief don't settle it. Write each answer to the log as soon as it arrives.
@@ -46,7 +50,26 @@ Repeat until the floor; each round goes in `challengeRounds` and in a SPRINT.md 
 
 Good rounds find something. Five rounds that all say "kept" means the attacks were too soft.
 
-## Step 4: freeze and hand off
+## Step 4: pre-flight (router and services)
+Before exiting Discover, verify execution tooling and every external dependency works right now:
+1. Run `node V:/Projects/sprint/scripts/router-smoke.mjs --require antigravity` and record `exitCode` (nonzero needs a user waiver via `AskUserQuestion`).
+2. List every external service, login, and API key the spec needs and test each once (log in, make one real call). For any failure, ask the user (`AskUserQuestion`) whether to fix it now or cut it.
+3. Write `.sprint/preflight.json` (`"services": []` if none needed):
+```json
+{ "routerSmoke": { "exitCode": 0 },
+  "services": [{ "name": "Earth Engine login", "status": "ok|cut", "userConfirmed": true }] }
+```
+(If router smoke failed and the user waived it: `{ "waivedByUser": true, "reason": "..." }`.)
+
+## Step 5: user-asks ledger
+Capture every explicit user ask (features, integrations, visuals, deliverables the user named) in `.sprint/user-asks.json`:
+```json
+[{ "ask": "3D explainer", "phase": 3, "status": "planned", "userConfirmedCut": false }]
+```
+- `status` is `planned | done | cut`. Never demote an ask to stretch or cut silently: a cut needs explicit user confirmation (`AskUserQuestion`) and `"userConfirmedCut": true`.
+- Update `status` to `done` when built; `advance` prints open `planned` asks and refuses unconfirmed cuts.
+
+## Step 6: freeze and hand off
 - Freeze the schema (`types.ts`, OpenAPI or Pydantic). Changes after this need the user's go.
 - Post the scorecard with `[TIME] <used> / 30 min (floor 25)` and wait for go.
 - If you are over budget, the hook says so: post the scorecard at once.

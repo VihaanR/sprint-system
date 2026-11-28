@@ -55,6 +55,10 @@ description: Phase 4 of the 5-Hour Hackathon Sprint. Applies impeccable anti-slo
 
 ## Execution Checklist
 
+- **User questions (every phase):** ask at least 15 questions with `AskUserQuestion` before the phase may end
+  (`gates.minUserQuestionsPerPhase`). A PostToolUse hook counts them into `.sprint-state.json` `questionsByPhase`;
+  `advance` refuses below 15. Ask about this phase's real decisions (trade-offs, thresholds, edge cases, cuts), 4 per call.
+
 1. **Pre-Phase Gate**:
    - Deliver Phase 3 Executive Scorecard.
    - Confirm visual archetype and motion requirements.
@@ -77,5 +81,22 @@ description: Phase 4 of the 5-Hour Hackathon Sprint. Applies impeccable anti-slo
 7. **Visual Validation & Gravitas Verification**:
    - Run `ui-visual-validator` screenshot inspection.
    - Confirm zero regression on test suite.
-8. **Phase Checkpoint**:
+8. **Logo for approval (mandatory)**: design 2-3 logo options for the product (authored SVG, one consistent mark plus
+   wordmark, in DESIGN.md tokens), save them to `frontend/public/logo-*.svg`, render each to PNG, and ask the user to pick
+   one with `AskUserQuestion` (previews, options = the logos plus "none of these, redo"). Put the approved logo in the
+   app header and favicon; Phase 6 uses it in the launch video. Never ship a product without a user-approved logo.
+9. **Show the running app (exit step, mandatory)**: before the scorecard, open it in the user's own browser.
+   - Make sure the app is serving (`curl -s -f -o /dev/null -w "%{http_code}" <url>` returns 200).
+   - Open it: `cmd.exe /c start "" "<url>"` (Windows), `open <url>` (macOS) or `xdg-open <url>` (Linux).
+   - Print the clickable link on its own line, above the scorecard: `Open the app: <url>`.
+   - Write the proof the gate checks:
+     `node -e "require('fs').writeFileSync('.sprint/showcase-polish.json', JSON.stringify({url:'<url>',timestamp:new Date().toISOString()}))"`
+   - `advance` refuses without `.sprint/showcase-polish.json` (a url and a timestamp from this phase).
+10. **Design exit gate (mandatory)**: `advance` checks all five before leaving Phase 4:
+   - Run `/impeccable critique` on the running UI and save it to `.sprint/impeccable-critique-p4.md`.
+   - Save a desktop screenshot and a 375px-wide screenshot (file name contains `375`) to `.sprint/screens-p4/`.
+   - Load every `font-family` named in CSS (`@fontsource/*` import in `frontend/src` or `@font-face` in CSS).
+   - Set a real `<title>` in `frontend/index.html` (no `Vite + React` or placeholder).
+   - Replace the starter `frontend/public/favicon.svg`.
+11. **Phase Checkpoint**:
    - Update `SPRINT.md` and prepare Executive Scorecard with screenshot evidence for gate approval into **Phase 5 (Audit & Hardening)**.

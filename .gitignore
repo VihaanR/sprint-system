@@ -59,3 +59,6 @@ graphify-out/
 Thumbs.db
 .sprint-state.json
 .sprint/
+
+# Sprint reports quote the user; they stay local (this repo is public)
+docs/sprint-reports/

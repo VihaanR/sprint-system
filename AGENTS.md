@@ -6,16 +6,17 @@ Applies to any AI assistant working in this repo or running a sprint. Tunables l
 - Six phases, in order: 1 discover, 2 backend, 3 frontend, 4 polish, 5 audit, 6 launch.
 - The first action of each phase is loading its skill (`phase-<name>`). Hooks block code edits until it is loaded.
 - Phase 2+ needs Phase 1 artifacts: `SPRINT.md`, `PRODUCT.md`, `DESIGN.md`, a golden fixture, a frozen schema.
-- Phases advance only after the user types `go`, via `node scripts/hooks/sprint-gate.js advance` (runs the exit gate).
+- Phases advance only after the user types `go`, via `node V:/Projects/sprint/scripts/hooks/sprint-gate.js advance` (runs the exit gate).
 
 ## 2. Worktree rule
 - Delegated writes run in router worktrees (`~/.claude/bin/ab-route.js`, `~/.agent-bridge/worktrees/route-*`).
 - Never edit the main checkout while a route-* worktree is live: it trips `isolation-breach`.
 - Write jobs need `--accept "<measurable metric>"` and a `--status` check in the current phase.
-- One failed chain means implement directly. No blind `--reset` retries.
+- One failed chain means the Sonnet `builder` that dispatched it redoes or fixes it. No blind `--reset` retries.
+- Roles: Opus = CEO (decisions, architecture, core science code only). Sonnet `builder` = manager (dispatches slices to agy/opencode via the router, reviews their diffs, fixes failures). agy/opencode = workers.
 
 ## 3. Core science stays on Claude
-- Domain and scientific logic (algorithms, matching, scoring) is written by Claude, not free models.
+- Domain and scientific logic (algorithms, matching, scoring) is written by Opus, not Sonnet or free models.
 - It ships with measurable acceptance criteria: complexity bound, golden fixture match, test name.
 - Backend core <= 450 hand-written LOC, cyclomatic complexity <= 6, no single-implementation abstractions.
 

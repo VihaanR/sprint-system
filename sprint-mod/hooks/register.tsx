@@ -108,6 +108,17 @@ let agentsCache: Awaited<ReturnType<$T['agent']['list']>> = []
 type KeepStatus = { keepwarm: 'on' | 'stopped' | 'off'; leftMs: number; autoWarm: boolean; stopped: string | null; pingSkipped: boolean; idlePingUsd: number | null; cold: boolean | null }
 let keepCache: KeepStatus | null = null
 let lastPhase = -1
+let panesOpened = false
+// The engine seats a pane a mod opens unasked only from 110 terminal columns (144 the first time); narrower,
+// it waits undrawn. Then a one-line band above the prompt carries the sprint instead, at any width.
+const paneWaiting = atom({ plugin: 'sprint-mod', key: 'paneWaiting' } as const, false)
+async function openPanes($: $T): Promise<void> {
+  const r = await $.ui.open({ id: PANE, title: 'Sprint', columns: 42 }).catch(() => null)
+  void $.ui.open({ id: AGENTS, title: 'Agents', columns: 42 }).catch(() => null)
+  const waiting = !!r && !r.isPlaced
+  await update($, paneWaiting, () => waiting)
+  if (waiting) $.ui.toast('Sprint sidebar needs a terminal 110+ columns wide: /sprint opens it here now')
+}
 async function keepwarm($: $T, s: Snapshot): Promise<void> {
   // No $.cacheTax where cache-tax is not installed: the call throws and the gauge stays hidden.
   try { keepCache = await ($ as unknown as { cacheTax: { status: () => Promise<KeepStatus> } }).cacheTax.status() } catch { keepCache = null }
@@ -231,6 +242,21 @@ async function btwAgent($: $T, a: { id: string; type: string; description: strin
   const r = await $.model.complete({ model: 'haiku', maxTokens: 160, prompt: `A coding subagent (${a.type}) is working on: ${a.description || a.label}\nIts tool calls so far, oldest first:\n${acts}\n\n${BTW_ASK}` }).catch(() => null)
   btwAnswers.set(a.id, r && r.isAnswered ? r.text.trim() : 'no answer')
 }
+// Automatic /btw for the main session: what Claude itself is doing, in plain words, refreshed while it works.
+const MAIN = 'main'
+let mainSummarizedAt = 0
+export function mainPrompt(phase: string, acts: { at: number; tool: string; brief: string }[]): string {
+  const list = acts.map(x => `- ${hhmm(x.at)} ${x.tool} ${x.brief}`.trimEnd()).join('\n')
+  return `Claude is running a timed hackathon sprint${phase ? `, phase: ${phase}` : ''}. Its latest tool calls, oldest first:\n${list}\n\nFor the user watching, in at most two short plain-English lines with no jargon: what is it doing right now, and what is it about to do next?`
+}
+async function btwMain($: $T, phase: string): Promise<void> {
+  const acts = activity.get(MAIN) ?? []
+  const last = acts.at(-1)?.at ?? 0
+  if (!last || last <= mainSummarizedAt) return
+  mainSummarizedAt = last
+  const r = await $.model.complete({ model: 'haiku', maxTokens: 120, prompt: mainPrompt(phase, acts) }).catch(() => null)
+  if (r && r.isAnswered) btwAnswers.set(MAIN, r.text.trim())
+}
 async function btwJob($: $T, j: Job): Promise<void> {
   const log = (j.log ? await $.fs.read(j.log).catch(() => '') : '').replace(/\x1b\[[0-9;]*m/g, '')
   btwAnswers.set(j.id, '… asking haiku')
@@ -307,6 +333,12 @@ async function refresh($: $T): Promise<Snapshot> {
   // Held critiques get their ponytail pass at each phase boundary and when the sprint ends.
   if (lastPhase > 0 && (!s.active || s.phase > lastPhase)) await applyCritiques($).catch(() => null)
   lastPhase = s.active ? s.phase : 0
+  // A sprint started mid-session ("start a sprint") opens the sidebar the first time it is seen active.
+  if (s.active && !panesOpened) {
+    panesOpened = true
+    void openPanes($)
+  }
+  if (!s.active) panesOpened = false
   await update($, snap, () => s)
   // The status line's sprint segment reads this, so each fact is worked out once, here.
   const open = (await read($, critiques)).filter(c => c.status === 'open').length
@@ -341,15 +373,16 @@ function effortFor(type: string, phase: number): Effort | undefined {
   if (type === 'builder' && phase === 2) return 'high'
   return EFFORT_BY_TYPE[type]
 }
+// btw answers the user expanded to full text (the more/less button on each answer).
+const expandedBtw = atom({ plugin: 'sprint-mod', key: 'expandedBtw' } as const, [] as string[])
 const routedEffort = atom({ plugin: 'sprint-mod', key: 'effort' } as const, [] as string[])
 
 export const register: Register = on => {
   // What each subagent is doing, live: its tool calls as they pass. Read-only; every call goes on unchanged.
   on('tool.call', async ($, e, next) => {
-    if (e.agentId) {
-      const list = activity.get(e.agentId) ?? []
-      activity.set(e.agentId, [...list, { at: await $.clock.now(), tool: e.tool, brief: briefOf(e as unknown as Record<string, unknown>) }].slice(-15))
-    }
+    const key = e.agentId || MAIN
+    const list = activity.get(key) ?? []
+    activity.set(key, [...list, { at: await $.clock.now(), tool: e.tool, brief: briefOf(e as unknown as Record<string, unknown>) }].slice(-15))
     return next(e)
   })
 
@@ -411,7 +444,7 @@ export const register: Register = on => {
         {(r.attempts ?? []).map((a, i) => (
           <Text key={String(i)} color={a.outcome === 'ok' ? C.green : a.skipped ? C.sub : C.red}>{a.executor.replace('opencode:free:', '').replace('antigravity:', 'agy:')} {a.outcome ?? 'skip'}{i < (r.attempts ?? []).length - 1 ? ' · ' : ''}</Text>
         ))}
-        {!ok && <Text color={C.red}> · do it with Claude</Text>}
+        {!ok && <Text color={C.red}> · hand to builder</Text>}
       </Text>
     )
   })
@@ -442,12 +475,13 @@ export const register: Register = on => {
       if (moving) await update($, frame, f => (f + 1) % SPIN.length)
       if (ticks % 5 === 0) await refresh($)
       if (ticks % 60 === 0) void refreshUsage($)
+      if (ticks % 45 === 0) { const st = await read($, snap); if (st?.active) void btwMain($, NAMES[st.phase - 1] ?? '') }
     })
     void refreshUsage($)
     const root = (await $.session.cwd()).replace(/\\/g, '/')
-    if (s.active || root === SPRINT_REPO) {
-      void $.ui.open({ id: AGENTS, title: 'Agents', columns: 42 })
-      void $.ui.open({ id: PANE, title: 'Sprint', columns: 42 })
+    if (root === SPRINT_REPO && !panesOpened) {
+      panesOpened = true
+      void openPanes($)
     }
     return next(e)
   })
@@ -456,7 +490,25 @@ export const register: Register = on => {
     await refresh($)
     await refreshUsage($)
     await $.ui.open({ id: PANE, title: 'Sprint', focus: true, columns: 42 })
+    await update($, paneWaiting, () => false)
     return { text: 'Sprint sidebar opened.' }
+  })
+
+  // Fallback when the sidebar waits undrawn (narrow terminal): one row with the phase, window and what Claude is doing.
+  on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
+    const s = await read($, snap)
+    if (!s?.active || !(await read($, paneWaiting))) return next(e)
+    const { Box, Text } = $.ui.resolve(e)
+    const w = phaseWindow(s), said = btwAnswers.get(MAIN)
+    return (
+      <Box>
+        <Text>
+          <Text color={C.peach} bold>SPRINT P{s.phase}/6 {NAMES[s.phase - 1].toUpperCase()}</Text>
+          <Text color={w.tone === 'over' ? C.red : w.tone === 'wait' ? C.yellow : C.green}> · {w.text}</Text>
+          <Text color={C.sub}> · {said ? said.replace(/\s+/g, ' ').slice(0, 80) : '/sprint opens the sidebar'}</Text>
+        </Text>
+      </Box>
+    )
   })
 
   on('command.run', { command: 'sprint-agents' }, async $ => {
@@ -555,6 +607,15 @@ export const register: Register = on => {
       <Box flexDirection="column" gap={1}>
         {header}
 
+        {s.active && (() => {
+          const said = btwAnswers.get(MAIN), last = (activity.get(MAIN) ?? []).at(-1)
+          return card('now', C.peach, [
+            title('NOW', C.peach, last ? hhmm(last.at) : undefined),
+            <Text key="n1">{said ?? 'summary in under a minute…'}</Text>,
+            ...(last ? [<Text key="n2" color={C.sub}>{cut(`▸ ${last.tool} ${last.brief}`.trim(), inner)}</Text>] : []),
+          ])
+        })()}
+
         {(() => {
           const g = s.gate, st = gateState(g), ok = st === 'clean' || st === 'pass'
           const clock = (ms: number) => hhmm(ms)
@@ -647,9 +708,20 @@ export const register: Register = on => {
     const isLive = (st: string) => /running|pending|waiting/.test(st)
     const agents = [...agentsCache].sort((x, y) => y.startTime - x.startTime).slice(0, 4)
     const live = agentsCache.filter(a => isLive(a.status)).length, running = jobs.filter(j => j.state === 'running').length
+    const open = await read($, expandedBtw)
     const answer = (id: string) => {
       const t = btwAnswers.get(id)
-      return t ? <Text key={`a-${id}`} color={C.yellow}>{t.startsWith('…') ? `${SPIN[f]} ` : '» '}{cut(t.replace(/\s+/g, ' '), inner * 2)}</Text> : null
+      if (!t) return null
+      const flat = t.replace(/\s+/g, ' '), full = open.includes(id), long = flat.length > inner * 2
+      return (
+        <Box key={`a-${id}`} flexDirection="column">
+          <Text color={C.yellow}>{t.startsWith('…') ? `${SPIN[f]} ` : '» '}{full ? t.trim() : cut(flat, inner * 2)}</Text>
+          {long && !t.startsWith('…') ? (
+            <Button key={`more-${id}`} label={full ? 'less' : 'more'}
+              onPress={async () => { await update($, expandedBtw, l => (l.includes(id) ? l.filter(x => x !== id) : [...l, id])) }} />
+          ) : null}
+        </Box>
+      )
     }
     const btw = (id: string, ask: () => Promise<void>) => (
       <Button key={`btw-${id}`} label="btw" onPress={async () => { await ask(); await update($, note, () => `btw answered at ${hhmm(now)}`) }} />
