@@ -222,9 +222,11 @@ function parseFamilies(raw) {
     .filter(x => x && !/^var\(/i.test(x) && !IGNORED_FONTS.has(x.toLowerCase()));
 }
 
+// font-family declarations plus font custom properties (--font-ui: "Inter", ...; Tailwind @theme --font-*), minus size/weight-style tokens.
+const FONT_DECL = /(?:^|[;\s{])(?:font-family|--font(?![\w-]*(?:size|weight|leading|line|letter|tracking|style|feature|variation|stretch|smooth))[\w-]*)\s*:\s*([^;{}]+)/gi;
 function usedFontFamilies(css) {
   const out = [];
-  for (const m of css.replace(/@font-face\s*\{[^}]*\}/gi, "").matchAll(/(?:^|[;\s{])font-family\s*:\s*([^;{}]+)/gi))
+  for (const m of css.replace(/@font-face\s*\{[^}]*\}/gi, "").matchAll(FONT_DECL))
     out.push(...parseFamilies(m[1]));
   return out;
 }

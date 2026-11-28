@@ -335,3 +335,13 @@ test("design exit gate (Phase 3 + font variants): accepts @font-face, @fontsourc
   assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
   assert.strictEqual(state(root).phase, 4);
 });
+
+test("design exit gate: fonts named in CSS custom properties (--font-*) must load too; size/weight tokens are ignored", () => {
+  const root = project({ phase: 4, phaseStartedAt: ago(41) }); showcase(root, "polish"); designOk(root, 4);
+  write(root, "frontend/src/index.css", ':root { --font-ui: "Inter", system-ui, sans-serif; --font-mono: "JetBrains Mono", monospace; --font-size: 14px; --font-weight-bold: 700; }\nbody { font: 14px/1.45 var(--font-ui); }');
+  const r = run(root, { args: ["advance"] });
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /fonts not loaded.*: Inter, JetBrains Mono$/m);
+  write(root, "frontend/src/main.tsx", 'import "@fontsource/inter";\nimport "@fontsource/jetbrains-mono";\n');
+  assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
+});
