@@ -28,7 +28,22 @@ function config(root) {
   return readJson(path.join(root, "sprint.config.json")) || readJson("V:/Projects/sprint/sprint.config.json") || {};
 }
 const statePath = root => path.join(root, ".sprint-state.json");
-const saveState = (root, s) => fs.writeFileSync(statePath(root), JSON.stringify(s, null, 2));
+function renameAtomic(tmp, p) {
+  try { fs.renameSync(tmp, p); return "ok"; }
+  catch (e) { return e.code === "EPERM" || e.code === "EBUSY" ? "retry" : "fail"; }
+}
+function saveState(root, s) {
+  const p = statePath(root), tmp = `${p}.${process.pid}.tmp`, data = JSON.stringify(s, null, 2);
+  fs.writeFileSync(tmp, data);
+  for (let i = 0; i < 4; i++) {
+    const res = renameAtomic(tmp, p);
+    if (res === "ok") return;
+    if (res === "fail") break;
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 15);
+  }
+  try { fs.unlinkSync(tmp); } catch {}
+  fs.writeFileSync(p, data);
+}
 
 // Phase 1 artifacts that every later phase depends on.
 function missingArtifacts(root) {
@@ -41,14 +56,15 @@ function missingArtifacts(root) {
 // Live router worktrees registered on this repo (stale/prunable ones ignored).
 function liveRouteTrees(root) {
   const r = spawnSync("git", ["worktree", "list", "--porcelain"], { cwd: root, encoding: "utf8", timeout: 3000 });
-  return (r.stdout || "").split(/\n\n/).filter(b => /branch refs\/heads\/route\//.test(b) && !/prunable/.test(b))
-    .map(b => (/^worktree (.+)$/m.exec(b) || [])[1]).filter(p => p && fs.existsSync(p));
+  return (r.stdout || "").split(/\r?\n\r?\n/).filter(b => /branch refs\/heads\/route\//.test(b) && !/prunable/.test(b))
+    .map(b => ((/^worktree (.+)$/m.exec(b) || [])[1] || "").trim()).filter(p => p && fs.existsSync(p));
 }
 
 function preEdit(root, s, file) {
   const abs = path.resolve(root, file || ""), rel = path.relative(root, abs);
   if (rel.startsWith("..")) return; // outside the project (scratch, ~/.claude): not gated
-  const trees = liveRouteTrees(root);
+  const inAgentTree = /^\.claude[\\/]worktrees[\\/]/.test(rel);
+  const trees = inAgentTree ? [] : liveRouteTrees(root);
   if (trees.length) block(`[BLOCKED] Router worktree active (${trees[0]}). Editing the main checkout now trips isolation-breach. Wait for the route job, or edit inside the worktree.`);
   const name = NAMES[s.phase - 1];
   const isCode = CODE_DIR.test(rel), isUi = UI_FILE.test(rel);
@@ -68,16 +84,26 @@ function preBash(s, cmd) {
   }
 }
 
-function postTool(root, s, inp) {
+function answerCount(inp) {
+  const ans = (inp.tool_response || {}).answers;
+  if (Object.prototype.toString.call(ans) === "[object Object]")
+    return Object.values(ans).filter(v => String(v ?? "").trim()).length;
+  const qs = (inp.tool_input || {}).questions;
+  return Array.isArray(qs) ? qs.length : 1;
+}
+
+function postTool(root, s, inp, dirty = false) {
   const t = inp.tool_name, ti = inp.tool_input || {};
   // Rule: >= gates.minUserQuestionsPerPhase answered questions in EVERY phase. The tool returns after the user answered.
   if (t === "AskUserQuestion") {
-    const n = Array.isArray(ti.questions) ? ti.questions.length : 1;
-    s.questionsByPhase = { ...(s.questionsByPhase || {}), [s.phase]: ((s.questionsByPhase || {})[s.phase] || 0) + n };
-    saveState(root, s); return;
+    const n = answerCount(inp);
+    if (n) s.questionsByPhase = { ...(s.questionsByPhase || {}), [s.phase]: ((s.questionsByPhase || {})[s.phase] || 0) + n };
+    if (n || dirty) saveState(root, s);
+    return;
   }
   if (t === "Skill" && ti.skill) { s.skillsLoaded = [...new Set([...(s.skillsLoaded || []), ti.skill])]; saveState(root, s); return; }
-  if (t === "Bash" && /ab-route\.js\s+--status/.test(ti.command || "")) { s.statusPhase = s.phase; saveState(root, s); }
+  if (t === "Bash" && /ab-route\.js\s+--status/.test(ti.command || "")) { s.statusPhase = s.phase; dirty = true; }
+  if (dirty) saveState(root, s);
   if (t === "Bash" && /ab-route\.js/.test(ti.command || "")) {
     const out = JSON.stringify(inp.tool_response || "");
     const m = /isolation-breach|exhausted|startup-stall|"quota"|"stall"/.exec(out);
@@ -92,12 +118,24 @@ function postTool(root, s, inp) {
 }
 
 // ---- phase window: a phase may not end before budget - lead (floor) and should end by its budget (ceiling) ----
+function pausedMs(pauses, phase, since, until) {
+  let ms = 0;
+  for (const p of pauses || []) {
+    const to = Date.parse(p?.to);
+    if (p?.phase !== phase || !(to >= since)) continue;
+    const from = Date.parse(p.from) || since;
+    ms += Math.max(0, Math.min(until, to) - Math.max(since, from));
+  }
+  return ms;
+}
+
 function phaseWindow(s, cfg, now = Date.now()) {
   const budget = ((cfg.phases || {})[s.phase] || {}).budgetMin || 0;
   const lead = (cfg.gates || {}).phaseFloorLeadMin ?? 5;
   const started = Date.parse(s.phaseStartedAt || s.startedAt || "") || now;
+  const paused = pausedMs(s.pauses, s.phase, started, now);
   const floor = s.floorSkippedPhase === s.phase ? 0 : Math.max(0, budget - lead); // the user typed "skip floor"
-  return { elapsedMin: (now - started) / 60000, floorMin: floor, ceilMin: budget };
+  return { elapsedMin: Math.max(0, (now - started - paused) / 60000), floorMin: floor, ceilMin: budget };
 }
 const CHALLENGES = [
   { phases: [3, 4], text: "run /impeccable critique on the running UI, have a builder fix the top finding, re-screenshot into .sprint/screens-p<N>/" },
@@ -361,18 +399,33 @@ function routeGuard(cmd) {
 
 // ---- SPRINT-REPORT.md: your words, phase times and friction, for the post-mortem ----
 // Paused clock: a gap with no hook activity longer than idlePauseMin (terminal closed, usage exhausted, session
-// restart) is not sprint time. Shift the sprint and phase start forward by the gap, so every reader of the clock
-// (gate, sidebar, scorecard, report) sees it paused, and record the pause.
-function pauseClock(root, s, cfg) {
-  const now = Date.now(), idle = ((cfg.gates || {}).idlePauseMin ?? 10) * 60000;
-  const last = Date.parse(s.lastActivityAt || "") || now, gap = now - last;
-  if (gap > idle) {
-    const shift = t => (t ? new Date(Date.parse(t) + gap).toISOString() : t);
-    s.startedAt = shift(s.startedAt); s.phaseStartedAt = shift(s.phaseStartedAt);
-    s.pauses = [...(s.pauses || []), { from: new Date(last).toISOString(), to: new Date(now).toISOString(), min: Math.round(gap / 60000) }];
+// restart) is not sprint time. Record the pause with its phase instead of shifting start timestamps, so
+// showcase/report checks still match real start times while phaseWindow/report subtract paused ms.
+// Track active tool_use_id values across hook events: long tool calls (router chains, tests, AskUserQuestion)
+// are hook-silent between PreToolUse and PostToolUse, so a young in-flight entry suppresses false idle pauses.
+function pauseBounds(cfg) {
+  const idle = (cfg.gates?.idlePauseMin ?? 10) * 60000;
+  return { idle, cap: (cfg.router?.maxChainWallMs ?? 1500000) + idle };
+}
+function pruneInFlight(s, now, cap) {
+  const next = {};
+  let changed = false;
+  for (const [id, ts] of Object.entries(s.inFlight || {})) {
+    const t = Date.parse(ts);
+    if (t && now - t < cap) next[id] = ts;
+    else changed = true;
   }
+  if (changed) s.inFlight = next;
+  return { changed, busy: Object.keys(next).length > 0 };
+}
+function pauseClock(root, s, cfg) {
+  const now = Date.now(), { idle, cap } = pauseBounds(cfg);
+  const stored = Date.parse(s.lastActivityAt), gap = stored ? now - stored : 0;
+  const { changed, busy } = pruneInFlight(s, now, cap);
+  const paused = gap > idle && !busy;
+  if (paused) s.pauses = [...(s.pauses || []), { from: new Date(stored).toISOString(), to: new Date(now).toISOString(), min: Math.round(gap / 60000), phase: s.phase }];
   s.lastActivityAt = new Date(now).toISOString();
-  saveState(root, s);
+  if ([paused, changed, !stored, gap > 60000].some(Boolean)) saveState(root, s);
 }
 
 const endPhase = (s, now) => { s.phaseLog = [...(s.phaseLog || []), { phase: s.phase, startedAt: s.phaseStartedAt || s.startedAt, endedAt: now }]; };
@@ -408,7 +461,8 @@ function writeReport(root, s, cfg, status) {
     `### Interrupts (Esc): ${Object.values(interrupts).reduce((a, b) => a + b, 0)}`,
     ...Object.entries(interrupts).map(([p, n]) => `- ${label(+p)}: ${n}`), "",
     "## Time per phase", "", "| Phase | Used (min) | Budget (min) | |", "|---|---|---|---|",
-    ...phases.map(x => { const used = Math.round(((x.endedAt ? at(x.endedAt) : now) - at(x.startedAt)) / 60000), b = ((cfg.phases || {})[x.phase] || {}).budgetMin;
+    ...phases.map(x => { const start = at(x.startedAt), end = x.endedAt ? at(x.endedAt) : now;
+      const used = Math.max(0, Math.round((end - start - pausedMs(s.pauses, x.phase, start, end)) / 60000)), b = ((cfg.phases || {})[x.phase] || {}).budgetMin;
       return `| ${label(x.phase)} | ${used} | ${b ?? "-"} | ${!x.endedAt ? "running" : b && used > b ? "**over**" : ""} |`; }), "",
     "## Friction (blocks, failures, router)", "", "| Phase | Source | Event | Count | Example |", "|---|---|---|---|---|",
     ...Object.values(friction).sort((a, b) => b.n - a.n).map(f => `| ${f.phase ?? "?"} | ${f.to} | ${oneLine(f.outcome)} | ${f.n} | ${f.ex.slice(0, 120)} |`), "",
@@ -480,11 +534,17 @@ function main() {
     s.floorSkippedPhase = s.phase; saveState(root, s); log({ phase: s.phase, to: "phase", outcome: "floor-skipped" });
     context(ev, `[DONE] Phase ${s.phase}/6 floor lifted by the user. The exit gate's other checks still apply; post the scorecard and ask for go.`);
   }
-  const ti = inp.tool_input || {};
-  if (ev === "PreToolUse" && (inp.tool_name === "Edit" || inp.tool_name === "Write")) preEdit(root, s, ti.file_path);
-  else if (ev === "PreToolUse" && inp.tool_name === "Bash") preBash(s, ti.command || "");
-  else if (ev === "PostToolUse") postTool(root, s, inp);
-  else if (ev === "PostToolUseFailure") log({ phase: s.phase, to: inp.tool_name, outcome: "tool-failure", flags: [String(inp.error || "").slice(0, 200)] });
+  const ti = inp.tool_input || {}, id = inp.tool_use_id;
+  if (ev === "PreToolUse") {
+    if (inp.tool_name === "Edit" || inp.tool_name === "Write") preEdit(root, s, ti.file_path);
+    else if (inp.tool_name === "Bash") preBash(s, ti.command || "");
+    if (id) { s.inFlight = { ...(s.inFlight || {}), [id]: new Date().toISOString() }; saveState(root, s); }
+  } else if (ev === "PostToolUse" || ev === "PostToolUseFailure") {
+    const dropped = Boolean(id && s.inFlight && Object.prototype.hasOwnProperty.call(s.inFlight, id));
+    if (dropped) delete s.inFlight[id];
+    if (ev === "PostToolUse") postTool(root, s, inp, dropped);
+    else { if (dropped) saveState(root, s); log({ phase: s.phase, to: inp.tool_name, outcome: "tool-failure", flags: [String(inp.error || "").slice(0, 200)] }); }
+  }
   else if (ev === "Stop") stopGate(root, s, cfg, inp);
   if (ev === "UserPromptSubmit" || ev === "PostToolUse") ceilingNotice(root, s, cfg, ev);
 }
