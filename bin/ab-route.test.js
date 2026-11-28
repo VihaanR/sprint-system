@@ -110,6 +110,15 @@ test("isolation snapshot ignores .claude/worktrees but sees a stray file", () =>
   assert.notStrictEqual(mainSnapshot(repo), before);
 });
 
+test("isolation snapshot sees a stray commit in the main checkout", () => {
+  const repo = tmp(), g = (...a) => spawnSync("git", a, { cwd: repo, encoding: "utf8" });
+  const commit = m => g("-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", m);
+  g("init", "-q"); fs.writeFileSync(path.join(repo, "a.txt"), "a\n"); g("add", "a.txt"); commit("init");
+  const before = mainSnapshot(repo);
+  fs.writeFileSync(path.join(repo, "a.txt"), "b\n"); g("add", "a.txt"); commit("stray");
+  assert.notStrictEqual(mainSnapshot(repo), before);
+});
+
 function initRepo() {
   const repo = tmp(), g = (...a) => spawnSync("git", a, { cwd: repo, encoding: "utf8" });
   g("init", "-q");

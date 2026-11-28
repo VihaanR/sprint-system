@@ -258,8 +258,9 @@ function bridgeEntry() {
 }
 const git = (cwd, ...a) => spawnSync("git", a, { cwd, encoding: "utf8" });
 const gitOut = (cwd, ...a) => (git(cwd, ...a).stdout || "").trim();
-// Main-checkout snapshot for the isolation check; Claude Code's own agent worktrees (untracked .claude/worktrees/) are not a breach.
-const mainSnapshot = repo => git(repo, "status", "--porcelain", "--", ".", ":(exclude).claude/worktrees").stdout;
+// Main-checkout snapshot for the isolation check: HEAD (a stray commit) + porcelain status (stray edits).
+// Claude Code's own agent worktrees (untracked .claude/worktrees/) are not a breach.
+const mainSnapshot = repo => gitOut(repo, "rev-parse", "HEAD") + "\n" + git(repo, "status", "--porcelain", "--", ".", ":(exclude).claude/worktrees").stdout;
 
 // Refuse repos that track secret-looking files: free models may train on prompts (see council notes).
 function privateReason(repo) {
