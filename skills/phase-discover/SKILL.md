@@ -61,7 +61,15 @@ Before exiting Discover, verify execution tooling and every external dependency 
 ```
 (If router smoke failed and the user waived it: `{ "waivedByUser": true, "reason": "..." }`.)
 
-## Step 5: freeze and hand off
+## Step 5: user-asks ledger
+Capture every explicit user ask (features, integrations, visuals, deliverables the user named) in `.sprint/user-asks.json`:
+```json
+[{ "ask": "3D explainer", "phase": 3, "status": "planned", "userConfirmedCut": false }]
+```
+- `status` is `planned | done | cut`. Never demote an ask to stretch or cut silently: a cut needs explicit user confirmation (`AskUserQuestion`) and `"userConfirmedCut": true`.
+- Update `status` to `done` when built; `advance` prints open `planned` asks and refuses unconfirmed cuts.
+
+## Step 6: freeze and hand off
 - Freeze the schema (`types.ts`, OpenAPI or Pydantic). Changes after this need the user's go.
 - Post the scorecard with `[TIME] <used> / 30 min (floor 25)` and wait for go.
 - If you are over budget, the hook says so: post the scorecard at once.

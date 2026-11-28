@@ -138,6 +138,24 @@ function preflightFails(root) {
   return [...smokeFail(p.routerSmoke), ...p.services.map(serviceFail).filter(Boolean)];
 }
 
+function userAskFail(a) {
+  const x = Object(a), name = x.ask || "?";
+  if (x.status === "cut") return x.userConfirmedCut === true ? null : `.sprint/user-asks.json: '${name}' was cut without the user confirming (ask them, then set userConfirmedCut true)`;
+  return ["planned", "done"].includes(x.status) ? null : `.sprint/user-asks.json: '${name}' status must be planned, done, or cut`;
+}
+function userAskFails(root, phase) {
+  const p = path.join(root, ".sprint", "user-asks.json");
+  if (!fs.existsSync(p)) return phase === 1 ? [".sprint/user-asks.json missing: record every explicit user ask"] : [];
+  const asks = readJson(p);
+  return Array.isArray(asks) ? asks.map(userAskFail).filter(Boolean) : [".sprint/user-asks.json must be a JSON array"];
+}
+function openAsksLine(root) {
+  const asks = readJson(path.join(root, ".sprint", "user-asks.json"));
+  if (!Array.isArray(asks)) return "";
+  const open = asks.filter(a => Object(a).status === "planned").map(a => `${a.ask || "?"}${a.phase ? ` (P${a.phase})` : ""}`);
+  return open.length ? `Open user asks: ${open.join(", ")}` : "";
+}
+
 // Every phase: the user answered at least gates.minUserQuestionsPerPhase questions (counted by the AskUserQuestion hook).
 function questionFails(s, g) {
   const min = g.minUserQuestionsPerPhase ?? 15, n = (s.questionsByPhase || {})[s.phase] || 0;
@@ -199,7 +217,7 @@ function exitGate(root, s, cfg) {
   const g = cfg.gates || {}, fail = [];
   const w = phaseWindow(s, cfg);
   if (w.elapsedMin < w.floorMin) fail.push(`Phase ${s.phase} floor: ${Math.ceil(w.floorMin - w.elapsedMin)} min left (floor ${w.floorMin} of ${w.ceilMin} min). Keep validating before advancing.`);
-  fail.push(...questionFails(s, g), ...showcaseFails(root, s));
+  fail.push(...questionFails(s, g), ...showcaseFails(root, s), ...userAskFails(root, s.phase));
   if (s.phase === 1) { const m = missingArtifacts(root); if (m.length) fail.push(`Phase 1 artifacts missing: ${m.join(", ")}`); fail.push(...discoverLogFails(root, g), ...preflightFails(root)); }
   if (s.phase === 2) {
     // uv projects keep deps in .venv, which the system python cannot see (pytest then exits 2 on import errors).
@@ -274,9 +292,11 @@ function writeReport(root, s, cfg, status) {
   }
   const phases = [...(s.phaseLog || []), ...(s.active ? [{ phase: s.phase, startedAt: s.phaseStartedAt, endedAt: null }] : [])];
   const quote = g => `- [${label(g.phase)}, ${hhmm(g.ts)}] ${oneLine(g.text)}`;
+  const open = openAsksLine(root);
   const md = [
     `# Sprint report: ${path.basename(root)}`, "",
-    `Started ${s.startedAt} · status: **${status}** · reached Phase ${s.phase}/6 (${NAMES[s.phase - 1]})`, "",
+    `Started ${s.startedAt} · status: **${status}** · reached Phase ${s.phase}/6 (${NAMES[s.phase - 1]})`,
+    ...(open ? ["", open] : []), "",
     "## Your words", "",
     `### wtf (you flagged these): ${mine.length}`, ...(mine.length ? mine.map(quote) : ["- none"]), "",
     `### Sounded frustrated (auto, may include false positives): ${auto.length}`, ...(auto.length ? auto.map(quote) : ["- none"]), "",
@@ -300,15 +320,16 @@ function main() {
   if (process.argv[2] === "advance") {
     const root = process.cwd(), s = readJson(statePath(root)), cfg = config(root);
     if (!s || !s.active) { console.log("no active sprint"); process.exit(1); }
-    const fail = exitGate(root, s, cfg);
-    if (fail.length) { s.exitRequested = true; saveState(root, s); console.log(`[BLOCKED] Phase ${s.phase} exit gate:\n- ${fail.join("\n- ")}`); process.exit(1); }
+    const fail = exitGate(root, s, cfg), open = openAsksLine(root);
+    if (fail.length) { s.exitRequested = true; saveState(root, s); console.log([`[BLOCKED] Phase ${s.phase} exit gate:\n- ${fail.join("\n- ")}`, open].filter(Boolean).join("\n")); process.exit(1); }
     const now = new Date().toISOString();
     endPhase(s, now); s.exitRequested = false; s.phaseStartedAt = now; s.floorStopBlocks = 0; s.ceilNoticed = false;
     if (s.phase === 6) { s.active = false; spawnSync("python", [path.join(SPRINT_REPO, "scripts", "evolve_skills.py")], { cwd: SPRINT_REPO, stdio: "inherit" }); }
     else s.phase++;
     saveState(root, s); log({ phase: s.phase, to: "phase", outcome: s.active ? "advanced" : "sprint-closed" });
     writeReport(root, s, cfg, s.active ? "in progress" : "complete");
-    console.log(s.active ? `[DONE] Phase ${s.phase}/6 (${NAMES[s.phase - 1]}). Load Skill(phase-${NAMES[s.phase - 1]}) first. SPRINT-REPORT.md updated.` : "[DONE] Sprint closed; evolve_skills.py ran; SPRINT-REPORT.md written.");
+    const done = s.active ? `[DONE] Phase ${s.phase}/6 (${NAMES[s.phase - 1]}). Load Skill(phase-${NAMES[s.phase - 1]}) first. SPRINT-REPORT.md updated.` : "[DONE] Sprint closed; evolve_skills.py ran; SPRINT-REPORT.md written.";
+    console.log([done, open].filter(Boolean).join("\n"));
     return;
   }
   let inp = {}; try { inp = JSON.parse(fs.readFileSync(0, "utf8") || "{}"); } catch {}

@@ -78,6 +78,7 @@ test("Discover gate needs 15 answered questions and 5 challenge rounds", () => {
   for (const f of ["SPRINT.md", "PRODUCT.md", "DESIGN.md"]) write(root, f, "x");
   write(root, "fixtures/golden.json", "{}");
   write(root, ".sprint/preflight.json", { routerSmoke: { exitCode: 0 }, services: [] });
+  write(root, ".sprint/user-asks.json", []);
   const q = n => Array.from({ length: n }, (_, i) => ({ q: `q${i}`, answer: `a${i}` }));
   const rounds = n => Array.from({ length: n }, () => ({ claim: "c", attack: "a", verdict: "kept" }));
 
@@ -194,6 +195,7 @@ function phase1Ready() {
   const userQuestions = Array.from({ length: 15 }, (_, i) => ({ q: `q${i}`, answer: `a${i}` }));
   const challengeRounds = Array.from({ length: 5 }, () => ({ claim: "c", attack: "a", verdict: "kept" }));
   write(root, ".sprint/discover-log.json", { userQuestions, challengeRounds });
+  write(root, ".sprint/user-asks.json", []);
   return root;
 }
 
@@ -232,4 +234,42 @@ test("Phase 1 advance is allowed with valid preflight.json (exitCode 0 or waiver
   write(waived, ".sprint/preflight.json", { routerSmoke: { exitCode: 2, waivedByUser: true, reason: "offline" }, services: [] });
   assert.strictEqual(run(waived, { args: ["advance"] }).code, 0);
   assert.strictEqual(state(waived).phase, 2);
+});
+
+test("user-asks ledger: unconfirmed cut blocks any phase, confirmed cut allows it, open asks print on refusal, success, and report", () => {
+  const root = project({ phase: 4, phaseStartedAt: ago(41) }); showcase(root, "polish");
+  write(root, ".sprint/user-asks.json", [
+    { ask: "3D explainer", phase: 3, status: "cut", userConfirmedCut: false },
+    { ask: "InVEST", phase: 2, status: "planned", userConfirmedCut: false },
+  ]);
+  const refused = run(root, { args: ["advance"] });
+  assert.strictEqual(refused.code, 1);
+  assert.match(refused.out, /'3D explainer' was cut without the user confirming/);
+  assert.match(refused.out, /Open user asks: InVEST \(P2\)/);
+  assert.strictEqual(state(root).phase, 4);
+
+  write(root, ".sprint/user-asks.json", [
+    { ask: "3D explainer", phase: 3, status: "cut", userConfirmedCut: true },
+    { ask: "InVEST", phase: 2, status: "planned", userConfirmedCut: false },
+  ]);
+  const ok = run(root, { args: ["advance"] });
+  assert.strictEqual(ok.code, 0);
+  assert.match(ok.out, /Open user asks: InVEST \(P2\)/);
+  assert.strictEqual(state(root).phase, 5);
+  assert.match(fs.readFileSync(path.join(root, "SPRINT-REPORT.md"), "utf8"), /Open user asks: InVEST \(P2\)/);
+});
+
+test("Phase 1 advance is refused when user-asks.json is missing or invalid", () => {
+  const root = phase1Ready();
+  write(root, ".sprint/preflight.json", { routerSmoke: { exitCode: 0 }, services: [] });
+  fs.unlinkSync(path.join(root, ".sprint", "user-asks.json"));
+  const missing = run(root, { args: ["advance"] });
+  assert.strictEqual(missing.code, 1);
+  assert.match(missing.out, /user-asks\.json missing/);
+  assert.strictEqual(state(root).phase, 1);
+
+  write(root, ".sprint/user-asks.json", [{ ask: "Bad ask", phase: 1, status: "bogus" }]);
+  const badStatus = run(root, { args: ["advance"] });
+  assert.strictEqual(badStatus.code, 1);
+  assert.match(badStatus.out, /'Bad ask' status must be planned, done, or cut/);
 });
