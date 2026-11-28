@@ -28,7 +28,7 @@ const TRIP_RE = /\b429\b|rate.?limit|quota|exhausted|unauthori[sz]ed|\b401\b|\b4
 
 // ---- sprint config (sprint.config.json in --repo, else the sprint system repo) -----------------
 const TELEMETRY = path.join(AB, "telemetry.jsonl");
-const CFG_DEFAULT = { router: { agyModels: ["Gemini 4 Hydrogen (High)", "Gemini 3.8 Flash (Medium)"], agySessionPrefix: "sprint", agyStartupStallMs: 60000, agyOneStrikeDrop: true, opencodeFallback: "freellmapi/auto", maxChainWallMs: 600000 }, gates: {}, phases: {} };
+const CFG_DEFAULT = { router: { agyModels: ["Gemini 4 Hydrogen (High)", "Gemini 3.8 Flash (Medium)"], agySessionPrefix: "sprint", agyStartupStallMs: 180000, agySilentMs: 900000, opencodeFallback: "freellmapi/auto", maxChainWallMs: 600000 }, gates: {}, phases: {} };
 function loadCfg(repo) {
   for (const p of [repo && path.join(repo, "sprint.config.json"), process.env.SPRINT_CONFIG, "V:/Projects/sprint/sprint.config.json"].filter(Boolean)) {
     try { const j = JSON.parse(fs.readFileSync(p, "utf8")); return { ...CFG_DEFAULT, ...j, router: { ...CFG_DEFAULT.router, ...(j.router || {}) }, _path: p }; } catch {}
@@ -49,15 +49,18 @@ const freeTail = agent => [["opencode:free", { agent, model: FREE_AUTO }]]; // f
 const CHAINS = {
   recon:    freeTail("cheap-explore"),
   bulk:     freeTail("worker"),
-  // large: antigravity tiers are PRIMARY; quota trips that tier only, startup-stall drops agy for the sprint
+  // large: antigravity tiers are PRIMARY; quota trips that tier only; stalls are tolerated once, then trip <= 30 min
   large:    [...AGY, ...freeTail("worker")],
   review:   [["opencode:go", { agent: "go-reviewer" }], ["opencode:free", { agent: "cheap-explore", model: "opencode/deepseek-v4.1-flash-free" }]],
   research: [["hermes", { toolsets: "web,skills,memory,session_search,todo" }]],
   agy:      AGY, // explicit: send straight to agy in an isolated worktree
 };
 const WRITES = new Set(["bulk", "large", "agy"]);
-const STALL_BY_EXECUTOR = { antigravity: 240000 }; // agy print mode is silent until it finishes; startup is watched separately
-const AGY_STARTUP_MS = CFG.router.agyStartupStallMs || 60000;
+// agy print mode is silent (stdout and agent-bridge's status.md) until it finishes and waits on its own background tasks:
+// a live agy is working until it has been silent (no output, no edits) for agySilentMs. Startup is watched separately.
+const AGY_SILENT_MS = CFG.router.agySilentMs || 900000;
+const STALL_BY_EXECUTOR = { antigravity: AGY_SILENT_MS };
+const AGY_STARTUP_MS = Math.max(180000, CFG.router.agyStartupStallMs || 0);
 
 // Ledger key for a chain step: free models and agy tiers trip individually, everything else per executor.
 const keyOf = (base, cfg) => base === "opencode:free" ? `${base}:${cfg.model || cfg.agent}` : base === "antigravity" && cfg.model ? `antigravity:${cfg.model}` : base;
@@ -221,18 +224,18 @@ function recordLocked(h, k, run) {
   const e = ex(h, k); if (e.day !== today()) { e.day = today(); e.usedToday = 0; }
   const prev = e.runs.length ? e.runs[e.runs.length - 1].outcome : null;
   e.usedToday++; e.runs = [...e.runs, run].slice(-20);
-  // Per-error thresholds: quota/auth trip at once; a single stall is tolerated, a second one in a row trips.
-  if (run.outcome === "quota" || run.outcome === "auth" || (run.outcome === "stall" && prev === "stall")) {
-    const mins = run.resetMin || COOLDOWN_MIN[k] || COOLDOWN_MIN[k.split(":").slice(0, 2).join(":")] || COOLDOWN_MIN[k.split(":")[0]] || 30;
-    e.state = "tripped"; e.until = new Date(Date.now() + mins * 60000).toISOString(); e.reason = run.outcome;
-  }
-  // One-strike drop: an agy startup stall is a transport problem, not a model one; every agy tier sits out the sprint.
-  if (run.outcome === "startup-stall" && CFG.router.agyOneStrikeDrop !== false) {
-    const until = new Date(Date.now() + (CFG.timeBudgetMinutes || 300) * 60000).toISOString();
-    for (const [b, c] of AGY) { const x = ex(h, keyOf(b, c)); x.state = "tripped"; x.until = until; x.reason = "startup-stall"; }
-  }
+  const mins = cooldownMin(k, run, prev);
+  if (mins) { e.state = "tripped"; e.until = new Date(Date.now() + mins * 60000).toISOString(); e.reason = run.outcome; }
   save(h);
   telemetry({ taskId: run.taskId, phase: run.phase ?? null, from: "claude", to: k.startsWith("antigravity") ? "antigravity" : k, model: run.model, session: run.session || null, outcome: run.outcome, durS: run.durS, diffstat: run.diffstat || null, flags: run.flags || [] });
+}
+const STALLS = new Set(["stall", "startup-stall"]), STALL_COOLDOWN_CAP_MIN = 30;
+const baseCooldownMin = k => COOLDOWN_MIN[k] || COOLDOWN_MIN[k.split(":").slice(0, 2).join(":")] || COOLDOWN_MIN[k.split(":")[0]] || 30;
+// Per-error thresholds: quota/auth trip at once; a single (startup-)stall is tolerated, a second in a row trips for <= 30 min.
+function cooldownMin(k, run, prev) {
+  const mins = run.resetMin || baseCooldownMin(k);
+  if (run.outcome === "quota" || run.outcome === "auth") return mins;
+  return STALLS.has(run.outcome) && STALLS.has(prev) ? Math.min(STALL_COOLDOWN_CAP_MIN, mins) : 0;
 }
 function skipReason(h, k) {
   const e = ex(h, k);
@@ -253,6 +256,8 @@ function bridgeEntry() {
   return null;
 }
 const git = (cwd, ...a) => spawnSync("git", a, { cwd, encoding: "utf8" });
+// Main-checkout snapshot for the isolation check; Claude Code's own agent worktrees (untracked .claude/worktrees/) are not a breach.
+const mainSnapshot = repo => git(repo, "status", "--porcelain", "--", ".", ":(exclude).claude/worktrees").stdout;
 
 // Refuse repos that track secret-looking files: free models may train on prompts (see council notes).
 function privateReason(repo) {
@@ -301,17 +306,29 @@ function resetMinutes(text) {
   return Math.min(10080, Math.max(5, n * mult));
 }
 
+// Still queued: no output at all, or agent-bridge's "Waiting for the agent to start" in the last lines. O(len(text)).
+const stillQueued = text => !text.trim() || /Waiting for the agent to start/i.test(text.trim().split("\n").slice(-3).join("\n"));
+// One watchdog tick: null keeps the child running, a string is the kill reason. startupMs > 0 marks agy, whose silence
+// while alive is work (stallMs is then agySilentMs); only a queued state lasting past the startup limit is a dead transport.
+function watchVerdict({ idleMs, ageMs, stallMs, startupMs, touched, text }) {
+  if (idleMs > stallMs) return "stall";
+  if (!startupMs || touched || ageMs <= startupMs) return null;
+  return stillQueued(text) ? "startup-stall" : null;
+}
+// agy's own output: agent-bridge's framing lines (task header, footer) removed.
+const agyOutput = text => text.replace(/^(▶ |\s+(workspace:|status file|status:)|── |\(no output\)).*$/gm, "").trim();
 // Run a child with a hard timeout, a stall watchdog and early exit when the provider is just retrying.
-function runChild(bin, args, cwd, logFile, stallMs = STALL_MS, startupMs = 0, hardMs = HARD_TIMEOUT_MS) {
+// clock and tickMs are injectable so tests can fake minutes of silence.
+function runChild(bin, args, cwd, logFile, stallMs = STALL_MS, startupMs = 0, hardMs = HARD_TIMEOUT_MS, { clock = Date.now, tickMs = 15000 } = {}) {
   return new Promise(resolve => {
-    const out = fs.createWriteStream(logFile); let text = "", last = Date.now(), retries = 0, done = false;
+    const out = fs.createWriteStream(logFile), t0 = clock(); let text = "", last = t0, retries = 0, done = false;
     // opencode trusts the PWD env var over the process cwd; Git Bash leaves PWD pointing at wherever the router was
     // launched, which made it work in the wrong directory (once the main repo, once the home dir). Force it.
     const env = { ...process.env, PWD: cwd, INIT_CWD: cwd }; delete env.OLDPWD;
     const c = spawn(bin, args, { cwd, env, stdio: ["ignore", "pipe", "pipe"], windowsHide: true });
     const kill = why => { if (done) return; done = true; killTree(c); finish(null, why); };
     const feed = b => {
-      const s = b.toString(); last = Date.now(); text += s; out.write(s);
+      const s = b.toString(); last = clock(); text += s; out.write(s);
       const lines = s.split("\n").filter(l => /retrying \(attempt/i.test(l));
       retries += lines.length;
       // A provider retry line that already says rate-limited/exhausted will not recover soon: trip now.
@@ -325,28 +342,21 @@ function runChild(bin, args, cwd, logFile, stallMs = STALL_MS, startupMs = 0, ha
     const treeTick = () => {
       const g = spawnSync("git", ["status", "--porcelain"], { cwd, encoding: "utf8", timeout: 10000, windowsHide: true });
       const now = g.status === 0 ? g.stdout : tree;
-      if (now !== tree) { if (tree !== "" || now !== "") { last = Date.now(); touched = true; } tree = now; }
+      if (now !== tree) { if (tree !== "" || now !== "") { last = clock(); touched = true; } tree = now; }
     };
-    const t2 = setInterval(() => { treeTick(); if (Date.now() - last > stallMs) kill("stall"); }, 15000);
-    // Startup watchdog: agent-bridge prints/writes "Waiting for the agent to start" until agy attaches; that = dead transport.
-    const t3 = startupMs ? setTimeout(() => {
+    const t2 = setInterval(() => {
       treeTick();
-      if (touched) return; // files are changing: the agent is working, silent or not
-      const tail = text.trim().split("\n").slice(-3).join("\n");
-      if (!text.trim() || /Waiting for the agent to start|transport cli\s*$/i.test(tail) || statusStillQueued(text)) kill("startup-stall");
-    }, startupMs) : null;
-    function finish(code, why) { clearTimeout(t1); clearTimeout(t3); clearInterval(t2); out.end(); resolve({ code, why, text }); }
-    c.on("close", code => { if (!done) { done = true; finish(code, null); } });
+      const why = watchVerdict({ idleMs: clock() - last, ageMs: clock() - t0, stallMs, startupMs, touched, text });
+      if (why) kill(why);
+    }, tickMs);
+    function finish(code, why) { clearTimeout(t1); clearInterval(t2); out.end(); resolve({ code, why, text }); }
+    // An agy that exits without output or edits never started: that (not silence) is a startup-stall.
+    c.on("close", code => { if (!done) { done = true; finish(code, startupMs && !touched && !agyOutput(text) ? "startup-stall" : null); } });
     c.on("error", e => { if (!done) { done = true; text += String(e); finish(127, "spawn-error"); } });
   });
 }
-// agent-bridge prints its task dir; if that task's status.md is still the queued placeholder, agy never attached.
-function statusStillQueued(text) {
-  const m = /tasks[\\/]+([\w-]+)/.exec(text || ""); if (!m) return false;
-  try { return /Waiting for the agent to start/i.test(fs.readFileSync(path.join(AB, "tasks", m[1], "status.md"), "utf8")); } catch { return false; }
-}
 function classify(r) {
-  if (r.why === "startup-stall") return "startup-stall";
+  if (r.why === "startup-stall" && !TRIP_RE.test(r.text)) return "startup-stall"; // quota/auth text still classifies below
   // A refused connection is the local proxy being down, not a quota: no cooldown.
   if ((r.code !== 0 || r.why === "retry-loop") && /ECONNREFUSED|Unable to connect|ENOTFOUND|ECONNRESET/i.test(r.text)) return "unreachable";
   if (r.why === "retry-loop") return "quota";
@@ -369,7 +379,7 @@ async function ensureFreellm() {
   for (let i = 0; i < 30; i++) { await new Promise(r => setTimeout(r, 1000)); if (await freellmUp()) return true; }
   return false;
 }
-(async () => {
+async function main() {
   const argv = process.argv.slice(2), o = { class: null, repo: process.cwd(), base: "main" }, rest = [];
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -448,12 +458,12 @@ async function ensureFreellm() {
     if (o.dry) { attempts.push({ executor: key, dry: true, bin: path.basename(bin), cwd, args: args.map(a => a.length > 60 ? a.slice(0, 57) + "..." : a) }); if (tree) removeTree(o.repo, tree, branch); continue; }
     // Isolation check: opencode's shared background service once wrote into the main checkout instead of the worktree
     // (fixed with --standalone). Snapshot the main repo before a write run and refuse to continue if it changed.
-    const before = tree ? git(o.repo, "status", "--porcelain").stdout : null;
+    const before = tree ? mainSnapshot(o.repo) : null;
     // A start record, so the sprint sidebar can show the job (task, log, worktree) while it runs.
     telemetry({ taskId: id, phase, from: "claude", to: key.startsWith("antigravity") ? "antigravity" : key, model: cfg.model || cfg.agent, outcome: "started", task: task.slice(0, 200), log, worktree: tree || null });
     const t0 = Date.now(), r = await runChild(bin, args, cwd, log, STALL_BY_EXECUTOR[base] || STALL_MS, base === "antigravity" ? AGY_STARTUP_MS : 0, Math.min(CFG.router.hardTimeoutMs || HARD_TIMEOUT_MS, leftMs));
     let outcome = classify(r);
-    if (tree && git(o.repo, "status", "--porcelain").stdout !== before) {
+    if (tree && mainSnapshot(o.repo) !== before) {
       telemetry({ taskId: id, phase, from: "claude", to: key, model: cfg.model || cfg.agent, session: o.session || null, outcome: "isolation-breach", durS: Math.round((Date.now() - t0) / 1000), flags: [] });
       console.log(JSON.stringify({ outcome: "isolation-breach", executor: key, worktree: tree, branch,
         reason: "The main checkout changed during an isolated run. Nothing was reverted: inspect `git status` in " + o.repo + " yourself.", log, attempts }, null, 2));
@@ -488,4 +498,6 @@ async function ensureFreellm() {
   if (!o.dry) telemetry({ taskId: id, phase, from: "claude", to: "router", outcome: "exhausted", class: o.class, attempts: attempts.map(a => `${a.executor}:${a.outcome || "skipped"}`) });
   console.log(JSON.stringify({ outcome: o.dry ? "dry-run" : "exhausted", class: o.class, attempts, next: o.dry ? "" : "Every executor failed or was skipped: do it with Claude directly." }, null, 2));
   process.exit(o.dry ? 0 : 1);
-})();
+}
+if (require.main === module) main();
+else module.exports = { watchVerdict, runChild, cooldownMin, mainSnapshot };
