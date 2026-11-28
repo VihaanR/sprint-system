@@ -92,5 +92,11 @@ description: Phase 4 of the 5-Hour Hackathon Sprint. Applies impeccable anti-slo
    - Write the proof the gate checks:
      `node -e "require('fs').writeFileSync('.sprint/showcase-polish.json', JSON.stringify({url:'<url>',timestamp:new Date().toISOString()}))"`
    - `advance` refuses without `.sprint/showcase-polish.json` (a url and a timestamp from this phase).
-9. **Phase Checkpoint**:
+10. **Design exit gate (mandatory)**: `advance` checks all five before leaving Phase 4:
+   - Run `/impeccable critique` on the running UI and save it to `.sprint/impeccable-critique-p4.md`.
+   - Save a desktop screenshot and a 375px-wide screenshot (file name contains `375`) to `.sprint/screens-p4/`.
+   - Load every `font-family` named in CSS (`@fontsource/*` import in `frontend/src` or `@font-face` in CSS).
+   - Set a real `<title>` in `frontend/index.html` (no `Vite + React` or placeholder).
+   - Replace the starter `frontend/public/favicon.svg`.
+11. **Phase Checkpoint**:
    - Update `SPRINT.md` and prepare Executive Scorecard with screenshot evidence for gate approval into **Phase 5 (Audit & Hardening)**.

@@ -172,6 +172,104 @@ function showcaseFails(root, s) {
   return [];
 }
 
+// ---- Phases 3 and 4 design exit gate: critique, desktop + 375px screens, loaded fonts, real title, custom favicon ----
+const IGNORED_FONTS = new Set([
+  "serif", "sans-serif", "monospace", "cursive", "fantasy", "system-ui", "ui-sans-serif", "ui-serif",
+  "ui-monospace", "ui-rounded", "-apple-system", "blinkmacsystemfont", "emoji", "math", "inherit", "initial",
+  "unset", "arial", "helvetica", "helvetica neue", "segoe ui", "georgia", "times new roman", "courier new",
+  "menlo", "consolas", "monaco", "apple color emoji", "segoe ui emoji",
+]);
+const BAD_TITLES = new Set(["", "app name", "vite + react", "vite + react + ts", "vite app", "react app"]);
+
+function critiqueFail(root, phase) {
+  const f = `.sprint/impeccable-critique-p${phase}.md`;
+  let txt = ""; try { txt = fs.readFileSync(path.join(root, f), "utf8"); } catch {}
+  return txt.trim() ? null : `${f} missing or empty (run /impeccable critique on the running UI)`;
+}
+
+function screensFail(root, phase) {
+  const dir = `.sprint/screens-p${phase}`;
+  let imgs = []; try { imgs = fs.readdirSync(path.join(root, dir)).filter(f => /\.(png|jpe?g|webp)$/i.test(f)); } catch {}
+  const miss = [];
+  if (!imgs.some(f => !/375|mobile/i.test(f))) miss.push("desktop");
+  if (!imgs.some(f => /375|mobile/i.test(f))) miss.push("375px (name with 375 or mobile)");
+  return miss.length ? `${dir}/ missing ${miss.join(" and ")} screenshot` : null;
+}
+
+function walkFiles(dir, extRe, out) {
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (e.name === "node_modules") continue;
+    const p = path.join(dir, e.name);
+    if (e.isDirectory()) walkFiles(p, extRe, out);
+    else if (extRe.test(e.name)) out.push(p);
+  }
+  return out;
+}
+
+const stripQuotes = s => s.replace(/!important/gi, "").trim().replace(/^['"]|['"]$/g, "").trim();
+function fontFaceFamilies(css) {
+  const out = [];
+  for (const b of css.matchAll(/@font-face\s*\{([^}]*)\}/gi)) {
+    const m = /font-family\s*:\s*([^;]+)/i.exec(b[1]);
+    if (m) out.push(stripQuotes(m[1]).toLowerCase());
+  }
+  return out;
+}
+
+const fontsourceImports = txt => [...txt.matchAll(/['"]@fontsource(?:-variable)?\/([a-z0-9-]+)(?:\/[^'"]*)?['"]/gi)].map(m => m[1].toLowerCase());
+function parseFamilies(raw) {
+  return raw.replace(/var\([^()]*\)/gi, "").split(",").map(stripQuotes)
+    .filter(x => x && !/^var\(/i.test(x) && !IGNORED_FONTS.has(x.toLowerCase()));
+}
+
+function usedFontFamilies(css) {
+  const out = [];
+  for (const m of css.replace(/@font-face\s*\{[^}]*\}/gi, "").matchAll(/(?:^|[;\s{])font-family\s*:\s*([^;{}]+)/gi))
+    out.push(...parseFamilies(m[1]));
+  return out;
+}
+
+function collectFonts(files) {
+  const faces = new Set(), imports = new Set(), used = new Map();
+  for (const f of files) {
+    const txt = fs.readFileSync(f, "utf8");
+    fontsourceImports(txt).forEach(s => imports.add(s));
+    if (!/\.css$/i.test(f)) continue;
+    const clean = txt.replace(/\/\*[\s\S]*?\*\//g, "");
+    fontFaceFamilies(clean).forEach(fam => faces.add(fam));
+    usedFontFamilies(clean).forEach(fam => { const k = fam.toLowerCase(); used.set(k, used.get(k) || fam); });
+  }
+  return { faces, imports, used };
+}
+
+function fontFail(root) {
+  const src = path.join(root, "frontend", "src");
+  if (!fs.existsSync(src)) return null;
+  const { faces, imports, used } = collectFonts(walkFiles(src, /\.(css|js|jsx|ts|tsx)$/i, []));
+  const unloaded = [...used.entries()].filter(([k]) => !faces.has(k) && !imports.has(k.replace(/\s+/g, "-"))).map(([, v]) => v);
+  return unloaded.length ? `fonts not loaded (no @font-face or @fontsource import in frontend/src): ${unloaded.join(", ")}` : null;
+}
+
+function titleFail(root) {
+  const p = path.join(root, "frontend", "index.html");
+  if (!fs.existsSync(p)) return null;
+  const m = /<title(?:\s[^>]*)?>([\s\S]*?)<\/title>/i.exec(fs.readFileSync(p, "utf8"));
+  const title = m ? m[1].trim().replace(/\s+/g, " ") : "";
+  return BAD_TITLES.has(title.toLowerCase()) ? `frontend/index.html <title> is missing or a placeholder (${title || "empty"})` : null;
+}
+
+function faviconFail(root) {
+  const starter = path.join(process.env.SPRINT_STARTER_DIR || "V:/Projects/hackathon-starter", "frontend", "public", "favicon.svg");
+  const fav = path.join(root, "frontend", "public", "favicon.svg");
+  if (!fs.existsSync(starter) || !fs.existsSync(fav)) return null;
+  return fs.readFileSync(fav).equals(fs.readFileSync(starter)) ? "frontend/public/favicon.svg is still the starter default" : null;
+}
+
+function designFails(root, phase) {
+  if (phase !== 3 && phase !== 4) return [];
+  return [critiqueFail(root, phase), screensFail(root, phase), fontFail(root), titleFail(root), faviconFail(root)].filter(Boolean);
+}
+
 // ---- orchestrator model: the sprint runs on cfg.orchestrator (Opus 5.5, high effort) ----
 function lastModel(transcript) {
   let lines = []; try { lines = fs.readFileSync(transcript, "utf8").trim().split("\n"); } catch { return null; }
@@ -217,7 +315,7 @@ function exitGate(root, s, cfg) {
   const g = cfg.gates || {}, fail = [];
   const w = phaseWindow(s, cfg);
   if (w.elapsedMin < w.floorMin) fail.push(`Phase ${s.phase} floor: ${Math.ceil(w.floorMin - w.elapsedMin)} min left (floor ${w.floorMin} of ${w.ceilMin} min). Keep validating before advancing.`);
-  fail.push(...questionFails(s, g), ...showcaseFails(root, s), ...userAskFails(root, s.phase));
+  fail.push(...questionFails(s, g), ...showcaseFails(root, s), ...designFails(root, s.phase), ...userAskFails(root, s.phase));
   if (s.phase === 1) { const m = missingArtifacts(root); if (m.length) fail.push(`Phase 1 artifacts missing: ${m.join(", ")}`); fail.push(...discoverLogFails(root, g), ...preflightFails(root)); }
   if (s.phase === 2) {
     // uv projects keep deps in .venv, which the system python cannot see (pytest then exits 2 on import errors).

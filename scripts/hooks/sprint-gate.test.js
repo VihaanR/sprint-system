@@ -31,6 +31,11 @@ function run(root, { args = [], input, env = {} } = {}) {
 const state = root => JSON.parse(fs.readFileSync(path.join(root, ".sprint-state.json"), "utf8"));
 const write = (root, f, v) => { fs.mkdirSync(path.dirname(path.join(root, f)), { recursive: true }); fs.writeFileSync(path.join(root, f), typeof v === "string" ? v : JSON.stringify(v)); };
 const showcase = (root, name) => write(root, `.sprint/showcase-${name}.json`, { url: "http://localhost:5173", timestamp: new Date().toISOString() });
+const designOk = (root, p) => {
+  write(root, `.sprint/impeccable-critique-p${p}.md`, "# Critique\nClean.");
+  write(root, `.sprint/screens-p${p}/desktop.png`, "png");
+  write(root, `.sprint/screens-p${p}/mobile-375.png`, "png");
+};
 function transcript(root, model) {
   write(root, "t.jsonl", [{ type: "user", message: {} }, { type: "assistant", message: { model } }].map(x => JSON.stringify(x)).join("\n"));
   return path.join(root, "t.jsonl");
@@ -42,7 +47,7 @@ test("advance is refused before the floor and allowed after it", () => {
   assert.strictEqual(r.code, 1); assert.match(r.out, /Phase 4 floor: 30 min left/);
   assert.strictEqual(state(early).phase, 4);
 
-  const late = project({ phase: 4, phaseStartedAt: ago(41) }); showcase(late, "polish");
+  const late = project({ phase: 4, phaseStartedAt: ago(41) }); showcase(late, "polish"); designOk(late, 4);
   assert.strictEqual(run(late, { args: ["advance"] }).code, 0);
   const s = state(late);
   assert.strictEqual(s.phase, 5); assert.ok(Date.now() - Date.parse(s.phaseStartedAt) < 60000, "new phase clock starts now");
@@ -60,7 +65,7 @@ test("Stop is blocked under the floor, at most maxFloorStopBlocks times", () => 
 });
 
 test("only the user's 'skip floor' lifts the floor", () => {
-  const root = project({ phase: 4, phaseStartedAt: ago(2) }); showcase(root, "polish");
+  const root = project({ phase: 4, phaseStartedAt: ago(2) }); showcase(root, "polish"); designOk(root, 4);
   const r = run(root, { input: { hook_event_name: "UserPromptSubmit", prompt: "skip floor" } });
   assert.match(r.out, /floor lifted/);
   assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
@@ -151,7 +156,7 @@ test("end sprint closes the sprint and writes SPRINT-REPORT.md with quotes, inte
 
 test("advance writes the report and counts blocks from this sprint as friction", () => {
   const root = project({ phase: 4, startedAt: ago(60), phaseStartedAt: ago(60) });
-  write(root, "src/app.tsx", "x"); showcase(root, "polish");
+  write(root, "src/app.tsx", "x"); showcase(root, "polish"); designOk(root, 4);
   run(root, { input: { hook_event_name: "PreToolUse", tool_name: "Edit", tool_input: { file_path: path.join(root, "src/app.tsx") } } });
   assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
   const md = fs.readFileSync(path.join(root, "SPRINT-REPORT.md"), "utf8");
@@ -164,7 +169,7 @@ const ask = (root, n) => run(root, { input: { hook_event_name: "PostToolUse", to
 
 test("per-phase question gate: 14 answered questions refuse advance, 15 allow it, in any phase", () => {
   // Phase 4 (floor and showcase already satisfied) isolates the question count.
-  const root = project({ phase: 4, phaseStartedAt: ago(41), questionsByPhase: { 3: 15 } }); showcase(root, "polish");
+  const root = project({ phase: 4, phaseStartedAt: ago(41), questionsByPhase: { 3: 15 } }); showcase(root, "polish"); designOk(root, 4);
   for (const n of [4, 4, 4, 2]) assert.strictEqual(ask(root, n).code, 0); // 14, counted into the current phase only
   assert.deepStrictEqual(state(root).questionsByPhase, { 3: 15, 4: 14 });
   const refused = run(root, { args: ["advance"] });
@@ -184,7 +189,7 @@ test("showcase gate (phases 3, 4): needs url + timestamp from this phase; stale 
   assert.match(run(root, { args: ["advance"] }).out, /showcase-frontend.json/);
   write(root, ".sprint/showcase-frontend.json", { url: "http://localhost:5173", timestamp: ago(80) });
   assert.match(run(root, { args: ["advance"] }).out, /showcase-frontend.json/);
-  showcase(root, "frontend");
+  showcase(root, "frontend"); designOk(root, 3);
   assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
 });
 
@@ -237,7 +242,7 @@ test("Phase 1 advance is allowed with valid preflight.json (exitCode 0 or waiver
 });
 
 test("user-asks ledger: unconfirmed cut blocks any phase, confirmed cut allows it, open asks print on refusal, success, and report", () => {
-  const root = project({ phase: 4, phaseStartedAt: ago(41) }); showcase(root, "polish");
+  const root = project({ phase: 4, phaseStartedAt: ago(41) }); showcase(root, "polish"); designOk(root, 4);
   write(root, ".sprint/user-asks.json", [
     { ask: "3D explainer", phase: 3, status: "cut", userConfirmedCut: false },
     { ask: "InVEST", phase: 2, status: "planned", userConfirmedCut: false },
@@ -272,4 +277,61 @@ test("Phase 1 advance is refused when user-asks.json is missing or invalid", () 
   const badStatus = run(root, { args: ["advance"] });
   assert.strictEqual(badStatus.code, 1);
   assert.match(badStatus.out, /'Bad ask' status must be planned, done, or cut/);
+});
+
+test("design exit gate (Phase 4): refuses on all 5 checks and passes once all 5 are fixed", () => {
+  const root = project({ phase: 4, phaseStartedAt: ago(41) });
+  showcase(root, "polish");
+  const starter = path.join(root, "starter");
+  write(starter, "frontend/public/favicon.svg", "<svg>starter</svg>");
+  write(root, ".sprint/screens-p4/desktop.png", "png");
+  write(root, "frontend/src/index.css", 'body { font-family: "Fraunces", serif; }');
+  write(root, "frontend/index.html", "<html><head><title>Vite + React</title></head></html>");
+  write(root, "frontend/public/favicon.svg", "<svg>starter</svg>");
+
+  const env = { SPRINT_STARTER_DIR: starter };
+  const bad = run(root, { args: ["advance"], env });
+  assert.strictEqual(bad.code, 1);
+  const lines = bad.out.trim().split("\n").filter(l => l.startsWith("- "));
+  assert.strictEqual(lines.length, 5);
+  assert.match(bad.out, /impeccable-critique-p4\.md/);
+  assert.match(bad.out, /screens-p4\/ missing 375px/);
+  assert.match(bad.out, /fonts not loaded.*: Fraunces/);
+  assert.match(bad.out, /<title>.*Vite \+ React/);
+  assert.match(bad.out, /favicon\.svg is still the starter default/);
+  assert.strictEqual(state(root).phase, 4);
+
+  write(root, ".sprint/impeccable-critique-p4.md", "# Critique\nSpacing and contrast checked.");
+  write(root, ".sprint/screens-p4/mobile-375.png", "png");
+  write(root, "frontend/src/index.css", '@import "@fontsource/fraunces";\nbody { font-family: "Fraunces", serif; }');
+  write(root, "frontend/index.html", "<html><head><title>Watershed Pulse</title></head></html>");
+  write(root, "frontend/public/favicon.svg", "<svg>custom</svg>");
+
+  const ok = run(root, { args: ["advance"], env });
+  assert.strictEqual(ok.code, 0);
+  assert.strictEqual(state(root).phase, 5);
+});
+
+test("design exit gate (Phase 3 + font variants): accepts @font-face, @fontsource-variable, OS fonts, var(), ignores node_modules", () => {
+  const root = project({ phase: 3, phaseStartedAt: ago(71) });
+  showcase(root, "frontend");
+  write(root, ".sprint/phase3-proof.json", { screenshot: "shot.png", axeViolations: 0 });
+  write(root, "shot.png", "x");
+  write(root, "frontend/src/node_modules/pkg/bad.css", 'x { font-family: "UnloadedFromPkg"; }');
+  write(root, "frontend/src/main.tsx", 'import "@fontsource-variable/inter-tight";\n');
+  write(root, "frontend/src/styles/app.css", [
+    '@font-face { font-family: "JetBrains Mono"; src: url("/jb.woff2"); }',
+    'body { font-family: "Inter Tight", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif; }',
+    'code { font-family: "JetBrains Mono", Menlo, Consolas, Monaco, var(--mono), ui-monospace, monospace; }',
+  ].join("\n"));
+
+  const refused = run(root, { args: ["advance"] });
+  assert.strictEqual(refused.code, 1);
+  assert.match(refused.out, /impeccable-critique-p3\.md/);
+  assert.match(refused.out, /screens-p3\/ missing desktop and 375px/);
+  assert.doesNotMatch(refused.out, /fonts not loaded/);
+
+  designOk(root, 3);
+  assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
+  assert.strictEqual(state(root).phase, 4);
 });
