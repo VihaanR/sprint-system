@@ -4,7 +4,7 @@ const test = require("node:test");
 const assert = require("node:assert");
 const fs = require("fs"), os = require("os"), path = require("path");
 const { spawnSync } = require("child_process");
-const { runChild, cooldownMin, mainSnapshot, newestConvMtime } = require("./ab-route.js");
+const { runChild, cooldownMin, mainSnapshot, newestConvMtime, guardrails } = require("./ab-route.js");
 
 const IDLE_MS = 300000, SILENT_MS = 900000, STARTUP_MS = 180000, HARD_MS = 60000;
 const HEADER = "▶ antigravity ← task t1\n  workspace: W  (sandbox workspace-write, transport cli)\n  status file Claude reads:  S\n";
@@ -108,4 +108,53 @@ test("isolation snapshot ignores .claude/worktrees but sees a stray file", () =>
   assert.strictEqual(mainSnapshot(repo), before);
   fs.writeFileSync(path.join(repo, "stray.txt"), "s\n");
   assert.notStrictEqual(mainSnapshot(repo), before);
+});
+
+function initRepo() {
+  const repo = tmp(), g = (...a) => spawnSync("git", a, { cwd: repo, encoding: "utf8" });
+  g("init", "-q");
+  fs.writeFileSync(path.join(repo, "a.txt"), "a\n");
+  g("add", "a.txt");
+  g("-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "init");
+  const baseSha = g("rev-parse", "HEAD").stdout.trim();
+  return { repo, g, baseSha };
+}
+
+test("guardrails: committed-only work is detected and labeled committed", () => {
+  const { repo, g, baseSha } = initRepo();
+  fs.writeFileSync(path.join(repo, "b.txt"), "hello\n");
+  g("add", "b.txt");
+  g("-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "work");
+  const flags = [], stat = guardrails(repo, flags, baseSha);
+  assert.match(stat, /1 file changed/);
+  assert.match(stat, /\(committed\)$/);
+  assert.ok(!flags.includes("no-changes"));
+});
+
+test("guardrails: staged-only work is detected and labeled staged", () => {
+  const { repo, baseSha } = initRepo();
+  fs.writeFileSync(path.join(repo, "a.txt"), "modified\n");
+  const flags = [], stat = guardrails(repo, flags, baseSha);
+  assert.match(stat, /1 file changed/);
+  assert.match(stat, /\(staged\)$/);
+  assert.ok(!flags.includes("no-changes"));
+});
+
+test("guardrails: nothing changed flags no-changes", () => {
+  const { repo, baseSha } = initRepo();
+  const flags = [], stat = guardrails(repo, flags, baseSha);
+  assert.strictEqual(stat, "no changes");
+  assert.ok(flags.includes("no-changes"));
+});
+
+test("guardrails: committed plus uncommitted work is labeled committed+staged", () => {
+  const { repo, g, baseSha } = initRepo();
+  fs.writeFileSync(path.join(repo, "a.txt"), "committed\n");
+  g("add", "a.txt");
+  g("-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "work");
+  fs.writeFileSync(path.join(repo, "b.txt"), "uncommitted\n");
+  const flags = [], stat = guardrails(repo, flags, baseSha);
+  assert.match(stat, /2 files changed/);
+  assert.match(stat, /\(committed\+staged\)$/);
+  assert.ok(!flags.includes("no-changes"));
 });
