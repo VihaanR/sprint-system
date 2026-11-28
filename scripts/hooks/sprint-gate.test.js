@@ -321,7 +321,7 @@ test("design exit gate (Phase 3 + font variants): accepts @font-face, @fontsourc
   write(root, "frontend/src/main.tsx", 'import "@fontsource-variable/inter-tight";\n');
   write(root, "frontend/src/styles/app.css", [
     '@font-face { font-family: "JetBrains Mono"; src: url("/jb.woff2"); }',
-    'body { font-family: "Inter Tight", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif; }',
+    'body { font-family: "Inter Tight Variable", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif; }',
     'code { font-family: "JetBrains Mono", Menlo, Consolas, Monaco, var(--mono), ui-monospace, monospace; }',
   ].join("\n"));
 
@@ -343,6 +343,49 @@ test("design exit gate: fonts named in CSS custom properties (--font-*) must loa
   assert.strictEqual(r.code, 1);
   assert.match(r.out, /fonts not loaded.*: Inter, JetBrains Mono$/m);
   write(root, "frontend/src/main.tsx", 'import "@fontsource/inter";\nimport "@fontsource/jetbrains-mono";\n');
+  assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
+});
+
+test("font check: @fontsource-variable/inter satisfies Inter Variable", () => {
+  const root = project({ phase: 4, phaseStartedAt: ago(41) }); showcase(root, "polish"); designOk(root, 4);
+  write(root, "frontend/src/main.tsx", 'import "@fontsource-variable/inter";\n');
+  write(root, "frontend/src/index.css", 'body { font-family: "Inter Variable", sans-serif; }');
+  assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
+});
+
+test("font check: @fontsource-variable/inter-tight rejects non-variable Inter Tight", () => {
+  const root = project({ phase: 4, phaseStartedAt: ago(41) }); showcase(root, "polish"); designOk(root, 4);
+  write(root, "frontend/src/main.tsx", 'import "@fontsource-variable/inter-tight";\n');
+  write(root, "frontend/src/index.css", 'body { font-family: "Inter Tight", sans-serif; }');
+  const r = run(root, { args: ["advance"] });
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /fonts not loaded.*: Inter Tight$/m);
+});
+
+test("font check: @fontsource/inter-tight satisfies Inter Tight", () => {
+  const root = project({ phase: 4, phaseStartedAt: ago(41) }); showcase(root, "polish"); designOk(root, 4);
+  write(root, "frontend/src/main.tsx", 'import "@fontsource/inter-tight";\n');
+  write(root, "frontend/src/index.css", 'body { font-family: "Inter Tight", sans-serif; }');
+  assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
+});
+
+test("font check: Google Fonts <link> in frontend/index.html loads Inter Tight and JetBrains Mono", () => {
+  const root = project({ phase: 4, phaseStartedAt: ago(41) }); showcase(root, "polish"); designOk(root, 4);
+  write(root, "frontend/index.html", '<html><head><title>Watershed Pulse</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;700&family=JetBrains+Mono&display=swap"></head></html>');
+  write(root, "frontend/src/index.css", 'body { font-family: "Inter Tight", sans-serif; }\ncode { font-family: "JetBrains Mono", monospace; }');
+  assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
+});
+
+test("font check: CSS @import url(fonts.googleapis.com ... family=Fraunces) loads Fraunces", () => {
+  const root = project({ phase: 4, phaseStartedAt: ago(41) }); showcase(root, "polish"); designOk(root, 4);
+  write(root, "frontend/src/index.css", '@import url(fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&display=swap);\nbody { font-family: "Fraunces", serif; }');
+  assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
+});
+
+test("font check: legacy Google Fonts css?family=A|B loads both families", () => {
+  const root = project({ phase: 4, phaseStartedAt: ago(41) }); showcase(root, "polish"); designOk(root, 4);
+  write(root, "frontend/index.html", '<html><head><title>Watershed Pulse</title><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter+Tight:400,700|JetBrains+Mono"></head></html>');
+  write(root, "frontend/src/index.css", 'body { font-family: "Inter Tight", sans-serif; }\ncode { font-family: "JetBrains Mono", monospace; }');
   assert.strictEqual(run(root, { args: ["advance"] }).code, 0);
 });
 

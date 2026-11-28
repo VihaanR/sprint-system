@@ -266,7 +266,33 @@ function fontFaceFamilies(css) {
   return out;
 }
 
-const fontsourceImports = txt => [...txt.matchAll(/['"]@fontsource(?:-variable)?\/([a-z0-9-]+)(?:\/[^'"]*)?['"]/gi)].map(m => m[1].toLowerCase());
+const fontsourceImports = txt => [...txt.matchAll(/['"]@fontsource(-variable)?\/([a-z0-9-]+)(?:\/[^'"]*)?['"]/gi)]
+  .map(m => `${m[2].toLowerCase().replace(/-/g, " ")}${m[1] ? " variable" : ""}`);
+
+function googleFontFamilies(url) {
+  const qi = url.indexOf("?");
+  if (qi < 0) return [];
+  const params = url.slice(qi + 1).split("#")[0].replace(/&amp;/gi, "&").split("&");
+  const out = [];
+  for (const p of params.filter(x => /^family=/i.test(x))) {
+    let val = p.slice(7).replace(/\+/g, " ");
+    try { val = decodeURIComponent(val); } catch {}
+    out.push(...val.split("|").map(f => f.split(":")[0].trim().toLowerCase()));
+  }
+  return out.filter(Boolean);
+}
+
+const cssGoogleImports = css => [...css.matchAll(/@import\s+(?:url\(\s*)?(?:"([^"]*)"|'([^']*)'|([^)\s;]+))\s*\)?/gi)]
+  .map(m => m.slice(1, 4).find(Boolean) || "").filter(u => /fonts\.googleapis\.com/i.test(u)).flatMap(googleFontFamilies);
+
+function htmlGoogleLinks(root) {
+  const p = path.join(root, "frontend", "index.html");
+  if (!fs.existsSync(p)) return [];
+  const html = fs.readFileSync(p, "utf8").replace(/<!--[\s\S]*?-->/g, "");
+  return [...html.matchAll(/<link\b[^>]*\shref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi)]
+    .map(m => m.slice(1, 4).find(Boolean) || "").filter(u => /fonts\.googleapis\.com/i.test(u)).flatMap(googleFontFamilies);
+}
+
 function parseFamilies(raw) {
   return raw.replace(/var\([^()]*\)/gi, "").split(",").map(stripQuotes)
     .filter(x => x && !/^var\(/i.test(x) && !IGNORED_FONTS.has(x.toLowerCase()));
@@ -282,24 +308,26 @@ function usedFontFamilies(css) {
 }
 
 function collectFonts(files) {
-  const faces = new Set(), imports = new Set(), used = new Map();
+  const loaded = new Set(), used = new Map();
   for (const f of files) {
     const txt = fs.readFileSync(f, "utf8");
-    fontsourceImports(txt).forEach(s => imports.add(s));
+    fontsourceImports(txt).forEach(s => loaded.add(s));
     if (!/\.css$/i.test(f)) continue;
     const clean = txt.replace(/\/\*[\s\S]*?\*\//g, "");
-    fontFaceFamilies(clean).forEach(fam => faces.add(fam));
+    fontFaceFamilies(clean).forEach(fam => loaded.add(fam));
+    cssGoogleImports(clean).forEach(fam => loaded.add(fam));
     usedFontFamilies(clean).forEach(fam => { const k = fam.toLowerCase(); used.set(k, used.get(k) || fam); });
   }
-  return { faces, imports, used };
+  return { loaded, used };
 }
 
 function fontFail(root) {
   const src = path.join(root, "frontend", "src");
   if (!fs.existsSync(src)) return null;
-  const { faces, imports, used } = collectFonts(walkFiles(src, /\.(css|js|jsx|ts|tsx)$/i, []));
-  const unloaded = [...used.entries()].filter(([k]) => !faces.has(k) && !imports.has(k.replace(/\s+/g, "-"))).map(([, v]) => v);
-  return unloaded.length ? `fonts not loaded (no @font-face or @fontsource import in frontend/src): ${unloaded.join(", ")}` : null;
+  const { loaded, used } = collectFonts(walkFiles(src, /\.(css|js|jsx|ts|tsx)$/i, []));
+  htmlGoogleLinks(root).forEach(fam => loaded.add(fam));
+  const unloaded = [...used.entries()].filter(([k]) => !loaded.has(k)).map(([, v]) => v);
+  return unloaded.length ? `fonts not loaded (no @font-face, @fontsource, or Google Fonts link/import): ${unloaded.join(", ")}` : null;
 }
 
 function titleFail(root) {
