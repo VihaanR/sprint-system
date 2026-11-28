@@ -1,6 +1,6 @@
 ---
 name: sprint-orchestrator
-description: Phase-gate dispatcher for the 5-hour hackathon sprint. Use when the user says "start a sprint" or "run a sprint", or when a sprint is active (.sprint-state.json). Loads each phase skill in order; Opus plans, briefs and reviews but writes no code; agy/free models via ab-route.js and Sonnet builders write it; stops for the user's go between phases.
+description: Phase-gate dispatcher for the 5-hour hackathon sprint. Use when the user says "start a sprint" or "run a sprint", or when a sprint is active (.sprint-state.json). Loads each phase skill in order; Opus is the CEO (decisions, core science, final review); Sonnet builders manage agy/free models via ab-route.js and review their work; stops for the user's go between phases.
 ---
 
 # Sprint Orchestrator v3 (phase-gate dispatcher)
@@ -12,7 +12,7 @@ Every reply in a sprint starts with: `Phase N/6 (<name>) | X min in | floor F, b
 ## Runs on Opus 5.5, high effort
 The sprint only starts on `claude-opus-5-5` at `high` effort (`sprint.config.json` `orchestrator`); the start hook
 blocks otherwise and pins both in `.claude/settings.local.json`. You are the orchestrator: think before acting,
-validate before claiming. You write no code (the user's rule): you brief, review and run checks.
+validate before claiming. You are the CEO: decisions, architecture and the core science code; nothing else.
 
 ## Phase window: floor = budget − 5 min, ceiling = budget
 - A phase may not end before its floor. `advance` refuses, and stopping early is blocked with the next validation
@@ -27,17 +27,18 @@ validate before claiming. You write no code (the user's rule): you brief, review
 2. Phase 1 output (PRODUCT.md, DESIGN.md, golden fixture, frozen schema) gates every later phase.
 3. Sprint start: run `node scripts/router-smoke.mjs --require antigravity` (~2 min). agy counts as available only
    after it passes. (Sprint 1's agy "never started" was the router killing silent agy at 182-184 s; fixed 2026-11-28.)
-4. Opus (you) writes NO code, not even small fixes or merges of conflicting files (the user's rule). Opus plans,
-   writes briefs, reviews every diff and runs the checks before merging.
-   - Implementation slices (backend endpoints, UI screens, tests, seed data, docs, deploy config) go to the router
-     first: `node ~/.claude/bin/ab-route.js --class <large|agy|bulk> --accept-cmd "<real check>" --repo . "<outcome>"`
-     (`large`/`agy` for multi-file work, `bulk` for one mechanical file). Independent slices: several dispatches in
-     parallel, at least 30 s apart.
-   - Core domain/scientific logic and anything the router failed once: spawn the `builder` agent (Sonnet, own
-     worktree) with the outcome, the frozen schema and a measurable acceptance check.
+4. Chain of command (the user's rule):
+   - Opus (you) = CEO: decisions, architecture, the frozen schema, and the core domain/scientific logic (the only
+     code you write). You review what each Sonnet manager hands back and run the checks before merging.
+   - Sonnet `builder` = manager: one per slice (backend endpoints, UI screens, tests, seed data, docs, deploy
+     config). It dispatches the implementation to agy/free models through the router
+     (`node ~/.claude/bin/ab-route.js --class <large|agy|bulk> --accept-cmd "<real check>" --repo . "<outcome>"`),
+     reviews their diff, and redoes or fixes what fails. Brief it with the outcome, the frozen schema and a
+     measurable acceptance check. Independent slices: several builders in one message, in parallel.
+   - agy / opencode = workers: they write the slice code.
    - Check `/usage` at each phase end and put the % in the scorecard's [TIME] line.
-5. Router rules: run `--status` first. A silent agy is normal (it prints nothing until done; the router allows 15 min
-   of silence). One failed chain: hand it to a `builder`, no `--reset`, no retry.
+5. Router rules: run `--status` first. A silent agy is normal: it prints nothing until done; the router watches its
+   conversation-file writes (5 min idle = stuck). One failed chain: the builder redoes or fixes it, no `--reset`.
    Never edit the main checkout while a route-* worktree is live.
 6. Phase end: post the scorecard, wait for the user to type `go`, then run `node V:/Projects/sprint/scripts/hooks/sprint-gate.js advance`
    (runs the exit gate: every phase its floor and 15+ answered user questions, P1 5 challenge rounds, P2 pytest + LOC,
@@ -66,7 +67,7 @@ validate before claiming. You write no code (the user's rule): you brief, review
 
 ## Learned guardrails (auto, evolve_skills.py)
 - executor quota trips seen 2x: prefer freellmapi/auto; batch slices into one dispatch.
-- chain exhausted 4x: hand it to a Sonnet builder after one failed chain; no re-dispatch.
+- chain exhausted 4x: the Sonnet builder fixes it after one failed chain; no re-dispatch.
 
 ## Delegation lessons (2026-11-27 sprint, by hand)
 - Delegate UI slices with `--accept-cmd "<real check>"`: the router runs it in the worktree. A stub slice once came back "ok".

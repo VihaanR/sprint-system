@@ -12,10 +12,11 @@ Applies to any AI assistant working in this repo or running a sprint. Tunables l
 - Delegated writes run in router worktrees (`~/.claude/bin/ab-route.js`, `~/.agent-bridge/worktrees/route-*`).
 - Never edit the main checkout while a route-* worktree is live: it trips `isolation-breach`.
 - Write jobs need `--accept "<measurable metric>"` and a `--status` check in the current phase.
-- One failed chain means hand the job to a Sonnet `builder` agent; Claude (Opus) writes no code and only reviews. No blind `--reset` retries.
+- One failed chain means the Sonnet `builder` that dispatched it redoes or fixes it. No blind `--reset` retries.
+- Roles: Opus = CEO (decisions, architecture, core science code only). Sonnet `builder` = manager (dispatches slices to agy/opencode via the router, reviews their diffs, fixes failures). agy/opencode = workers.
 
 ## 3. Core science stays on Claude
-- Domain and scientific logic (algorithms, matching, scoring) is written by Claude, not free models.
+- Domain and scientific logic (algorithms, matching, scoring) is written by Opus, not Sonnet or free models.
 - It ships with measurable acceptance criteria: complexity bound, golden fixture match, test name.
 - Backend core <= 450 hand-written LOC, cyclomatic complexity <= 6, no single-implementation abstractions.
 
