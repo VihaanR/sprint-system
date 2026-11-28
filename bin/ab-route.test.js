@@ -4,7 +4,7 @@ const test = require("node:test");
 const assert = require("node:assert");
 const fs = require("fs"), os = require("os"), path = require("path");
 const { spawnSync } = require("child_process");
-const { runChild, cooldownMin, mainSnapshot, newestConvMtime, guardrails } = require("./ab-route.js");
+const { runChild, cooldownMin, mainSnapshot, newestConvMtime, guardrails, skipReason, sessionName } = require("./ab-route.js");
 
 const IDLE_MS = 300000, SILENT_MS = 900000, STARTUP_MS = 180000, HARD_MS = 60000;
 const HEADER = "▶ antigravity ← task t1\n  workspace: W  (sandbox workspace-write, transport cli)\n  status file Claude reads:  S\n";
@@ -166,4 +166,40 @@ test("guardrails: committed plus uncommitted work is labeled committed+staged", 
   assert.match(stat, /2 files changed/);
   assert.match(stat, /\(committed\+staged\)$/);
   assert.ok(!flags.includes("no-changes"));
+});
+
+test("sessionName is unique per task id and honors explicit --session", () => {
+  const a = sessionName(undefined, 2, "large", "job-1", "sprint");
+  const b = sessionName(undefined, 2, "large", "job-2", "sprint");
+  assert.notStrictEqual(a, b);
+  assert.ok(a.includes("job-1") && b.includes("job-2"));
+  assert.strictEqual(sessionName("custom-s", 2, "large", "job-1", "sprint"), "custom-s");
+  assert.strictEqual(sessionName(undefined, null, "large", "job-1", "sprint"), undefined);
+});
+
+test("skipReason returns parked reason for parked executors", () => {
+  const h = { executors: {} };
+  const hermesReason = skipReason(h, "hermes");
+  const goReason = skipReason(h, "opencode:go");
+  assert.ok(typeof hermesReason === "string" && hermesReason.length > 0);
+  assert.match(hermesReason, /parked/i);
+  assert.ok(typeof goReason === "string" && goReason.length > 0);
+  assert.match(goReason, /parked/i);
+});
+
+test("runChild does not crash when output arrives after kill/finish", async () => {
+  const childScript = `
+    const { spawn } = require("child_process");
+    const g = spawn(process.execPath, ["-e", "setTimeout(() => { setInterval(() => process.stdout.write('late\\\\n'), 10); setTimeout(() => process.exit(0), 200); }, 100)"], { detached: true, stdio: ["ignore", 1, 2] });
+    g.unref();
+    process.stdout.write(${JSON.stringify(HEADER)});
+    setTimeout(() => {}, 30000);
+  `;
+  const { state, log, p } = fakeAgy(childScript);
+  await untilLogHas(log, "status file");
+  state.t = IDLE_MS + 1000;
+  const r = await p;
+  assert.strictEqual(r.why, "stall");
+  await wait(350);
+  assert.ok(!fs.readFileSync(log, "utf8").includes("late"), "wrote after finish");
 });
