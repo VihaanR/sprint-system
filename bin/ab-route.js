@@ -28,7 +28,7 @@ const TRIP_RE = /\b429\b|rate.?limit|quota|exhausted|unauthori[sz]ed|\b401\b|\b4
 
 // ---- sprint config (sprint.config.json in --repo, else the sprint system repo) -----------------
 const TELEMETRY = path.join(AB, "telemetry.jsonl");
-const CFG_DEFAULT = { router: { agyModels: ["Gemini 4 Hydrogen (High)", "Gemini 3.8 Flash (Medium)"], agySessionPrefix: "sprint", agyStartupStallMs: 180000, agySilentMs: 900000, opencodeFallback: "freellmapi/auto", maxChainWallMs: 600000 }, gates: {}, phases: {} };
+const CFG_DEFAULT = { router: { agyModels: ["Gemini 4 Hydrogen (High)", "Gemini 3.8 Flash (Medium)"], agySessionPrefix: "sprint", agyStartupStallMs: 180000, agyIdleMs: 300000, agySilentMs: 900000, opencodeFallback: "freellmapi/auto", maxChainWallMs: 600000 }, gates: {}, phases: {} };
 function loadCfg(repo) {
   for (const p of [repo && path.join(repo, "sprint.config.json"), process.env.SPRINT_CONFIG, "V:/Projects/sprint/sprint.config.json"].filter(Boolean)) {
     try { const j = JSON.parse(fs.readFileSync(p, "utf8")); return { ...CFG_DEFAULT, ...j, router: { ...CFG_DEFAULT.router, ...(j.router || {}) }, _path: p }; } catch {}
@@ -56,10 +56,11 @@ const CHAINS = {
   agy:      AGY, // explicit: send straight to agy in an isolated worktree
 };
 const WRITES = new Set(["bulk", "large", "agy"]);
-// agy print mode is silent (stdout and agent-bridge's status.md) until it finishes and waits on its own background tasks:
-// a live agy is working until it has been silent (no output, no edits) for agySilentMs. Startup is watched separately.
+// agy print mode is silent until it finishes, but writes steps to its conversation DBs: stall if idle (no output,
+// no worktree edit, no conversation-folder write) for agyIdleMs, or if total silence (no output/edits) exceeds agySilentMs.
+const AGY_IDLE_MS = CFG.router.agyIdleMs || 300000;
 const AGY_SILENT_MS = CFG.router.agySilentMs || 900000;
-const STALL_BY_EXECUTOR = { antigravity: AGY_SILENT_MS };
+const STALL_BY_EXECUTOR = { antigravity: AGY_IDLE_MS };
 const AGY_STARTUP_MS = Math.max(180000, CFG.router.agyStartupStallMs || 0);
 
 // Ledger key for a chain step: free models and agy tiers trip individually, everything else per executor.
@@ -309,26 +310,36 @@ function resetMinutes(text) {
 // Still queued: no output at all, or agent-bridge's "Waiting for the agent to start" in the last lines. O(len(text)).
 const stillQueued = text => !text.trim() || /Waiting for the agent to start/i.test(text.trim().split("\n").slice(-3).join("\n"));
 // One watchdog tick: null keeps the child running, a string is the kill reason. startupMs > 0 marks agy, whose silence
-// while alive is work (stallMs is then agySilentMs); only a queued state lasting past the startup limit is a dead transport.
-function watchVerdict({ idleMs, ageMs, stallMs, startupMs, touched, text }) {
-  if (idleMs > stallMs) return "stall";
+// while alive is work up to agySilentMs when conversation DB writes keep arriving (stallMs is then agyIdleMs).
+function watchVerdict({ idleMs, silentMs = 0, maxSilentMs = 0, ageMs, stallMs, startupMs, touched, text }) {
+  if (idleMs > stallMs || (maxSilentMs && silentMs > maxSilentMs)) return "stall";
   if (!startupMs || touched || ageMs <= startupMs) return null;
   return stillQueued(text) ? "startup-stall" : null;
+}
+const CONV_DIR = path.join(HOME, ".gemini", "antigravity-cli", "conversations");
+function newestConvMtime(dir = CONV_DIR) {
+  let files = [], max = 0;
+  try { files = fs.readdirSync(dir); } catch { return 0; }
+  for (const name of files) {
+    if (!/\.db(-wal|-shm)?$/i.test(name)) continue;
+    try { max = Math.max(max, fs.statSync(path.join(dir, name)).mtimeMs); } catch {}
+  }
+  return max;
 }
 // agy's own output: agent-bridge's framing lines (task header, footer) removed.
 const agyOutput = text => text.replace(/^(▶ |\s+(workspace:|status file|status:)|── |\(no output\)).*$/gm, "").trim();
 // Run a child with a hard timeout, a stall watchdog and early exit when the provider is just retrying.
-// clock and tickMs are injectable so tests can fake minutes of silence.
-function runChild(bin, args, cwd, logFile, stallMs = STALL_MS, startupMs = 0, hardMs = HARD_TIMEOUT_MS, { clock = Date.now, tickMs = 15000 } = {}) {
+// clock, tickMs and convMtime are injectable so tests can fake minutes of silence or conversation writes.
+function runChild(bin, args, cwd, logFile, stallMs = STALL_MS, startupMs = 0, hardMs = HARD_TIMEOUT_MS, { clock = Date.now, tickMs = 15000, convMtime = startupMs ? newestConvMtime : null, maxSilentMs = startupMs ? AGY_SILENT_MS : 0 } = {}) {
   return new Promise(resolve => {
-    const out = fs.createWriteStream(logFile), t0 = clock(); let text = "", last = t0, retries = 0, done = false;
+    const out = fs.createWriteStream(logFile), t0 = clock(); let text = "", last = t0, lastWork = t0, retries = 0, done = false;
     // opencode trusts the PWD env var over the process cwd; Git Bash leaves PWD pointing at wherever the router was
     // launched, which made it work in the wrong directory (once the main repo, once the home dir). Force it.
     const env = { ...process.env, PWD: cwd, INIT_CWD: cwd }; delete env.OLDPWD;
     const c = spawn(bin, args, { cwd, env, stdio: ["ignore", "pipe", "pipe"], windowsHide: true });
     const kill = why => { if (done) return; done = true; killTree(c); finish(null, why); };
     const feed = b => {
-      const s = b.toString(); last = clock(); text += s; out.write(s);
+      const s = b.toString(); last = clock(); lastWork = last; text += s; out.write(s);
       const lines = s.split("\n").filter(l => /retrying \(attempt/i.test(l));
       retries += lines.length;
       // A provider retry line that already says rate-limited/exhausted will not recover soon: trip now.
@@ -336,17 +347,25 @@ function runChild(bin, args, cwd, logFile, stallMs = STALL_MS, startupMs = 0, ha
     };
     c.stdout.on("data", feed); c.stderr.on("data", feed);
     const t1 = setTimeout(() => kill("timeout"), Math.max(5000, hardMs));
-    // Liveness also counts edits in the job's worktree: agy print mode prints nothing until it finishes, so stdout
-    // alone killed every agy job longer than the startup/stall limits even while it was writing files.
-    let tree = "", touched = false;
+    // Liveness also counts edits in the job's worktree and agy's conversation DB writes: agy print mode prints
+    // nothing until it finishes, so stdout alone would kill live agy jobs while they work.
+    let tree = "", touched = false, prevConv = convMtime ? convMtime() : 0;
     const treeTick = () => {
       const g = spawnSync("git", ["status", "--porcelain"], { cwd, encoding: "utf8", timeout: 10000, windowsHide: true });
       const now = g.status === 0 ? g.stdout : tree;
-      if (now !== tree) { if (tree !== "" || now !== "") { last = clock(); touched = true; } tree = now; }
+      if (now !== tree) { if (tree !== "" || now !== "") { last = clock(); lastWork = last; touched = true; } tree = now; }
+    };
+    const convTick = () => {
+      const cur = convMtime ? convMtime() : 0;
+      if (cur <= prevConv) return;
+      prevConv = cur; last = clock();
+      out.write(`agy active ${Math.max(0, Math.round((last - cur) / 1000))}s ago\n`);
     };
     const t2 = setInterval(() => {
       treeTick();
-      const why = watchVerdict({ idleMs: clock() - last, ageMs: clock() - t0, stallMs, startupMs, touched, text });
+      convTick();
+      const now = clock();
+      const why = watchVerdict({ idleMs: now - last, silentMs: now - lastWork, maxSilentMs, ageMs: now - t0, stallMs, startupMs, touched, text });
       if (why) kill(why);
     }, tickMs);
     function finish(code, why) { clearTimeout(t1); clearInterval(t2); out.end(); resolve({ code, why, text }); }
@@ -449,6 +468,7 @@ async function main() {
       // Every write run: the brief once named the main checkout's absolute path and the executor read (and could have
       // written) there instead of its worktree. Say it in every brief so no caller has to remember.
       (tree ? `[ISOLATION: work ONLY in your current working directory (a git worktree). Use relative paths. Never read or write ${o.repo.replace(/\\/g, "/")} by absolute path: that is a different checkout. Placeholder or stub code is a failed job.]\n` : "") +
+      (base === "antigravity" ? "Do the work yourself in this session: do not start subagents or background agents; run commands in the foreground and wait for them.\n" : "") +
       `\n${prompt}`;
     const log =path.join(LOGS, `${id}-${key.replace(/[:/]/g, "_")}.log`);
     let bin, args;
@@ -491,13 +511,13 @@ async function main() {
       // The executor finished cleanly but wrote nothing: right for a read-only or report job, so stop the chain here.
       if (tree) removeTree(o.repo, tree, branch);
       console.log(JSON.stringify({ outcome: "no-change", executor: key, class: o.class, log, attempts,
-        next: "Finished without changing files. Read the log for its answer; if you expected edits, implement directly." }, null, 2)); return;
+        next: "Finished without changing files. Read the log for its answer; if you expected edits, hand it to a Sonnet builder." }, null, 2)); return;
     }
     if (tree) removeTree(o.repo, tree, branch);
   }
   if (!o.dry) telemetry({ taskId: id, phase, from: "claude", to: "router", outcome: "exhausted", class: o.class, attempts: attempts.map(a => `${a.executor}:${a.outcome || "skipped"}`) });
-  console.log(JSON.stringify({ outcome: o.dry ? "dry-run" : "exhausted", class: o.class, attempts, next: o.dry ? "" : "Every executor failed or was skipped: do it with Claude directly." }, null, 2));
+  console.log(JSON.stringify({ outcome: o.dry ? "dry-run" : "exhausted", class: o.class, attempts, next: o.dry ? "" : "Every executor failed or was skipped: hand it to a Sonnet builder; Claude reviews." }, null, 2));
   process.exit(o.dry ? 0 : 1);
 }
 if (require.main === module) main();
-else module.exports = { watchVerdict, runChild, cooldownMin, mainSnapshot };
+else module.exports = { watchVerdict, runChild, cooldownMin, mainSnapshot, newestConvMtime };

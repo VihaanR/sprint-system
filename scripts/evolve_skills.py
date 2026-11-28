@@ -38,7 +38,7 @@ RULES = {
     "isolation-breach": ("skills/sprint-orchestrator/SKILL.md", "isolation-breach seen {n}x: never edit the main checkout while a route-* worktree is live."),
     "quota": ("skills/sprint-orchestrator/SKILL.md", "executor quota trips seen {n}x: prefer freellmapi/auto; batch slices into one dispatch."),
     "stall": ("skills/sprint-orchestrator/SKILL.md", "executor stalls seen {n}x: give tighter acceptance criteria and smaller slices."),
-    "exhausted": ("skills/sprint-orchestrator/SKILL.md", "chain exhausted {n}x: implement directly after one failed chain; no re-dispatch."),
+    "exhausted": ("skills/sprint-orchestrator/SKILL.md", "chain exhausted {n}x: hand it to a Sonnet builder after one failed chain; no re-dispatch."),
     "slop": (".claude/agents/builder.md", "slop regex hits seen {n}x: read DESIGN.md tokens before writing any class or color."),
     "tool-failure": (".claude/agents/auditor.md", "tool failures seen {n}x in audit runs: rerun the failing command once, then report it."),
     "blocked": ("skills/sprint-orchestrator/SKILL.md", "PreToolUse gate blocks seen {n}x: load the phase skill and Phase 1 artifacts before the first edit."),
