@@ -18,7 +18,8 @@ You run Phase 1 of the sprint. Output artifacts, not prose.
 6. Domain-expert review: argue the fixture as a skeptical practitioner would. Fix what fails.
 7. Self-challenge: at least 5 rounds, each picks one spec claim, attacks it, checks it against data or docs and
    records `{claim, attack, evidence, verdict: kept|changed|cut}` in `.sprint/discover-log.json` `challengeRounds`.
-8. Freeze `types.ts` / OpenAPI / Pydantic schema. After this, schema changes need the user's go.
+8. Record `.sprint/preflight.json` (`router-smoke.mjs --require antigravity` + every required service/key `ok`, or `cut` with `userConfirmed: true`) and `.sprint/user-asks.json` (all explicit user asks).
+9. Freeze `types.ts` / OpenAPI / Pydantic schema. After this, schema changes need the user's go.
 
 Rules:
 - Core domain and scientific logic is specified here with measurable acceptance criteria (complexity bound, golden match).

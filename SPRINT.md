@@ -12,58 +12,41 @@
 
 ## Sprint Checklist
 
-- [ ] **Phase 1: Discover & Spec** (~30 min)
-  - [ ] Pre-Phase Gate: Devil's Advocate Interrogation (Moat, Persona, Constraints)
-  - [ ] Problem Statement & Winning Moat defined
-  - [ ] Impeccable product truth & UX shape (PRODUCT.md)
-  - [ ] Architecture Diagram (`docs/SPEC.md`)
-  - [ ] Database Relational ERD
-  - [ ] OpenAPI Schema Draft
-  *Deliverable*: `PRODUCT.md` + `docs/SPEC.md`
+- [ ] **Phase 1: Discover & Spec** (~30 min, floor 25 min)
+  - [ ] 15+ answered user questions + 5+ challenge rounds (`.sprint/discover-log.json`)
+  - [ ] Pre-flight: `router-smoke.mjs --require antigravity` + service/key checks (`.sprint/preflight.json`)
+  - [ ] User-asks ledger (`.sprint/user-asks.json`) + `PRODUCT.md` + `DESIGN.md`
+  - [ ] Mermaid architecture/ERD in `SPRINT.md`, golden fixture (`fixtures/*golden*`), frozen schema
+  *Deliverable*: `PRODUCT.md` + `DESIGN.md` + `SPRINT.md` + golden fixture + frozen schema
 
-- [ ] **Phase 2: Core Engine & Backend** (~60 min)
-  - [ ] Pre-Phase Gate: Phase 1 Scorecard + Devil's Advocate Interrogation
-  - [ ] FastAPI async scaffolding
-  - [ ] SQLAlchemy / SQLite persistence
-  - [ ] Gemini API / RAG model integration
-  - [ ] Third-party live web data integrated via api-anything (if applicable)
-  - [ ] TDD unit tests & live `fetch` validation
-  *Deliverable*: Verified running API + populated database
+- [ ] **Phase 2: Core Engine & Backend** (~60 min, floor 55 min)
+  - [ ] 15+ answered user questions; core domain/scientific logic written by Opus (CEO)
+  - [ ] Mechanical slices dispatched by Sonnet `builder`s via `ab-route.js`; `<= 450` core LOC
+  - [ ] `.env.example` → `.env` live-key check; `DEMO_MODE=offline` + `pytest` exit 0
+  *Deliverable*: Verified running API + passing `pytest`
 
-- [ ] **Phase 3: Visual Swarm & Frontend** (~75 min)
-  - [ ] Pre-Phase Gate: Phase 2 Scorecard + Devil's Advocate Interrogation
-  - [ ] Impeccable craft-floor rules enforced (no purple gradients, strict spacing)
-  - [ ] Vite dev server + live Hot Module Replacement
-  - [ ] Visual Swarm HUD overlay (`swarm-overlay.js`) + live variant generation
-  - [ ] Component assembly (Orion, Lyra, Echo parallel agents)
-  - [ ] Connected to Phase 2 API
-  *Deliverable*: Working, interactive frontend
+- [ ] **Phase 3: Frontend Assembly** (~75 min, floor 70 min)
+  - [ ] 15+ answered user questions; `.sprint/impeccable.ok` preflight before UI edits
+  - [ ] Sonnet `builder`s dispatch UI slices via `ab-route.js` in `route-*` worktrees
+  - [ ] Auditor human-click walkthrough + `axeViolations: 0` (`.sprint/phase3-proof.json`)
+  - [ ] Browser showcase (`.sprint/showcase-frontend.json`) + P3 design gate (critique, desktop + `375`px screens, loaded fonts, real `<title>`, custom `favicon.svg`)
+  *Deliverable*: Working, verified frontend + `.sprint/phase3-proof.json`
 
-- [ ] **Phase 4: Beautification & Polish** (~45 min)
-  - [ ] Pre-Phase Gate: Phase 3 Scorecard + Devil's Advocate Interrogation
-  - [ ] Impeccable anti-slop pass (`scripts/impeccable context`, read PRODUCT.md + DESIGN.md + skills/impeccable/reference/craft-floor.md, then polish/typeset)
-  - [ ] UI/UX Pro Max design intelligence applied (OLED Dark / Glassmorphism)
-  - [ ] Semantic typography & Phosphor SVG icons
-  - [ ] CSS micro-interactions & button active states
-  - [ ] Responsive viewport & touch target audit
-  *Deliverable*: Awwwards-grade visual presentation
+- [ ] **Phase 4: Beautification & Polish** (~45 min, floor 40 min)
+  - [ ] 15+ answered user questions; `impeccable` critique/polish + user-approved logo
+  - [ ] Browser showcase (`.sprint/showcase-polish.json`) + P4 design gate (critique, desktop + `375`px screens, loaded fonts, real `<title>`, custom `favicon.svg`)
+  *Deliverable*: Polished UI + approved logo
 
-- [ ] **Phase 5: Ironclad Audit & Verification** (~45 min)
-  - [ ] Pre-Phase Gate: Phase 4 Scorecard + Devil's Advocate Interrogation
-  - [ ] OWASP Top 10 security scan (security-auditor)
-  - [ ] Impeccable edge-case hardening (empty states, text overflows, error boundaries)
-  - [ ] Playwright automated E2E smoke tests
-  - [ ] 0 uncaught exceptions & 0 network 404s
-  - [ ] WCAG 2.1 AA accessibility audit
+- [ ] **Phase 5: Ironclad Audit & Verification** (~45 min, floor 40 min)
+  - [ ] 15+ answered user questions + open user-asks check (`.sprint/user-asks.json`)
+  - [ ] 2-pass audit (`pytest`, security scan, `/ponytail-review`, Playwright E2E, 0 console/404/a11y errors)
   *Deliverable*: `docs/AUDIT_REPORT.md` (clean security & QA pass)
 
-- [ ] **Phase 6: Judge-Ready Pitch & Launch** (~45 min)
-  - [ ] Pre-Phase Gate: Phase 5 Scorecard + Devil's Advocate Interrogation
-  - [ ] Live production deployment (Vercel / Railway)
-  - [ ] 15-25s product demo video (`brag`, `gates.videoDurationSec` in sprint.config.json)
-  - [ ] Interactive Swagger UI (`/docs`) & Postman collection
-  - [ ] Winning `README.md` with pitch, architecture & demo accounts
-  *Deliverable*: Live URL + 15-25s video + submission package
+- [ ] **Phase 6: Judge-Ready Pitch & Launch** (~45 min, floor 40 min)
+  - [ ] 15+ answered user questions + live production URL (HTTP 200 in `< 2s`)
+  - [ ] `brag` 15-25s demo video (`gates.videoDurationSec`); Stripe `cs_test_` only if `gates.stripeEnabled`
+  - [ ] Swagger (`/docs`), Postman collection, claim-verified `README.md`, `.sprint/launch-proof.json`
+  *Deliverable*: Live URL + 15-25s video + `.sprint/launch-proof.json`
 
 ---
 
