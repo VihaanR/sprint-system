@@ -444,7 +444,7 @@ export const register: Register = on => {
         {(r.attempts ?? []).map((a, i) => (
           <Text key={String(i)} color={a.outcome === 'ok' ? C.green : a.skipped ? C.sub : C.red}>{a.executor.replace('opencode:free:', '').replace('antigravity:', 'agy:')} {a.outcome ?? 'skip'}{i < (r.attempts ?? []).length - 1 ? ' · ' : ''}</Text>
         ))}
-        {!ok && <Text color={C.red}> · do it with Claude</Text>}
+        {!ok && <Text color={C.red}> · hand to builder</Text>}
       </Text>
     )
   })

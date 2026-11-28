@@ -97,7 +97,7 @@ flowchart LR
     L["--class large"] --> H["agy<br/>Gemini 4 Hydrogen"]
     H -->|"quota / stall"| F["agy<br/>Gemini 3.8 Flash"]
     F -->|"quota / stall"| A["opencode<br/>freellmapi/auto"]
-    A -->|"exhausted"| CL["Claude implements<br/>directly"]
+    A -->|"exhausted"| CL["Sonnet builder<br/>Claude reviews"]
     B["--class bulk / recon"] --> A
 
     classDef agy fill:#1E293B,stroke:#38BDF8,color:#F8FAFC
@@ -108,10 +108,10 @@ flowchart LR
     class CL claude
 ```
 
-- While agy is running, a live but silent process counts as working up to `agySilentMs` (default `900000`, 15 min).
+- While agy is running, conversation-folder writes and worktree edits count as activity; an idle process with no output, edits, or conversation writes stalls after `agyIdleMs` (default `300000`, 5 min), and total silence (no output or edits) is capped at `agySilentMs` (default `900000`, 15 min).
 - Startup watchdog `agyStartupStallMs` (at least `180000`, 3 min) records a `startup-stall` only when agent-bridge never produced output, or when agy exits with no output and no edits.
 - Stall cooldown tolerates the first stall; a second stall in a row trips the executor for at most 30 min.
-- A whole chain is capped at 10 minutes of wall clock (`maxChainWallMs`). After one failed chain, Claude implements the task directly.
+- A whole chain is capped at 25 minutes of wall clock (`maxChainWallMs`, `1500000` in `sprint.config.json`). After one failed chain, hand the task to a Sonnet builder.
 
 ## Sidebar mod (`sprint-mod/`)
 
